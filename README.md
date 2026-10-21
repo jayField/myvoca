@@ -14,19 +14,18 @@ npm test        # 학습 로직·저장 테스트
 npm run build   # 타입 검사 + dist/ 생성
 ```
 
-## 배포 (Cloudflare Pages)
+## 배포 (Cloudflare Workers)
 
-GitHub 저장소를 Cloudflare Pages에 연결하고 다음처럼 설정한다.
+GitHub 저장소를 Cloudflare Workers에 연결한다 (Create application → Import a repository). 저장소 루트의 `package.json`이 `frontend/`를 빌드하고, `wrangler.jsonc`가 `frontend/dist`를 정적 자산으로 올린다.
 
 | 항목 | 값 |
 |---|---|
-| Project name | `tango-note` (주소가 tango-note.pages.dev가 됨) |
-| Framework preset | React (Vite) |
-| Root directory | `frontend` |
+| Project name | `tango-note` (`wrangler.jsonc`의 `name`과 같아야 함) |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
+| Deploy command | `npx wrangler deploy` |
+| Path (Root directory) | 비워 둠 (저장소 루트) |
 
-`404.html`이 없으면 Pages가 모든 경로를 `index.html`로 돌려주므로 `/decks/n5` 같은 주소를 새로고침해도 동작한다.
+`not_found_handling: single-page-application` 덕분에 `/decks/n5` 같은 주소를 새로고침해도 동작한다.
 
 ## 구조 메모
 
