@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type QuizQuestion } from '../api';
 import { BackIcon } from '../components/Icons';
 import { QuestionCountPicker } from '../components/QuestionCountPicker';
@@ -38,8 +38,14 @@ function saveBest(recordKey: string, score: number) {
 
 export default function Speed() {
   const [decks, setDecks] = useState<Deck[]>([]);
-  const [deckId, setDeckId] = useState('');
-  const [count, setCount] = useState(10);
+  const [params] = useSearchParams();
+  const [deckId, setDeckId] = useState(params.get('deck') ?? '');
+  const [count, setCount] = useState(() => {
+    const requested = Number(params.get('count'));
+    return [10, 20, 30].includes(requested) ? requested : 10;
+  });
+  // Coming from the quiz page with range and count already chosen: skip the setup screen.
+  const autoStart = useRef(params.get('start') === '1');
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<Result[]>([]);
@@ -57,7 +63,7 @@ export default function Speed() {
     Promise.all([api.decks(), api.settings()])
       .then(([d, s]) => {
         setDecks(d.decks);
-        setDeckId(s.deck_id);
+        setDeckId((current) => current || s.deck_id);
       })
       .catch(() => setError(LOAD_ERROR));
   }, []);
@@ -140,6 +146,13 @@ export default function Speed() {
       setError(LOAD_ERROR);
     }
   }
+
+  useEffect(() => {
+    if (!autoStart.current || !deckId || decks.length === 0) return;
+    autoStart.current = false;
+    void start();
+    // start reads the current deckId and count; running once after they load is the intent.
+  }, [deckId, decks.length]);
 
   async function addMissesToReview() {
     try {

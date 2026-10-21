@@ -1,17 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
 import { SpeakerIcon } from '../components/Icons';
 import { QuestionCountPicker } from '../components/QuestionCountPicker';
 import { GRADES } from '../labels';
 import { canSpeak, speak } from '../speech';
 
-type Mode = 'meaning' | 'listen' | 'type';
+type Mode = 'meaning' | 'listen' | 'type' | 'speed';
 
 const MODES: { mode: Mode; label: string; description: string }[] = [
   { mode: 'meaning', label: '뜻 고르기', description: '단어를 보고 뜻을 골라요' },
   { mode: 'listen', label: '듣기', description: '발음을 듣고 단어를 골라요' },
   { mode: 'type', label: '직접 입력', description: '읽는 법을 직접 써요' },
+  { mode: 'speed', label: '5초 스피드', description: '5초 안에 뜻 맞히기 · 점수 기록' },
 ];
 
 const ROMAJI_ALIASES: Record<string, string[]> = {
@@ -45,6 +46,7 @@ function isCorrectReading(item: Item, input: string): boolean {
 
 export default function Quiz() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [deckId, setDeckId] = useState(params.get('deck') ?? '');
   const [count, setCount] = useState(10);
@@ -79,6 +81,10 @@ export default function Quiz() {
   }, [mode, question, answered]);
 
   async function start() {
+    if (mode === 'speed') {
+      navigate(`/speed?deck=${encodeURIComponent(deckId)}&count=${count}&start=1`);
+      return;
+    }
     try {
       setQuiz(await api.quiz(deckId, count));
       setIndex(0);
