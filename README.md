@@ -1,6 +1,6 @@
 # 単語ノート (tango-note)
 
-https://tango-note.pages.dev — 가나부터 JLPT N3까지, 매일 정한 만큼 익히고 잊을 때쯤 복습하는 일본어 단어 학습 웹앱.
+https://tango-note.nariyo1324.workers.dev — 가나부터 JLPT N3까지, 매일 정한 만큼 익히고 잊을 때쯤 복습하는 일본어 단어 학습 웹앱.
 
 서버 없이 브라우저만으로 동작하는 정적 사이트다 (React + Vite + TypeScript). 학습 기록은 각자 브라우저의 IndexedDB에 저장된다.
 
