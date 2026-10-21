@@ -1,0 +1,1067 @@
+[
+ {
+  "term": "状態",
+  "reading": "じょうたい",
+  "meaning": "상태"
+ },
+ {
+  "term": "状況",
+  "reading": "じょうきょう",
+  "meaning": "상황"
+ },
+ {
+  "term": "環境",
+  "reading": "かんきょう",
+  "meaning": "환경"
+ },
+ {
+  "term": "影響",
+  "reading": "えいきょう",
+  "meaning": "영향"
+ },
+ {
+  "term": "関係",
+  "reading": "かんけい",
+  "meaning": "관계"
+ },
+ {
+  "term": "結果",
+  "reading": "けっか",
+  "meaning": "결과"
+ },
+ {
+  "term": "目的",
+  "reading": "もくてき",
+  "meaning": "목적"
+ },
+ {
+  "term": "目標",
+  "reading": "もくひょう",
+  "meaning": "목표"
+ },
+ {
+  "term": "機会",
+  "reading": "きかい",
+  "meaning": "기회"
+ },
+ {
+  "term": "価値",
+  "reading": "かち",
+  "meaning": "가치"
+ },
+ {
+  "term": "責任",
+  "reading": "せきにん",
+  "meaning": "책임"
+ },
+ {
+  "term": "権利",
+  "reading": "けんり",
+  "meaning": "권리"
+ },
+ {
+  "term": "義務",
+  "reading": "ぎむ",
+  "meaning": "의무"
+ },
+ {
+  "term": "自然",
+  "reading": "しぜん",
+  "meaning": "자연"
+ },
+ {
+  "term": "資源",
+  "reading": "しげん",
+  "meaning": "자원"
+ },
+ {
+  "term": "技術",
+  "reading": "ぎじゅつ",
+  "meaning": "기술"
+ },
+ {
+  "term": "情報",
+  "reading": "じょうほう",
+  "meaning": "정보"
+ },
+ {
+  "term": "記事",
+  "reading": "きじ",
+  "meaning": "기사"
+ },
+ {
+  "term": "番号",
+  "reading": "ばんごう",
+  "meaning": "번호"
+ },
+ {
+  "term": "記録",
+  "reading": "きろく",
+  "meaning": "기록"
+ },
+ {
+  "term": "計画",
+  "reading": "けいかく",
+  "meaning": "계획"
+ },
+ {
+  "term": "実験",
+  "reading": "じっけん",
+  "meaning": "실험"
+ },
+ {
+  "term": "調査",
+  "reading": "ちょうさ",
+  "meaning": "조사"
+ },
+ {
+  "term": "判断",
+  "reading": "はんだん",
+  "meaning": "판단"
+ },
+ {
+  "term": "決定",
+  "reading": "けってい",
+  "meaning": "결정"
+ },
+ {
+  "term": "比較",
+  "reading": "ひかく",
+  "meaning": "비교"
+ },
+ {
+  "term": "変化",
+  "reading": "へんか",
+  "meaning": "변화"
+ },
+ {
+  "term": "発展",
+  "reading": "はってん",
+  "meaning": "발전"
+ },
+ {
+  "term": "成長",
+  "reading": "せいちょう",
+  "meaning": "성장"
+ },
+ {
+  "term": "成功",
+  "reading": "せいこう",
+  "meaning": "성공"
+ },
+ {
+  "term": "減少",
+  "reading": "げんしょう",
+  "meaning": "감소"
+ },
+ {
+  "term": "増加",
+  "reading": "ぞうか",
+  "meaning": "증가"
+ },
+ {
+  "term": "生産",
+  "reading": "せいさん",
+  "meaning": "생산"
+ },
+ {
+  "term": "輸入",
+  "reading": "ゆにゅう",
+  "meaning": "수입 (무역)"
+ },
+ {
+  "term": "輸出",
+  "reading": "ゆしゅつ",
+  "meaning": "수출"
+ },
+ {
+  "term": "給料",
+  "reading": "きゅうりょう",
+  "meaning": "월급"
+ },
+ {
+  "term": "税金",
+  "reading": "ぜいきん",
+  "meaning": "세금"
+ },
+ {
+  "term": "値段",
+  "reading": "ねだん",
+  "meaning": "가격"
+ },
+ {
+  "term": "料金",
+  "reading": "りょうきん",
+  "meaning": "요금"
+ },
+ {
+  "term": "割合",
+  "reading": "わりあい",
+  "meaning": "비율"
+ },
+ {
+  "term": "平均",
+  "reading": "へいきん",
+  "meaning": "평균"
+ },
+ {
+  "term": "合計",
+  "reading": "ごうけい",
+  "meaning": "합계"
+ },
+ {
+  "term": "半分",
+  "reading": "はんぶん",
+  "meaning": "절반"
+ },
+ {
+  "term": "部分",
+  "reading": "ぶぶん",
+  "meaning": "부분"
+ },
+ {
+  "term": "全体",
+  "reading": "ぜんたい",
+  "meaning": "전체"
+ },
+ {
+  "term": "中心",
+  "reading": "ちゅうしん",
+  "meaning": "중심"
+ },
+ {
+  "term": "周り",
+  "reading": "まわり",
+  "meaning": "주위"
+ },
+ {
+  "term": "方向",
+  "reading": "ほうこう",
+  "meaning": "방향"
+ },
+ {
+  "term": "距離",
+  "reading": "きょり",
+  "meaning": "거리"
+ },
+ {
+  "term": "範囲",
+  "reading": "はんい",
+  "meaning": "범위"
+ },
+ {
+  "term": "場所",
+  "reading": "ばしょ",
+  "meaning": "장소"
+ },
+ {
+  "term": "地域",
+  "reading": "ちいき",
+  "meaning": "지역"
+ },
+ {
+  "term": "都市",
+  "reading": "とし",
+  "meaning": "도시"
+ },
+ {
+  "term": "首都",
+  "reading": "しゅと",
+  "meaning": "수도"
+ },
+ {
+  "term": "郊外",
+  "reading": "こうがい",
+  "meaning": "교외"
+ },
+ {
+  "term": "交通",
+  "reading": "こうつう",
+  "meaning": "교통"
+ },
+ {
+  "term": "事故",
+  "reading": "じこ",
+  "meaning": "사고"
+ },
+ {
+  "term": "渋滞",
+  "reading": "じゅうたい",
+  "meaning": "교통 정체"
+ },
+ {
+  "term": "信号",
+  "reading": "しんごう",
+  "meaning": "신호(등)"
+ },
+ {
+  "term": "横断歩道",
+  "reading": "おうだんほどう",
+  "meaning": "횡단보도"
+ },
+ {
+  "term": "免許",
+  "reading": "めんきょ",
+  "meaning": "면허"
+ },
+ {
+  "term": "会員",
+  "reading": "かいいん",
+  "meaning": "회원"
+ },
+ {
+  "term": "社員",
+  "reading": "しゃいん",
+  "meaning": "사원"
+ },
+ {
+  "term": "上司",
+  "reading": "じょうし",
+  "meaning": "상사"
+ },
+ {
+  "term": "部下",
+  "reading": "ぶか",
+  "meaning": "부하"
+ },
+ {
+  "term": "同僚",
+  "reading": "どうりょう",
+  "meaning": "동료"
+ },
+ {
+  "term": "先輩",
+  "reading": "せんぱい",
+  "meaning": "선배"
+ },
+ {
+  "term": "後輩",
+  "reading": "こうはい",
+  "meaning": "후배"
+ },
+ {
+  "term": "恋人",
+  "reading": "こいびと",
+  "meaning": "연인"
+ },
+ {
+  "term": "夫婦",
+  "reading": "ふうふ",
+  "meaning": "부부"
+ },
+ {
+  "term": "親",
+  "reading": "おや",
+  "meaning": "부모"
+ },
+ {
+  "term": "親戚",
+  "reading": "しんせき",
+  "meaning": "친척"
+ },
+ {
+  "term": "他人",
+  "reading": "たにん",
+  "meaning": "남, 타인"
+ },
+ {
+  "term": "個人",
+  "reading": "こじん",
+  "meaning": "개인"
+ },
+ {
+  "term": "性格",
+  "reading": "せいかく",
+  "meaning": "성격"
+ },
+ {
+  "term": "態度",
+  "reading": "たいど",
+  "meaning": "태도"
+ },
+ {
+  "term": "表情",
+  "reading": "ひょうじょう",
+  "meaning": "표정"
+ },
+ {
+  "term": "感情",
+  "reading": "かんじょう",
+  "meaning": "감정"
+ },
+ {
+  "term": "感謝",
+  "reading": "かんしゃ",
+  "meaning": "감사"
+ },
+ {
+  "term": "感動",
+  "reading": "かんどう",
+  "meaning": "감동"
+ },
+ {
+  "term": "不安",
+  "reading": "ふあん",
+  "meaning": "불안"
+ },
+ {
+  "term": "自信",
+  "reading": "じしん",
+  "meaning": "자신감"
+ },
+ {
+  "term": "我慢",
+  "reading": "がまん",
+  "meaning": "참음, 인내"
+ },
+ {
+  "term": "努力",
+  "reading": "どりょく",
+  "meaning": "노력"
+ },
+ {
+  "term": "希望",
+  "reading": "きぼう",
+  "meaning": "희망"
+ },
+ {
+  "term": "夢",
+  "reading": "ゆめ",
+  "meaning": "꿈"
+ },
+ {
+  "term": "将来",
+  "reading": "しょうらい",
+  "meaning": "장래"
+ },
+ {
+  "term": "過去",
+  "reading": "かこ",
+  "meaning": "과거"
+ },
+ {
+  "term": "現在",
+  "reading": "げんざい",
+  "meaning": "현재"
+ },
+ {
+  "term": "未来",
+  "reading": "みらい",
+  "meaning": "미래"
+ },
+ {
+  "term": "最近",
+  "reading": "さいきん",
+  "meaning": "최근"
+ },
+ {
+  "term": "最初",
+  "reading": "さいしょ",
+  "meaning": "처음, 최초"
+ },
+ {
+  "term": "最後",
+  "reading": "さいご",
+  "meaning": "마지막"
+ },
+ {
+  "term": "途中",
+  "reading": "とちゅう",
+  "meaning": "도중"
+ },
+ {
+  "term": "以前",
+  "reading": "いぜん",
+  "meaning": "이전"
+ },
+ {
+  "term": "締め切り",
+  "reading": "しめきり",
+  "meaning": "마감"
+ },
+ {
+  "term": "期間",
+  "reading": "きかん",
+  "meaning": "기간"
+ },
+ {
+  "term": "期限",
+  "reading": "きげん",
+  "meaning": "기한"
+ },
+ {
+  "term": "表す",
+  "reading": "あらわす",
+  "meaning": "나타내다, 표현하다"
+ },
+ {
+  "term": "現れる",
+  "reading": "あらわれる",
+  "meaning": "나타나다"
+ },
+ {
+  "term": "争う",
+  "reading": "あらそう",
+  "meaning": "다투다"
+ },
+ {
+  "term": "慌てる",
+  "reading": "あわてる",
+  "meaning": "허둥대다"
+ },
+ {
+  "term": "祝う",
+  "reading": "いわう",
+  "meaning": "축하하다"
+ },
+ {
+  "term": "疑う",
+  "reading": "うたがう",
+  "meaning": "의심하다"
+ },
+ {
+  "term": "訴える",
+  "reading": "うったえる",
+  "meaning": "호소하다, 고소하다"
+ },
+ {
+  "term": "埋める",
+  "reading": "うめる",
+  "meaning": "묻다, 메우다"
+ },
+ {
+  "term": "補う",
+  "reading": "おぎなう",
+  "meaning": "보충하다"
+ },
+ {
+  "term": "抑える",
+  "reading": "おさえる",
+  "meaning": "억누르다"
+ },
+ {
+  "term": "抱える",
+  "reading": "かかえる",
+  "meaning": "안다, 떠안다"
+ },
+ {
+  "term": "隠す",
+  "reading": "かくす",
+  "meaning": "숨기다"
+ },
+ {
+  "term": "重ねる",
+  "reading": "かさねる",
+  "meaning": "겹치다, 거듭하다"
+ },
+ {
+  "term": "稼ぐ",
+  "reading": "かせぐ",
+  "meaning": "(돈을) 벌다"
+ },
+ {
+  "term": "片付ける",
+  "reading": "かたづける",
+  "meaning": "정리하다"
+ },
+ {
+  "term": "叶う",
+  "reading": "かなう",
+  "meaning": "이루어지다"
+ },
+ {
+  "term": "構う",
+  "reading": "かまう",
+  "meaning": "상관하다, 신경 쓰다"
+ },
+ {
+  "term": "乾かす",
+  "reading": "かわかす",
+  "meaning": "말리다"
+ },
+ {
+  "term": "効く",
+  "reading": "きく",
+  "meaning": "효과가 있다"
+ },
+ {
+  "term": "鍛える",
+  "reading": "きたえる",
+  "meaning": "단련하다"
+ },
+ {
+  "term": "崩れる",
+  "reading": "くずれる",
+  "meaning": "무너지다"
+ },
+ {
+  "term": "加える",
+  "reading": "くわえる",
+  "meaning": "더하다"
+ },
+ {
+  "term": "断る",
+  "reading": "ことわる",
+  "meaning": "거절하다"
+ },
+ {
+  "term": "転ぶ",
+  "reading": "ころぶ",
+  "meaning": "넘어지다"
+ },
+ {
+  "term": "支える",
+  "reading": "ささえる",
+  "meaning": "지탱하다, 지원하다"
+ },
+ {
+  "term": "誘う",
+  "reading": "さそう",
+  "meaning": "권유하다"
+ },
+ {
+  "term": "冷める",
+  "reading": "さめる",
+  "meaning": "식다"
+ },
+ {
+  "term": "従う",
+  "reading": "したがう",
+  "meaning": "따르다"
+ },
+ {
+  "term": "沈む",
+  "reading": "しずむ",
+  "meaning": "가라앉다"
+ },
+ {
+  "term": "縛る",
+  "reading": "しばる",
+  "meaning": "묶다"
+ },
+ {
+  "term": "済む",
+  "reading": "すむ",
+  "meaning": "끝나다, 해결되다"
+ },
+ {
+  "term": "迫る",
+  "reading": "せまる",
+  "meaning": "다가오다"
+ },
+ {
+  "term": "備える",
+  "reading": "そなえる",
+  "meaning": "대비하다"
+ },
+ {
+  "term": "確かめる",
+  "reading": "たしかめる",
+  "meaning": "확인하다"
+ },
+ {
+  "term": "助ける",
+  "reading": "たすける",
+  "meaning": "돕다, 구하다"
+ },
+ {
+  "term": "戦う",
+  "reading": "たたかう",
+  "meaning": "싸우다"
+ },
+ {
+  "term": "叩く",
+  "reading": "たたく",
+  "meaning": "두드리다"
+ },
+ {
+  "term": "畳む",
+  "reading": "たたむ",
+  "meaning": "개다, 접다"
+ },
+ {
+  "term": "頼る",
+  "reading": "たよる",
+  "meaning": "의지하다"
+ },
+ {
+  "term": "違う",
+  "reading": "ちがう",
+  "meaning": "다르다, 틀리다"
+ },
+ {
+  "term": "縮む",
+  "reading": "ちぢむ",
+  "meaning": "줄어들다"
+ },
+ {
+  "term": "捕まえる",
+  "reading": "つかまえる",
+  "meaning": "붙잡다"
+ },
+ {
+  "term": "伝える",
+  "reading": "つたえる",
+  "meaning": "전하다"
+ },
+ {
+  "term": "繋ぐ",
+  "reading": "つなぐ",
+  "meaning": "잇다, 연결하다"
+ },
+ {
+  "term": "潰す",
+  "reading": "つぶす",
+  "meaning": "찌그러뜨리다, (시간을) 때우다"
+ },
+ {
+  "term": "積む",
+  "reading": "つむ",
+  "meaning": "쌓다"
+ },
+ {
+  "term": "照らす",
+  "reading": "てらす",
+  "meaning": "비추다"
+ },
+ {
+  "term": "解く",
+  "reading": "とく",
+  "meaning": "풀다"
+ },
+ {
+  "term": "整える",
+  "reading": "ととのえる",
+  "meaning": "정돈하다"
+ },
+ {
+  "term": "怠ける",
+  "reading": "なまける",
+  "meaning": "게으름 피우다"
+ },
+ {
+  "term": "悩む",
+  "reading": "なやむ",
+  "meaning": "고민하다"
+ },
+ {
+  "term": "願う",
+  "reading": "ねがう",
+  "meaning": "바라다"
+ },
+ {
+  "term": "除く",
+  "reading": "のぞく",
+  "meaning": "제외하다"
+ },
+ {
+  "term": "望む",
+  "reading": "のぞむ",
+  "meaning": "바라다"
+ },
+ {
+  "term": "測る",
+  "reading": "はかる",
+  "meaning": "재다"
+ },
+ {
+  "term": "省く",
+  "reading": "はぶく",
+  "meaning": "생략하다"
+ },
+ {
+  "term": "離れる",
+  "reading": "はなれる",
+  "meaning": "떨어지다, 멀어지다"
+ },
+ {
+  "term": "冷やす",
+  "reading": "ひやす",
+  "meaning": "식히다"
+ },
+ {
+  "term": "広がる",
+  "reading": "ひろがる",
+  "meaning": "넓어지다, 퍼지다"
+ },
+ {
+  "term": "防ぐ",
+  "reading": "ふせぐ",
+  "meaning": "막다, 방지하다"
+ },
+ {
+  "term": "震える",
+  "reading": "ふるえる",
+  "meaning": "떨다"
+ },
+ {
+  "term": "減らす",
+  "reading": "へらす",
+  "meaning": "줄이다"
+ },
+ {
+  "term": "任せる",
+  "reading": "まかせる",
+  "meaning": "맡기다"
+ },
+ {
+  "term": "混ぜる",
+  "reading": "まぜる",
+  "meaning": "섞다"
+ },
+ {
+  "term": "学ぶ",
+  "reading": "まなぶ",
+  "meaning": "배우다"
+ },
+ {
+  "term": "招く",
+  "reading": "まねく",
+  "meaning": "초대하다"
+ },
+ {
+  "term": "認める",
+  "reading": "みとめる",
+  "meaning": "인정하다"
+ },
+ {
+  "term": "結ぶ",
+  "reading": "むすぶ",
+  "meaning": "묶다, 맺다"
+ },
+ {
+  "term": "目指す",
+  "reading": "めざす",
+  "meaning": "목표로 하다"
+ },
+ {
+  "term": "求める",
+  "reading": "もとめる",
+  "meaning": "구하다, 요구하다"
+ },
+ {
+  "term": "破る",
+  "reading": "やぶる",
+  "meaning": "찢다, 어기다"
+ },
+ {
+  "term": "譲る",
+  "reading": "ゆずる",
+  "meaning": "양보하다"
+ },
+ {
+  "term": "許す",
+  "reading": "ゆるす",
+  "meaning": "용서하다, 허락하다"
+ },
+ {
+  "term": "汚す",
+  "reading": "よごす",
+  "meaning": "더럽히다"
+ },
+ {
+  "term": "酔う",
+  "reading": "よう",
+  "meaning": "취하다"
+ },
+ {
+  "term": "怪しい",
+  "reading": "あやしい",
+  "meaning": "수상하다"
+ },
+ {
+  "term": "偉い",
+  "reading": "えらい",
+  "meaning": "훌륭하다, 높다"
+ },
+ {
+  "term": "惜しい",
+  "reading": "おしい",
+  "meaning": "아깝다"
+ },
+ {
+  "term": "大人しい",
+  "reading": "おとなしい",
+  "meaning": "얌전하다"
+ },
+ {
+  "term": "賢い",
+  "reading": "かしこい",
+  "meaning": "현명하다"
+ },
+ {
+  "term": "悔しい",
+  "reading": "くやしい",
+  "meaning": "분하다"
+ },
+ {
+  "term": "詳しい",
+  "reading": "くわしい",
+  "meaning": "자세하다"
+ },
+ {
+  "term": "親しい",
+  "reading": "したしい",
+  "meaning": "친하다"
+ },
+ {
+  "term": "鋭い",
+  "reading": "するどい",
+  "meaning": "날카롭다"
+ },
+ {
+  "term": "激しい",
+  "reading": "はげしい",
+  "meaning": "격렬하다"
+ },
+ {
+  "term": "貧しい",
+  "reading": "まずしい",
+  "meaning": "가난하다"
+ },
+ {
+  "term": "眩しい",
+  "reading": "まぶしい",
+  "meaning": "눈부시다"
+ },
+ {
+  "term": "緩い",
+  "reading": "ゆるい",
+  "meaning": "느슨하다"
+ },
+ {
+  "term": "曖昧",
+  "reading": "あいまい",
+  "meaning": "애매함"
+ },
+ {
+  "term": "意外",
+  "reading": "いがい",
+  "meaning": "의외"
+ },
+ {
+  "term": "穏やか",
+  "reading": "おだやか",
+  "meaning": "온화함"
+ },
+ {
+  "term": "確実",
+  "reading": "かくじつ",
+  "meaning": "확실함"
+ },
+ {
+  "term": "複雑",
+  "reading": "ふくざつ",
+  "meaning": "복잡함"
+ },
+ {
+  "term": "単純",
+  "reading": "たんじゅん",
+  "meaning": "단순함"
+ },
+ {
+  "term": "正直",
+  "reading": "しょうじき",
+  "meaning": "정직함"
+ },
+ {
+  "term": "真剣",
+  "reading": "しんけん",
+  "meaning": "진지함"
+ },
+ {
+  "term": "素直",
+  "reading": "すなお",
+  "meaning": "순수함, 고분고분함"
+ },
+ {
+  "term": "退屈",
+  "reading": "たいくつ",
+  "meaning": "지루함"
+ },
+ {
+  "term": "適切",
+  "reading": "てきせつ",
+  "meaning": "적절함"
+ },
+ {
+  "term": "独特",
+  "reading": "どくとく",
+  "meaning": "독특함"
+ },
+ {
+  "term": "豊か",
+  "reading": "ゆたか",
+  "meaning": "풍부함"
+ },
+ {
+  "term": "立派",
+  "reading": "りっぱ",
+  "meaning": "훌륭함"
+ },
+ {
+  "term": "改めて",
+  "reading": "あらためて",
+  "meaning": "새삼, 다시"
+ },
+ {
+  "term": "一応",
+  "reading": "いちおう",
+  "meaning": "일단"
+ },
+ {
+  "term": "一層",
+  "reading": "いっそう",
+  "meaning": "한층"
+ },
+ {
+  "term": "主に",
+  "reading": "おもに",
+  "meaning": "주로"
+ },
+ {
+  "term": "必ずしも",
+  "reading": "かならずしも",
+  "meaning": "반드시 ~인 것은 아니다"
+ },
+ {
+  "term": "再び",
+  "reading": "ふたたび",
+  "meaning": "다시"
+ },
+ {
+  "term": "互いに",
+  "reading": "たがいに",
+  "meaning": "서로"
+ },
+ {
+  "term": "次第に",
+  "reading": "しだいに",
+  "meaning": "점점"
+ },
+ {
+  "term": "実は",
+  "reading": "じつは",
+  "meaning": "실은"
+ },
+ {
+  "term": "既に",
+  "reading": "すでに",
+  "meaning": "이미"
+ },
+ {
+  "term": "直接",
+  "reading": "ちょくせつ",
+  "meaning": "직접"
+ },
+ {
+  "term": "全く",
+  "reading": "まったく",
+  "meaning": "전혀, 완전히"
+ },
+ {
+  "term": "結局",
+  "reading": "けっきょく",
+  "meaning": "결국"
+ }
+]

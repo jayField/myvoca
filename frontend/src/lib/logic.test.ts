@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Progress, Settings } from '../types';
+import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
 import { applyReview, buildQuiz, computeStats, deckSummaries, DEFAULT_SETTINGS, planToday } from './logic';
 import { NEW_CARD, schedule } from './srs';
@@ -107,5 +108,16 @@ describe('computeStats', () => {
     expect(stats.heatmap).toHaveLength(140);
     expect(stats.heatmap.at(-1)).toEqual({ date: TODAY, count: 2 });
     expect(computeStats([], days.slice(0, 2), TODAY).streak).toBe(2);
+  });
+});
+
+describe('content', () => {
+  it('offers JLPT N5 to N3 with unique, complete items', () => {
+    expect(DECKS.map((d) => d.id)).toEqual(['hiragana', 'katakana', 'n5', 'n4', 'n3']);
+    expect(new Set(ITEMS.map((i) => i.id)).size).toBe(ITEMS.length);
+    for (const item of ITEMS) {
+      expect(item.reading && item.meaning).toBeTruthy();
+    }
+    expect(ITEMS_BY_DECK.get('n5')!.length).toBeGreaterThan(300);
   });
 });

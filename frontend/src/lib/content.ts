@@ -1,5 +1,7 @@
 import hiragana from '../data/hiragana.json';
 import katakana from '../data/katakana.json';
+import n3 from '../data/n3.json';
+import n4 from '../data/n4.json';
 import n5 from '../data/n5.json';
 import type { DeckKind, Item } from '../types';
 
@@ -22,7 +24,9 @@ interface DeckDef {
 const DECK_DEFS: DeckDef[] = [
   { id: 'hiragana', title: '히라가나', description: '기본 46자', kind: 'kana', items: hiragana },
   { id: 'katakana', title: '가타카나', description: '기본 46자', kind: 'kana', items: katakana },
-  { id: 'n5', title: 'JLPT N5', description: '기초 단어 80개 (샘플)', kind: 'word', items: n5 },
+  { id: 'n5', title: 'JLPT N5', description: `기초 단어 ${n5.length}개`, kind: 'word', items: n5 },
+  { id: 'n4', title: 'JLPT N4', description: `초급 단어 ${n4.length}개`, kind: 'word', items: n4 },
+  { id: 'n3', title: 'JLPT N3', description: `중급 단어 ${n3.length}개`, kind: 'word', items: n3 },
 ];
 
 export const CONFUSING_DECK = { id: 'confusing', title: '헷갈리는 단어', description: '몰랐음·헷갈림으로 표시한 단어' };
