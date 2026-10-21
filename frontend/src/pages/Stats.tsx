@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react';
-import { api, SERVER_ERROR, type Deck, type Stats as StatsData } from '../api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api, LOAD_ERROR, type Deck, type Stats as StatsData } from '../api';
 import { Heatmap } from '../components/Heatmap';
+import { localDate } from '../lib/dates';
 
 export default function Stats() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [decks, setDecks] = useState<Deck[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     Promise.all([api.stats(), api.decks()])
       .then(([s, d]) => {
         setStats(s);
         setDecks(d.decks);
       })
-      .catch(() => setError(SERVER_ERROR));
+      .catch(() => setError(LOAD_ERROR));
   }, []);
+
+  useEffect(load, [load]);
 
   const tiles = stats
     ? [
@@ -74,8 +77,71 @@ export default function Stats() {
               ))}
             </ul>
           </section>
+
+          <Backup onImported={load} />
         </>
       )}
     </div>
+  );
+}
+
+function Backup({ onImported }: { onImported: () => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+
+  async function exportFile() {
+    try {
+      const url = URL.createObjectURL(await api.exportBackup());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kotobacho-backup-${localDate()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setMessage({ text: '백업 파일을 저장했어요.', ok: true });
+    } catch {
+      setMessage({ text: '백업 파일을 만들지 못했어요.', ok: false });
+    }
+  }
+
+  async function importFile(file: File) {
+    if (!window.confirm('지금 이 브라우저의 학습 기록을 백업 파일 내용으로 바꿀까요? 되돌릴 수 없어요.')) return;
+    try {
+      const count = await api.importBackup(await file.text());
+      setMessage({ text: `백업에서 ${count}개 항목의 기록을 가져왔어요.`, ok: true });
+      onImported();
+    } catch (e) {
+      setMessage({ text: e instanceof Error ? e.message : '가져오지 못했어요.', ok: false });
+    }
+  }
+
+  return (
+    <section className="card card--lg stack-sm" aria-labelledby="backup">
+      <h2 id="backup" className="card-title">
+        백업
+      </h2>
+      <p className="muted small">
+        학습 기록은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 브라우저 데이터를 지우기 전에 파일로 내보내 두세요.
+      </p>
+      <div className="button-row">
+        <button type="button" className="btn btn--ghost" onClick={() => void exportFile()}>
+          내보내기
+        </button>
+        <button type="button" className="btn btn--ghost" onClick={() => fileRef.current?.click()}>
+          가져오기
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) void importFile(file);
+          }}
+        />
+      </div>
+      {message && <p className={message.ok ? 'success-text small' : 'error-text'}>{message.text}</p>}
+    </section>
   );
 }

@@ -1150,3 +1150,9 @@ a {
     transition: none;
   }
 }
+
+.stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

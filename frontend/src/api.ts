@@ -1,137 +1,137 @@
-export type Grade = 'again' | 'hard' | 'good';
-export type DeckKind = 'kana' | 'word';
-export type OrderMode = 'sequential' | 'random';
-export type ItemStatus = 'new' | 'due' | 'learning' | 'mastered';
+// The app's data layer. Everything runs in the browser: bundled word lists plus progress in IndexedDB.
+import { CONFUSING_DECK, DECK_BY_ID } from './lib/content';
+import { localDate } from './lib/dates';
+import {
+  applyReview,
+  buildQuiz,
+  computeStats,
+  deckItems,
+  deckSummaries,
+  DEFAULT_SETTINGS,
+  planToday,
+  wordOfDay,
+} from './lib/logic';
+import * as storage from './lib/storage';
+import type { DayCount, Grade, Progress, Settings } from './types';
 
-export interface Item {
-  id: number;
-  deck_id: string;
-  kind: DeckKind;
-  term: string;
-  reading: string;
-  meaning: string;
-  example_ja: string | null;
-  example_ko: string | null;
+export type * from './types';
+
+export const CONFUSING_DECK_ID = CONFUSING_DECK.id;
+export const LOAD_ERROR = '학습 기록을 불러오지 못했어요. 브라우저 저장소가 막혀 있지 않은지 확인해 주세요.';
+
+const GRADE_SET = new Set<Grade>(['again', 'hard', 'good']);
+const BACKUP_APP = 'myvoca';
+const BACKUP_VERSION = 1;
+
+function validSettings(s: Settings): Settings {
+  if (!DECK_BY_ID.has(s.deck_id)) throw new Error('단어장을 찾을 수 없어요.');
+  const daily_new = Math.max(1, Math.min(100, Math.round(s.daily_new)));
+  return { deck_id: s.deck_id, daily_new, order: s.order === 'random' ? 'random' : 'sequential' };
 }
 
-export interface Deck {
-  id: string;
-  title: string;
-  description: string;
-  kind: DeckKind;
-  total: number;
-  learned: number;
-  due: number;
+function isProgress(p: unknown): p is Progress {
+  const r = p as Record<string, unknown>;
+  return (
+    typeof r === 'object' &&
+    r !== null &&
+    typeof r.item_id === 'string' &&
+    typeof r.ease === 'number' &&
+    typeof r.interval_days === 'number' &&
+    typeof r.reps === 'number' &&
+    typeof r.lapses === 'number' &&
+    typeof r.due === 'string' &&
+    typeof r.first_seen === 'string' &&
+    GRADE_SET.has(r.last_grade as Grade)
+  );
 }
 
-export interface DeckItem extends Item {
-  status: ItemStatus;
-  due: string | null;
-  last_grade: Grade | null;
+function isDayCount(d: unknown): d is DayCount {
+  const r = d as Record<string, unknown>;
+  return typeof r === 'object' && r !== null && typeof r.day === 'string' && typeof r.count === 'number';
 }
 
-export interface Settings {
-  deck_id: string;
-  daily_new: number;
-  order: OrderMode;
-}
-
-export interface TodayPlan {
-  date: string;
-  settings: Settings;
-  deck_title: string;
-  reviews: Item[];
-  new_items: Item[];
-  new_done: number;
-  deck_unlearned: number;
-  reviewed_today: number;
-}
-
-export interface Stats {
-  streak: number;
-  learned: number;
-  mastered: number;
-  reviews_today: number;
-  heatmap: { date: string; count: number }[];
-}
-
-export interface QuizQuestion {
-  item: Item;
-  choices: Item[];
-}
-
-export interface Quiz {
-  deck_id: string;
-  source: 'learned' | 'all' | 'confusing';
-  questions: QuizQuestion[];
-}
-
-export const CONFUSING_DECK_ID = 'confusing';
-const DEVICE_KEY = 'myvoca.deviceId';
-
-// crypto.randomUUID is missing outside secure contexts (e.g. a phone opening the dev server by LAN IP).
-function newDeviceId(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-let sessionDeviceId: string | null = null;
-
-function deviceId(): string {
-  try {
-    let id = localStorage.getItem(DEVICE_KEY);
-    if (!id) {
-      id = newDeviceId();
-      localStorage.setItem(DEVICE_KEY, id);
-    }
-    return id;
-  } catch {
-    sessionDeviceId ??= newDeviceId();
-    return sessionDeviceId;
-  }
-}
-
-export function localDate(d = new Date()): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Device-Id': deviceId(),
-      'X-Local-Date': localDate(),
-      ...init.headers,
-    },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.detail && typeof body.detail === 'string' ? body.detail : `요청 실패 (${res.status})`);
-  }
-  return res.json() as Promise<T>;
+async function snapshot() {
+  const s = await storage.loadSnapshot();
+  return { ...s, settings: s.settings ?? DEFAULT_SETTINGS };
 }
 
 export const api = {
-  decks: () => request<{ decks: Deck[]; confusing: number }>('/decks'),
-  deckItems: (deckId: string) =>
-    request<{ deck: { id: string; title: string; description: string }; items: DeckItem[] }>(
-      `/decks/${encodeURIComponent(deckId)}/items`,
-    ),
-  settings: () => request<Settings>('/settings'),
-  saveSettings: (settings: Settings) =>
-    request<Settings>('/settings', { method: 'PUT', body: JSON.stringify(settings) }),
-  today: () => request<TodayPlan>('/today'),
-  review: (itemId: number, grade: Grade) =>
-    request<{ item_id: number; due: string; interval_days: number }>('/review', {
-      method: 'POST',
-      body: JSON.stringify({ item_id: itemId, grade }),
-    }),
-  stats: () => request<Stats>('/stats'),
-  quiz: (deckId: string, count = 10) =>
-    request<Quiz>(`/quiz?deck_id=${encodeURIComponent(deckId)}&count=${count}`),
-  wordOfDay: () => request<Item>('/word-of-day'),
-};
+  async decks() {
+    const { progress } = await snapshot();
+    return deckSummaries(progress, localDate());
+  },
 
-export const SERVER_ERROR = '서버에 연결하지 못했어요. 백엔드가 실행 중인지 확인해 주세요.';
+  async deckItems(deckId: string) {
+    const { progress } = await snapshot();
+    return deckItems(deckId, progress, localDate());
+  },
+
+  async settings() {
+    return (await snapshot()).settings;
+  },
+
+  async saveSettings(settings: Settings) {
+    const clean = validSettings(settings);
+    await storage.saveSettings(clean);
+    return clean;
+  },
+
+  async today() {
+    const today = localDate();
+    const { settings, progress, days } = await snapshot();
+    const reviewedToday = days.find((d) => d.day === today)?.count ?? 0;
+    return planToday(settings, progress, reviewedToday, today);
+  },
+
+  async review(itemId: string, grade: Grade) {
+    const today = localDate();
+    const next = applyReview(await storage.getProgress(itemId), itemId, grade, today);
+    await storage.saveReview(next, today);
+    return next;
+  },
+
+  async stats() {
+    const { progress, days } = await snapshot();
+    return computeStats(progress, days, localDate());
+  },
+
+  async quiz(deckId: string, count = 10) {
+    const { progress } = await snapshot();
+    return buildQuiz(deckId, count, progress);
+  },
+
+  async wordOfDay() {
+    return wordOfDay(localDate());
+  },
+
+  async exportBackup(): Promise<Blob> {
+    const data = await storage.loadSnapshot();
+    const backup = { app: BACKUP_APP, version: BACKUP_VERSION, exported_at: new Date().toISOString(), ...data };
+    return new Blob([JSON.stringify(backup, null, 1)], { type: 'application/json' });
+  },
+
+  /** Replaces all saved progress with the backup's; returns how many items it held. */
+  async importBackup(text: string): Promise<number> {
+    let data: Record<string, unknown>;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error('백업 파일을 읽을 수 없어요.');
+    }
+    if (data?.app !== BACKUP_APP || data.version !== BACKUP_VERSION) throw new Error('ことば帳 백업 파일이 아니에요.');
+    const { progress, days, settings } = data;
+    if (!Array.isArray(progress) || !progress.every(isProgress) || !Array.isArray(days) || !days.every(isDayCount)) {
+      throw new Error('백업 파일 내용이 올바르지 않아요.');
+    }
+    let cleanSettings: Settings | null = null;
+    if (settings) {
+      try {
+        cleanSettings = validSettings(settings as Settings);
+      } catch {
+        // Keep the default if the backup points at a deck that no longer exists.
+      }
+    }
+    await storage.replaceAll({ progress, days, settings: cleanSettings });
+    return progress.length;
+  },
+};

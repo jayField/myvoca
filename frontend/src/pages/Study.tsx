@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, SERVER_ERROR, type Grade, type Item } from '../api';
+import { api, LOAD_ERROR, type Grade, type Item } from '../api';
 import { Flashcard } from '../components/Flashcard';
 import { BackIcon } from '../components/Icons';
 import { GRADES } from '../labels';
@@ -30,7 +30,7 @@ export default function Study() {
           ...plan.new_items.map((item) => ({ item, kind: 'new' as const })),
         ]),
       )
-      .catch(() => setError(SERVER_ERROR));
+      .catch(() => setError(LOAD_ERROR));
   }, []);
 
   const current = queue?.[index];

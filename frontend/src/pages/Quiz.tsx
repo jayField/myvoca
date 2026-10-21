@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, SERVER_ERROR, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
 import { SpeakerIcon } from '../components/Icons';
 import { GRADES } from '../labels';
 import { canSpeak, speak } from '../speech';
@@ -62,7 +62,7 @@ export default function Quiz() {
         setDecks(d.decks);
         setDeckId((current) => current || s.deck_id);
       })
-      .catch(() => setError(SERVER_ERROR));
+      .catch(() => setError(LOAD_ERROR));
   }, []);
 
   const question = quiz?.questions[index];
@@ -83,7 +83,7 @@ export default function Quiz() {
       setSaved(false);
       setError(null);
     } catch {
-      setError(SERVER_ERROR);
+      setError(LOAD_ERROR);
     }
   }
 

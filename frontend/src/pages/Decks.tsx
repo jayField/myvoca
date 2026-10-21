@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, SERVER_ERROR, type Deck } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck } from '../api';
 
 export default function Decks() {
   const [decks, setDecks] = useState<Deck[] | null>(null);
@@ -14,7 +14,7 @@ export default function Decks() {
         setDecks(res.decks);
         setConfusing(res.confusing);
       })
-      .catch(() => setError(SERVER_ERROR));
+      .catch(() => setError(LOAD_ERROR));
   }, []);
 
   return (

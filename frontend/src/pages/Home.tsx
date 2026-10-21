@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, SERVER_ERROR, type Deck, type Item, type Stats, type TodayPlan } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type Stats, type TodayPlan } from '../api';
 import { Heatmap } from '../components/Heatmap';
 import { GearIcon } from '../components/Icons';
 import { SettingsDialog } from '../components/SettingsDialog';
@@ -34,7 +34,7 @@ export default function Home() {
       setData({ plan, decks: deckList.decks, confusing: deckList.confusing, stats, word });
       setError(null);
     } catch {
-      setError(SERVER_ERROR);
+      setError(LOAD_ERROR);
     }
   }, []);
 

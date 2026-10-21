@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, SERVER_ERROR, type DeckItem } from '../api';
+import { api, LOAD_ERROR, type DeckItem } from '../api';
 import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { STATUS_LABEL } from '../labels';
@@ -19,8 +19,8 @@ export default function DeckDetail() {
         setItems(res.items);
         setError(null);
       })
-      // fetch rejects with a TypeError when the server is unreachable; API errors carry their own message.
-      .catch((e) => setError(e instanceof TypeError || !(e instanceof Error) ? SERVER_ERROR : e.message));
+      // IndexedDB failures surface as DOMException; our own errors (e.g. unknown deck) carry their message.
+      .catch((e) => setError(e instanceof DOMException || !(e instanceof Error) ? LOAD_ERROR : e.message));
   }, [deckId]);
 
   return (
