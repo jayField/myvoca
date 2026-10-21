@@ -49,7 +49,7 @@ GitHub 저장소를 Cloudflare Pages(`tango-note`)에 연결해 main에 push하�
 - `src/data/` — 단어 데이터. 항목 ID는 `단어장:단어`라서 목록 순서를 바꾸거나 단어를 추가해도 기존 기록이 유지된다. JLPT N5(412)·N4(264)·N3(213)는 공개 목록을 옮기지 않고 자주 쓰는 단어를 직접 골라 한국어 뜻을 단 것이다. 공식 어휘 목록은 2010년 이후 공개되지 않아 레벨 구분은 일반적인 학습 자료 기준이다.
 - **오늘의 학습**: 오늘 복습일이 된 카드 → 오늘의 새 항목 순서. 새 항목은 아직 시작하지 않은 항목에서만 뽑아 날마다 겹치지 않는다. 랜덤 모드는 날짜로 시드를 고정해 새로고침해도 같은 묶음이 나온다.
 - **백업**: 기록 화면에서 JSON 파일로 내보내기/가져오기.
-- **발음**: `frontend/public/audio/`의 VOICEVOX(No.7 アナウンス) 녹음을 재생하고, 녹음이 없는 단어는 브라우저 내장 TTS(여자 목소리 우선)로 읽는다. 단어를 추가하면 VOICEVOX 엔진을 띄우고 `node scripts/generate-audio.mjs --speaker 30 --credit "VOICEVOX:No.7"`(frontend에서)을 다시 실행한다 — 새 단어만 만든다. 크레딧 표기는 계정·로그인 화면에 있다.
+- **발음**: `frontend/public/audio/`의 VOICEVOX(No.7 アナウンス, 0.75배속) 녹음을 재생하고, 녹음이 없는 단어는 브라우저 내장 TTS(여자 목소리 우선)로 읽는다. 단어를 추가하면 VOICEVOX 엔진을 띄우고 `node scripts/generate-audio.mjs --speaker 30 --speed 0.75 --credit "VOICEVOX:No.7"`(frontend에서)을 다시 실행한다 — 새 단어만 만든다. 크레딧 표기는 계정·로그인 화면에 있다.
 
 ## backend/ (현재 미사용)
 
