@@ -1,0 +1,5 @@
+[
+ {"id": "hiragana", "title": "히라가나", "description": "기본 46자", "kind": "kana", "file": "hiragana.json"},
+ {"id": "katakana", "title": "가타카나", "description": "기본 46자", "kind": "kana", "file": "katakana.json"},
+ {"id": "n5", "title": "JLPT N5", "description": "기초 단어 80개 (샘플)", "kind": "word", "file": "n5.json"}
+]
