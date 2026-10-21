@@ -1,8 +1,8 @@
 // Japanese text-to-speech with the browser's built-in voices, preferring a female voice.
 
 // Female Japanese voices shipped by Chrome, macOS/iOS, Windows and Edge, best first.
-const FEMALE_VOICES = ['Google 日本語', 'Nanami', 'O-Ren', 'Kyoko', 'Ayumi', 'Haruka', 'Sayaka', 'Mizuki'];
-const MALE_VOICES = ['Otoya', 'Hattori', 'Ichiro', 'Keita', 'Daichi', 'Naoki'];
+const FEMALE_VOICES = ['Google 日本語', 'Nanami', 'O-Ren', 'Kyoko', 'Ayumi', 'Haruka', 'Sayaka', 'Mizuki', 'Flo', 'Shelley', 'Sandy'];
+const MALE_VOICES = ['Otoya', 'Hattori', 'Ichiro', 'Keita', 'Daichi', 'Naoki', 'Eddy', 'Reed', 'Rocko', 'Grandpa'];
 
 let cachedVoice: SpeechSynthesisVoice | null = null;
 
