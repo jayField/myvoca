@@ -1,6 +1,6 @@
 # 単語ノート (tango-note)
 
-https://tango-note.nariyo1324.workers.dev — 가나부터 JLPT N3까지, 매일 정한 만큼 익히고 잊을 때쯤 복습하는 일본어 단어 학습 웹앱.
+https://tango-note.pages.dev — 가나부터 JLPT N3까지, 매일 정한 만큼 익히고 잊을 때쯤 복습하는 일본어 단어 학습 웹앱.
 
 서버 없이 브라우저만으로 동작하는 정적 사이트다 (React + Vite + TypeScript). 학습 기록은 각자 브라우저의 IndexedDB에 저장된다.
 
@@ -14,31 +14,30 @@ npm test        # 학습 로직·저장 테스트
 npm run build   # 타입 검사 + dist/ 생성
 ```
 
-## 배포 (Cloudflare Workers)
+## 배포 (Cloudflare Pages)
 
-GitHub 저장소를 Cloudflare Workers에 연결한다 (Create application → Import a repository). 저장소 루트의 `package.json`이 `frontend/`를 빌드하고, `wrangler.jsonc`가 `frontend/dist`를 정적 자산으로 올린다.
+GitHub 저장소를 Cloudflare Pages(`tango-note`)에 연결해 main에 push하면 자동 배포된다.
 
 | 항목 | 값 |
 |---|---|
-| Project name | `tango-note` (`wrangler.jsonc`의 `name`과 같아야 함) |
-| Build command | `npm run build` |
-| Deploy command | `npx wrangler deploy` |
-| Path (Root directory) | 비워 둠 (저장소 루트) |
+| Build command | `npm run build` (루트 `package.json`이 `frontend/`를 빌드) |
+| Build output directory | `frontend/dist` |
+| 환경 변수 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (빌드 시 주입되므로 바꾼 뒤 다시 배포) |
 
-`not_found_handling: single-page-application` 덕분에 `/decks/n5` 같은 주소를 새로고침해도 동작한다.
+`404.html`이 없으면 Pages가 모든 경로를 `index.html`로 돌려주므로 `/decks/n5` 같은 주소를 새로고침해도 동작한다. 루트의 `wrangler.jsonc`는 Workers로 배포할 때만 쓰인다.
 
 ## 로그인·동기화 (Supabase)
 
-로그인하지 않아도 지금처럼 이 브라우저에 저장하며 쓸 수 있다. 로그인하면 기록이 계정에 저장되고 같은 계정의 기기끼리 맞춰진다. Supabase 키가 없는 빌드는 로그인 메뉴만 "설정되지 않음"으로 보이고 나머지는 그대로 동작한다.
+사이트에 들어오면 로그인 화면부터 나오고, 로그인해야 앱을 쓸 수 있다. 가입은 아이디 + 비밀번호로 하며 이메일 인증은 없다. Supabase는 이메일로만 가입을 받으므로 아이디 `dalbi`는 `dalbi@tango-note.invalid`로 저장한다(`.invalid`는 메일이 갈 수 없는 주소). 학습 기록은 계정에 저장되고 같은 계정의 기기끼리 맞춰진다. Supabase 키가 없는 빌드는 로그인 없이 이 브라우저에만 저장하며 동작한다.
 
 1. [supabase.com](https://supabase.com)에서 프로젝트 생성 (Region: Northeast Asia (Seoul))
 2. SQL Editor에서 `supabase/schema.sql` 실행 — 테이블 3개와 본인 행만 읽고 쓰게 하는 RLS 정책
-3. Authentication → URL Configuration의 Site URL에 배포 주소 입력
+3. Authentication → Sign In / Providers에서 Confirm email 끄기, URL Configuration의 Site URL에 배포 주소 입력
 4. Project Settings → API에서 URL과 anon(publishable) 키를 복사해
    - 로컬: `frontend/.env.local` (`.env.example` 참고)
    - Cloudflare: 프로젝트 Settings → 빌드 변수에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` 추가 후 다시 배포
 
-동기화 규칙: 카드·설정은 마지막으로 바뀐 쪽(`updated_at`)이 이기고, 하루 학습량은 큰 값을 남긴다. 처음 로그인하면 비회원 때 기록이 계정으로 합쳐지고, 로그아웃하면 이 기기의 기록을 지운다(다시 로그인하면 계정에서 불러옴).
+동기화 규칙: 카드·설정은 마지막으로 바뀐 쪽(`updated_at`)이 이기고, 하루 학습량은 큰 값을 남긴다. 로그아웃하면 이 기기의 기록을 지운다(다시 로그인하면 계정에서 불러옴).
 
 ## 구조 메모
 

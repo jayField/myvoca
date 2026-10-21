@@ -4,12 +4,13 @@ import { useAuth } from '../auth';
 import { AuthLayout } from '../components/AuthLayout';
 import { authErrorMessage } from '../lib/authErrors';
 import { supabase } from '../lib/supabase';
+import { toAuthEmail } from '../lib/username';
 
 export default function Login() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState('');
+  const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,24 +23,25 @@ export default function Login() {
     if (!supabase) return;
     setBusy(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const { error } = await supabase.auth.signInWithPassword({ email: toAuthEmail(id), password });
     setBusy(false);
     if (error) setError(authErrorMessage(error));
     else navigate(from, { replace: true });
   }
 
   return (
-    <AuthLayout title="로그인" subtitle="로그인하면 학습 기록이 계정에 저장돼서 폰과 PC에서 이어서 할 수 있어요.">
+    <AuthLayout title="로그인" subtitle="학습 기록은 계정에 저장돼서 폰과 PC에서 이어서 할 수 있어요.">
       <form className="auth-form" onSubmit={submit}>
         <label className="form-field">
-          <span>이메일</span>
+          <span>아이디</span>
           <input
             className="text-input text-input--block"
-            type="email"
-            autoComplete="email"
+            autoComplete="username"
+            autoCapitalize="off"
+            spellCheck={false}
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={id}
+            onChange={(e) => setId(e.target.value)}
           />
         </label>
         <label className="form-field">

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './auth';
+import { displayName } from './lib/username';
 import { BookIcon, ChartIcon, DeviceIcon, HomeIcon, QuizIcon } from './components/Icons';
 
 const NAV: { to: string; label: string; icon: ReactNode; end?: boolean }[] = [
@@ -15,13 +16,13 @@ function AccountBox() {
   let title = '이 기기에 저장 중';
   let sub = enabled ? '로그인하면 기기 간 동기화' : '로그인 없이 사용';
   if (user) {
-    title = user.email ?? '내 계정';
+    title = displayName(user);
     sub = syncError ? '동기화 오류' : '기기 간 동기화 켜짐';
   }
   return (
     <Link to="/account" className="device-box" aria-label={`계정: ${title}, ${sub}`}>
       <span className="device-avatar" aria-hidden="true">
-        {user ? (user.email?.[0]?.toUpperCase() ?? '나') : <DeviceIcon />}
+        {user ? displayName(user)[0].toUpperCase() : <DeviceIcon />}
       </span>
       <div className="device-text">
         <div className="device-title">{title}</div>

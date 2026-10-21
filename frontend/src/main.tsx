@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './auth';
+import { RequireAuth } from './components/RequireAuth';
 import Account from './pages/Account';
 import DeckDetail from './pages/DeckDetail';
 import Decks from './pages/Decks';
@@ -21,7 +22,13 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
-          <Route element={<App />}>
+          <Route
+            element={
+              <RequireAuth>
+                <App />
+              </RequireAuth>
+            }
+          >
             <Route index element={<Home />} />
             <Route path="study" element={<Study />} />
             <Route path="decks" element={<Decks />} />

@@ -8,9 +8,9 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
   return (
     <div className="auth-page">
       <div className="auth-top">
-        <Link to="/" className="brand-link" lang="ja">
+        <span className="brand-link" lang="ja">
           単語ノート
-        </Link>
+        </span>
         <ThemeToggle />
       </div>
       <main className="auth-card">
@@ -24,9 +24,11 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
           <p className="banner-error">로그인 기능이 아직 설정되지 않았어요. 지금은 로그인 없이 이 기기에서만 사용할 수 있어요.</p>
         )}
       </main>
-      <Link to="/" className="muted small auth-guest">
-        로그인 없이 계속하기
-      </Link>
+      {!enabled && (
+        <Link to="/" className="muted small auth-guest">
+          로그인 없이 계속하기
+        </Link>
+      )}
     </div>
   );
 }
