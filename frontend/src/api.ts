@@ -1,5 +1,5 @@
 // The app's data layer: bundled word lists plus progress in IndexedDB, synced to the account when signed in.
-import { CONFUSING_DECK, DECK_BY_ID } from './lib/content';
+import { CONFUSING_DECK, DECK_BY_ID, ITEMS_BY_DECK } from './lib/content';
 import { localDate } from './lib/dates';
 import {
   applyReview,
@@ -12,6 +12,7 @@ import {
   wordOfDay,
 } from './lib/logic';
 import * as storage from './lib/storage';
+import { deleteRemoteStudyData } from './lib/sync';
 import type { DayCount, Grade, Progress, Settings } from './types';
 
 export type * from './types';
@@ -125,6 +126,29 @@ export const api = {
 
   async wordOfDay() {
     return wordOfDay(localDate());
+  },
+
+  /** Forget all progress in one deck, here and on the account. */
+  async resetDeck(deckId: string) {
+    const items = ITEMS_BY_DECK.get(deckId);
+    if (!items) throw new Error('단어장을 찾을 수 없어요.');
+    await deleteRemoteStudyData(deckId);
+    await storage.deleteProgress(items.map((item) => item.id));
+    notifyLocalChange();
+  },
+
+  /** Forget all progress, daily counts and speed-quiz best scores, here and on the account. */
+  async resetAll() {
+    await deleteRemoteStudyData();
+    await storage.clearStudyData();
+    try {
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith('tango-note.speed.best'))
+        .forEach((key) => localStorage.removeItem(key));
+    } catch {
+      // Best scores are a nicety; ignore storage failures.
+    }
+    notifyLocalChange();
   },
 
   async exportBackup(): Promise<Blob> {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDataVersion } from '../auth';
-import { api, LOAD_ERROR, type DeckItem } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, type DeckItem } from '../api';
 import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { STATUS_LABEL } from '../labels';
@@ -11,6 +11,8 @@ export default function DeckDetail() {
   const [deck, setDeck] = useState<{ title: string; description: string } | null>(null);
   const [items, setItems] = useState<DeckItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
+  const [resetting, setResetting] = useState(false);
 
   const dataVersion = useDataVersion();
   useEffect(() => {
@@ -23,7 +25,26 @@ export default function DeckDetail() {
       })
       // IndexedDB failures surface as DOMException; our own errors (e.g. unknown deck) carry their message.
       .catch((e) => setError(e instanceof DOMException || !(e instanceof Error) ? LOAD_ERROR : e.message));
-  }, [deckId, dataVersion]);
+  }, [deckId, dataVersion, reload]);
+
+  async function resetDeck() {
+    if (!deck) return;
+    const ok = window.confirm(
+      `${deck.title}의 학습 기록을 모두 지울까요?\n복습 일정과 헷갈리는 단어 표시도 사라지고 되돌릴 수 없어요.`,
+    );
+    if (!ok) return;
+    setResetting(true);
+    try {
+      await api.resetDeck(deckId);
+      setReload((n) => n + 1);
+    } catch {
+      setError('초기화하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  const learnedCount = items.filter((item) => item.status !== 'new').length;
 
   return (
     <div className="page">
@@ -36,9 +57,21 @@ export default function DeckDetail() {
           <h1>{deck?.title ?? ''}</h1>
           {deck && <p className="muted small">{deck.description}</p>}
         </div>
-        <Link to={`/quiz?deck=${deckId}`} className="btn btn--ghost">
-          이 범위로 퀴즈
-        </Link>
+        <div className="button-row">
+          <Link to={`/quiz?deck=${deckId}`} className="btn btn--ghost">
+            이 범위로 퀴즈
+          </Link>
+          {deckId !== CONFUSING_DECK_ID && (
+            <button
+              type="button"
+              className="btn btn--danger"
+              onClick={() => void resetDeck()}
+              disabled={resetting || learnedCount === 0}
+            >
+              {resetting ? '초기화 중…' : '기록 초기화'}
+            </button>
+          )}
+        </div>
       </header>
 
       {error && <p className="banner-error">{error}</p>}

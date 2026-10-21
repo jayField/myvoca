@@ -105,6 +105,20 @@ function Backup({ onImported }: { onImported: () => void }) {
     }
   }
 
+  async function resetAll() {
+    const ok = window.confirm(
+      '모든 학습 기록을 지울까요?\n단어장 진도, 학습 잔디, 5초 스피드 최고 기록이 모두 사라지고 되돌릴 수 없어요.',
+    );
+    if (!ok) return;
+    try {
+      await api.resetAll();
+      setMessage({ text: '모든 학습 기록을 지웠어요.', ok: true });
+      onImported();
+    } catch {
+      setMessage({ text: '초기화하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.', ok: false });
+    }
+  }
+
   async function importFile(file: File) {
     if (!window.confirm('지금 이 브라우저의 학습 기록을 백업 파일 내용으로 바꿀까요? 되돌릴 수 없어요.')) return;
     try {
@@ -119,10 +133,10 @@ function Backup({ onImported }: { onImported: () => void }) {
   return (
     <section className="card card--lg stack-sm" aria-labelledby="backup">
       <h2 id="backup" className="card-title">
-        백업
+        백업 · 초기화
       </h2>
       <p className="muted small">
-        학습 기록은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 브라우저 데이터를 지우기 전에 파일로 내보내 두세요.
+        학습 기록을 파일로 내보내거나 가져올 수 있어요. 초기화하면 이 기기와 계정의 기록이 모두 지워져요.
       </p>
       <div className="button-row">
         <button type="button" className="btn btn--ghost" onClick={() => void exportFile()}>
@@ -142,6 +156,11 @@ function Backup({ onImported }: { onImported: () => void }) {
             if (file) void importFile(file);
           }}
         />
+      </div>
+      <div className="button-row">
+        <button type="button" className="btn btn--danger" onClick={() => void resetAll()}>
+          모든 기록 초기화
+        </button>
       </div>
       {message && <p className={message.ok ? 'success-text small' : 'error-text'}>{message.text}</p>}
     </section>

@@ -172,6 +172,24 @@ export async function replaceAll(snapshot: Snapshot): Promise<void> {
   await committed(tx);
 }
 
+/** Remove progress for the given items, e.g. when one deck is reset. */
+export async function deleteProgress(itemIds: string[]): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction(PROGRESS, 'readwrite');
+  const store = tx.objectStore(PROGRESS);
+  itemIds.forEach((id) => store.delete(id));
+  await committed(tx);
+}
+
+/** Remove all progress and daily counts but keep settings and account ownership. */
+export async function clearStudyData(): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction([PROGRESS, DAYS], 'readwrite');
+  tx.objectStore(PROGRESS).clear();
+  tx.objectStore(DAYS).clear();
+  await committed(tx);
+}
+
 /** Forget all local study data, including which account it belonged to. */
 export async function clearAll(): Promise<void> {
   const db = await openDb();

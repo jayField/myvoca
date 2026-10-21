@@ -667,6 +667,16 @@ a {
   color: var(--text);
 }
 
+.btn--danger {
+  background: transparent;
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+.btn--danger:disabled {
+  opacity: 0.5;
+}
+
 .icon-btn {
   width: 2.75rem;
   height: 2.75rem;

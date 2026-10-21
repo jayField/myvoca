@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { applyReview } from './logic';
 import {
   clearAll,
+  clearStudyData,
+  deleteProgress,
   getOwner,
   getProgress,
   loadSnapshot,
@@ -81,5 +83,23 @@ describe('storage', () => {
     await setOwner('user-a');
     await clearAll();
     expect(await getOwner()).toBeNull();
+  });
+
+  it('deleteProgress removes only the given items; clearStudyData keeps settings and owner', async () => {
+    await saveReview(applyReview(undefined, 'n5:猫', 'good', '2026-10-21', T1), '2026-10-21');
+    await saveReview(applyReview(undefined, 'n4:会議', 'good', '2026-10-21', T1), '2026-10-21');
+    await saveSettings({ deck_id: 'n4', daily_new: 5, order: 'random' }, T1);
+    await setOwner('user-a');
+
+    await deleteProgress(['n5:猫']);
+    expect(await getProgress('n5:猫')).toBeUndefined();
+    expect(await getProgress('n4:会議')).toBeDefined();
+
+    await clearStudyData();
+    const snap = await loadSnapshot();
+    expect(snap.progress).toEqual([]);
+    expect(snap.days).toEqual([]);
+    expect(snap.settings?.value.deck_id).toBe('n4');
+    expect(await getOwner()).toBe('user-a');
   });
 });

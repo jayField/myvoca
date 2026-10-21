@@ -13,6 +13,24 @@ interface SettingsRow {
 }
 
 /**
+ * Delete the signed-in account's progress on the server — for one deck (item ids are `deck:term`)
+ * or everything, including daily counts. Without this a reset would be pulled back on the next sync.
+ * Does nothing when signed out.
+ */
+export async function deleteRemoteStudyData(deckId?: string): Promise<void> {
+  if (!supabase) return;
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) return;
+  const progress = supabase.from('progress').delete();
+  const res = await (deckId ? progress.like('item_id', `${deckId}:%`) : progress.like('item_id', '%'));
+  if (res.error) throw res.error;
+  if (!deckId) {
+    const days = await supabase.from('day_counts').delete().gte('day', '1900-01-01');
+    if (days.error) throw days.error;
+  }
+}
+
+/**
  * Pull the account's rows, merge them into local data (newer wins), then push whatever is newer
  * locally. Returns whether local data changed, so screens know to reload.
  */
