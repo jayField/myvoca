@@ -591,38 +591,6 @@ a {
   margin-top: 0.375rem;
 }
 
-.quiz-card {
-  flex: 1 1 17.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  line-height: 1.6;
-}
-
-.link-cta {
-  margin-top: auto;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.quiz-card--wide {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.5rem;
-}
-
-.quiz-card-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.quiz-card--wide .link-cta {
-  margin-top: 0;
-}
-
 .grass-head {
   margin-bottom: 1rem;
 }
@@ -1343,4 +1311,28 @@ a.device-box:hover {
   min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
+}
+
+.deck-card--accent {
+  border-color: var(--border-accent);
+  background: var(--surface-accent);
+}
+
+/* ---------- Speed quiz ---------- */
+
+.speed-timer {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.speed-timer-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.speed-timer--low .speed-timer-fill {
+  background: var(--danger);
 }

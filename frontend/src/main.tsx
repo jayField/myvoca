@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Quiz from './pages/Quiz';
 import Signup from './pages/Signup';
+import Speed from './pages/Speed';
 import Stats from './pages/Stats';
 import Study from './pages/Study';
 import './styles.css';
@@ -34,6 +35,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="decks" element={<Decks />} />
             <Route path="decks/:deckId" element={<DeckDetail />} />
             <Route path="quiz" element={<Quiz />} />
+            <Route path="speed" element={<Speed />} />
             <Route path="stats" element={<Stats />} />
             <Route path="account" element={<Account />} />
           </Route>

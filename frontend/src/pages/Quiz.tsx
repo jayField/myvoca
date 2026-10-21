@@ -46,7 +46,10 @@ export default function Quiz() {
   const [params] = useSearchParams();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [deckId, setDeckId] = useState(params.get('deck') ?? '');
-  const [mode, setMode] = useState<Mode>('meaning');
+  const [mode, setMode] = useState<Mode>(() => {
+    const requested = params.get('mode');
+    return MODES.some((m) => m.mode === requested) ? (requested as Mode) : 'meaning';
+  });
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);

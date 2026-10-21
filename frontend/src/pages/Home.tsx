@@ -9,6 +9,13 @@ import { SpeakButton } from '../components/SpeakButton';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ORDER_LABEL } from '../labels';
 
+const PRACTICE = [
+  { to: '/quiz?mode=meaning', title: '뜻 고르기', description: '단어를 보고 뜻을 골라요' },
+  { to: '/quiz?mode=listen', title: '듣기', description: '발음을 듣고 단어를 골라요' },
+  { to: '/quiz?mode=type', title: '직접 입력', description: '읽는 법을 직접 써요' },
+  { to: '/speed', title: '5초 스피드', description: '5초 안에 뜻 맞히기 · 점수 기록', accent: true },
+];
+
 interface HomeData {
   plan: TodayPlan;
   decks: Deck[];
@@ -70,14 +77,6 @@ export default function Home() {
             <WordOfDay word={data.word} />
           </div>
 
-          <Link to="/quiz" className="card card--lg quiz-card quiz-card--wide">
-            <div className="quiz-card-text">
-              <span className="card-title">퀴즈</span>
-              <span className="muted small">뜻 고르기 · 듣기 · 직접 입력. 끝나면 단어마다 몰랐음 / 헷갈림 / 알았음을 골라요.</span>
-            </div>
-            <span className="accent-text link-cta">퀴즈 풀기 →</span>
-          </Link>
-
           <section aria-labelledby="books">
             <h2 id="books" className="section-title">
               단어장
@@ -101,6 +100,20 @@ export default function Home() {
             </div>
           </section>
 
+
+          <section aria-labelledby="practice">
+            <h2 id="practice" className="section-title">
+              퀴즈
+            </h2>
+            <div className="deck-grid">
+              {PRACTICE.map((p) => (
+                <Link key={p.to} to={p.to} className={p.accent ? 'card deck-card deck-card--accent' : 'card deck-card'}>
+                  <span className="deck-title">{p.title}</span>
+                  <span className="muted small">{p.description}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
 
           <section aria-labelledby="grass" className="card card--lg">
             <div className="card-head grass-head">
