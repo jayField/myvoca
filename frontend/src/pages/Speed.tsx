@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type QuizQuestion } from '../api';
 import { BackIcon } from '../components/Icons';
+import { QuestionCountPicker } from '../components/QuestionCountPicker';
 
 const TIME_LIMIT_MS = 5000;
-const QUESTION_COUNT = 10;
 const FEEDBACK_MS = 900;
 const BEST_KEY = 'tango-note.speed.best';
 
@@ -19,17 +19,18 @@ function points(r: Result): number {
   return r.correct ? 100 + Math.round((100 * (TIME_LIMIT_MS - r.ms)) / TIME_LIMIT_MS) : 0;
 }
 
-function loadBest(deckId: string): number {
+/** Best scores are kept per range and question count, since longer runs score higher. */
+function loadBest(recordKey: string): number {
   try {
-    return Number(localStorage.getItem(`${BEST_KEY}.${deckId}`)) || 0;
+    return Number(localStorage.getItem(`${BEST_KEY}.${recordKey}`)) || 0;
   } catch {
     return 0;
   }
 }
 
-function saveBest(deckId: string, score: number) {
+function saveBest(recordKey: string, score: number) {
   try {
-    localStorage.setItem(`${BEST_KEY}.${deckId}`, String(score));
+    localStorage.setItem(`${BEST_KEY}.${recordKey}`, String(score));
   } catch {
     // Best score is a nicety; ignore storage failures.
   }
@@ -38,6 +39,7 @@ function saveBest(deckId: string, score: number) {
 export default function Speed() {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [deckId, setDeckId] = useState('');
+  const [count, setCount] = useState(10);
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<Result[]>([]);
@@ -108,22 +110,23 @@ export default function Speed() {
   }, [answer]);
 
   const score = results.reduce((sum, r) => sum + points(r), 0);
+  const recordKey = `${deckId}.${count}`;
 
   useEffect(() => {
     if (!finished) return;
-    const previous = loadBest(deckId);
+    const previous = loadBest(recordKey);
     if (score > previous) {
-      saveBest(deckId, score);
+      saveBest(recordKey, score);
       setNewBest(previous > 0);
       setBest(score);
     } else {
       setBest(previous);
     }
-  }, [finished, deckId, score]);
+  }, [finished, recordKey, score]);
 
   async function start() {
     try {
-      const quiz = await api.quiz(deckId, QUESTION_COUNT);
+      const quiz = await api.quiz(deckId, count);
       setQuestions(quiz.questions);
       answeredIndex.current = -1;
       setIndex(0);
@@ -131,7 +134,7 @@ export default function Speed() {
       setPicked(null);
       setNewBest(false);
       setReviewSaved(false);
-      setBest(loadBest(deckId));
+      setBest(loadBest(recordKey));
       setError(null);
     } catch {
       setError(LOAD_ERROR);
@@ -172,9 +175,14 @@ export default function Speed() {
               ))}
             </div>
           </fieldset>
-          {deckId && loadBest(deckId) > 0 && <p className="muted small">이 범위 최고 기록 {loadBest(deckId)}점</p>}
+          <QuestionCountPicker value={count} onChange={setCount} />
+          {deckId && loadBest(recordKey) > 0 && (
+            <p className="muted small">
+              이 범위 {count}문제 최고 기록 {loadBest(recordKey)}점
+            </p>
+          )}
           <button type="button" className="btn btn--primary btn--lg" onClick={() => void start()} disabled={!deckId}>
-            {QUESTION_COUNT}문제 시작
+            {count}문제 시작
           </button>
         </div>
       </div>

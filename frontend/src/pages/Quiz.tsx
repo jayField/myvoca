@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
 import { SpeakerIcon } from '../components/Icons';
+import { QuestionCountPicker } from '../components/QuestionCountPicker';
 import { GRADES } from '../labels';
 import { canSpeak, speak } from '../speech';
 
@@ -46,6 +47,7 @@ export default function Quiz() {
   const [params] = useSearchParams();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [deckId, setDeckId] = useState(params.get('deck') ?? '');
+  const [count, setCount] = useState(10);
   const [mode, setMode] = useState<Mode>(() => {
     const requested = params.get('mode');
     return MODES.some((m) => m.mode === requested) ? (requested as Mode) : 'meaning';
@@ -78,7 +80,7 @@ export default function Quiz() {
 
   async function start() {
     try {
-      setQuiz(await api.quiz(deckId));
+      setQuiz(await api.quiz(deckId, count));
       setIndex(0);
       setAnswers([]);
       setPicked(null);
@@ -150,8 +152,9 @@ export default function Quiz() {
               ))}
             </div>
           </fieldset>
+          <QuestionCountPicker value={count} onChange={setCount} />
           <button type="button" className="btn btn--primary btn--lg" onClick={() => void start()} disabled={!deckId}>
-            10문제 시작
+            {count}문제 시작
           </button>
         </div>
       </div>
