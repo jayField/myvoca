@@ -1,4 +1,4 @@
-// The app's data layer. Everything runs in the browser: bundled word lists plus progress in IndexedDB.
+// The app's data layer: bundled word lists plus progress in IndexedDB, synced to the account when signed in.
 import { CONFUSING_DECK, DECK_BY_ID } from './lib/content';
 import { localDate } from './lib/dates';
 import {
@@ -21,12 +21,33 @@ export const LOAD_ERROR = '학습 기록을 불러오지 못했어요. 브라우
 
 const GRADE_SET = new Set<Grade>(['again', 'hard', 'good']);
 const BACKUP_APP = 'tango-note';
-const BACKUP_VERSION = 1;
+const BACKUP_VERSION = 2;
+
+const listeners = new Set<() => void>();
+
+/** Subscribe to local writes (grades, settings, imports); returns an unsubscribe function. */
+export function onLocalChange(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function notifyLocalChange() {
+  listeners.forEach((listener) => listener());
+}
 
 function validSettings(s: Settings): Settings {
   if (!DECK_BY_ID.has(s.deck_id)) throw new Error('단어장을 찾을 수 없어요.');
   const daily_new = Math.max(1, Math.min(100, Math.round(s.daily_new)));
   return { deck_id: s.deck_id, daily_new, order: s.order === 'random' ? 'random' : 'sequential' };
+}
+
+function settingsOrDefault(s: Settings | undefined): Settings {
+  if (!s) return DEFAULT_SETTINGS;
+  try {
+    return validSettings(s);
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 }
 
 function isProgress(p: unknown): p is Progress {
@@ -52,7 +73,7 @@ function isDayCount(d: unknown): d is DayCount {
 
 async function snapshot() {
   const s = await storage.loadSnapshot();
-  return { ...s, settings: s.settings ?? DEFAULT_SETTINGS };
+  return { ...s, settings: settingsOrDefault(s.settings?.value) };
 }
 
 export const api = {
@@ -73,6 +94,7 @@ export const api = {
   async saveSettings(settings: Settings) {
     const clean = validSettings(settings);
     await storage.saveSettings(clean);
+    notifyLocalChange();
     return clean;
   },
 
@@ -87,6 +109,7 @@ export const api = {
     const today = localDate();
     const next = applyReview(await storage.getProgress(itemId), itemId, grade, today);
     await storage.saveReview(next, today);
+    notifyLocalChange();
     return next;
   },
 
@@ -105,8 +128,15 @@ export const api = {
   },
 
   async exportBackup(): Promise<Blob> {
-    const data = await storage.loadSnapshot();
-    const backup = { app: BACKUP_APP, version: BACKUP_VERSION, exported_at: new Date().toISOString(), ...data };
+    const { progress, days, settings } = await storage.loadSnapshot();
+    const backup = {
+      app: BACKUP_APP,
+      version: BACKUP_VERSION,
+      exported_at: new Date().toISOString(),
+      settings: settings?.value ?? null,
+      progress,
+      days,
+    };
     return new Blob([JSON.stringify(backup, null, 1)], { type: 'application/json' });
   },
 
@@ -118,20 +148,23 @@ export const api = {
     } catch {
       throw new Error('백업 파일을 읽을 수 없어요.');
     }
-    if (data?.app !== BACKUP_APP || data.version !== BACKUP_VERSION) throw new Error('단어 노트 백업 파일이 아니에요.');
+    // Version 1 backups came from the app's earlier name and had no sync timestamps.
+    const knownApp = data?.app === BACKUP_APP || data?.app === 'myvoca';
+    if (!knownApp || (data.version !== 1 && data.version !== BACKUP_VERSION)) {
+      throw new Error('単語ノート 백업 파일이 아니에요.');
+    }
     const { progress, days, settings } = data;
     if (!Array.isArray(progress) || !progress.every(isProgress) || !Array.isArray(days) || !days.every(isDayCount)) {
       throw new Error('백업 파일 내용이 올바르지 않아요.');
     }
-    let cleanSettings: Settings | null = null;
-    if (settings) {
-      try {
-        cleanSettings = validSettings(settings as Settings);
-      } catch {
-        // Keep the default if the backup points at a deck that no longer exists.
-      }
-    }
-    await storage.replaceAll({ progress, days, settings: cleanSettings });
+    // Stamp everything as just changed so the imported copy also replaces the account's on next sync.
+    const now = new Date().toISOString();
+    await storage.replaceAll({
+      progress: progress.map((p) => ({ ...p, updated_at: now })),
+      days: days.map(({ day, count }) => ({ day, count })),
+      settings: settings ? { value: settingsOrDefault(settings as Settings), updated_at: now } : null,
+    });
+    notifyLocalChange();
     return progress.length;
   },
 };

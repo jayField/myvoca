@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useDataVersion } from '../auth';
 import { api, LOAD_ERROR, type DeckItem } from '../api';
 import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
@@ -11,6 +12,7 @@ export default function DeckDetail() {
   const [items, setItems] = useState<DeckItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const dataVersion = useDataVersion();
   useEffect(() => {
     api
       .deckItems(deckId)
@@ -21,7 +23,7 @@ export default function DeckDetail() {
       })
       // IndexedDB failures surface as DOMException; our own errors (e.g. unknown deck) carry their message.
       .catch((e) => setError(e instanceof DOMException || !(e instanceof Error) ? LOAD_ERROR : e.message));
-  }, [deckId]);
+  }, [deckId, dataVersion]);
 
   return (
     <div className="page">

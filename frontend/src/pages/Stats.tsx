@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDataVersion } from '../auth';
 import { api, LOAD_ERROR, type Deck, type Stats as StatsData } from '../api';
 import { Heatmap } from '../components/Heatmap';
 import { localDate } from '../lib/dates';
@@ -17,7 +18,8 @@ export default function Stats() {
       .catch(() => setError(LOAD_ERROR));
   }, []);
 
-  useEffect(load, [load]);
+  const dataVersion = useDataVersion();
+  useEffect(load, [load, dataVersion]);
 
   const tiles = stats
     ? [

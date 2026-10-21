@@ -77,6 +77,13 @@ export const BackIcon = () => (
   </Icon>
 );
 
+export const UserIcon = () => (
+  <Icon>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20a8 8 0 0 1 16 0" />
+  </Icon>
+);
+
 export const DeviceIcon = () => (
   <Icon>
     <rect x="7" y="3" width="10" height="18" rx="2" />

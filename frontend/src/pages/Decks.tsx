@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useDataVersion } from '../auth';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck } from '../api';
 
 export default function Decks() {
@@ -7,6 +8,7 @@ export default function Decks() {
   const [confusing, setConfusing] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  const dataVersion = useDataVersion();
   useEffect(() => {
     api
       .decks()
@@ -15,7 +17,7 @@ export default function Decks() {
         setConfusing(res.confusing);
       })
       .catch(() => setError(LOAD_ERROR));
-  }, []);
+  }, [dataVersion]);
 
   return (
     <div className="page">

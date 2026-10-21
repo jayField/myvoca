@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type Stats, type TodayPlan } from '../api';
+import { useDataVersion } from '../auth';
 import { Heatmap } from '../components/Heatmap';
-import { GearIcon } from '../components/Icons';
+import { GearIcon, UserIcon } from '../components/Icons';
 import { SettingsDialog } from '../components/SettingsDialog';
 import { SpeakButton } from '../components/SpeakButton';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -38,9 +39,10 @@ export default function Home() {
     }
   }, []);
 
+  const dataVersion = useDataVersion();
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, dataVersion]);
 
   const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
 
@@ -51,7 +53,12 @@ export default function Home() {
           <div className="muted small">{today}</div>
           <h1>{data ? greeting(data.plan) : '単語ノート'}</h1>
         </div>
-        <ThemeToggle />
+        <div className="header-actions">
+          <Link to="/account" className="icon-btn icon-btn--framed mobile-only" aria-label="계정">
+            <UserIcon />
+          </Link>
+          <ThemeToggle />
+        </div>
       </header>
 
       {error && <p className="banner-error">{error}</p>}

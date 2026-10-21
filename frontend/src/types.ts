@@ -77,6 +77,8 @@ export interface Progress {
   due: string;
   first_seen: string;
   last_grade: Grade;
+  /** ISO timestamp of the last grade; the newer copy wins when syncing between devices. */
+  updated_at: string;
 }
 
 /** Cards graded on one local calendar day. */

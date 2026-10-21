@@ -108,14 +108,24 @@ export function planToday(settings: Settings, progress: Progress[], reviewedToda
   };
 }
 
-export function applyReview(prev: Progress | undefined, itemId: string, grade: Grade, today: string): Progress {
-  const next = schedule(prev ?? NEW_CARD, grade);
+export function applyReview(
+  prev: Progress | undefined,
+  itemId: string,
+  grade: Grade,
+  today: string,
+  now = new Date().toISOString(),
+): Progress {
+  const { ease, interval_days, reps, lapses } = schedule(prev ?? NEW_CARD, grade);
   return {
     item_id: itemId,
-    ...next,
-    due: addDays(today, next.interval_days),
+    ease,
+    interval_days,
+    reps,
+    lapses,
+    due: addDays(today, interval_days),
     first_seen: prev?.first_seen ?? today,
     last_grade: grade,
+    updated_at: now,
   };
 }
 
