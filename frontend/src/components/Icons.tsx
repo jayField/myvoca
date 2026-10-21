@@ -4,8 +4,8 @@ function Icon({ children, size = 18 }: { children: ReactNode; size?: number }) {
   return (
     <svg
       aria-hidden="true"
-      width={size}
-      height={size}
+      width={`${size / 16}rem`}
+      height={`${size / 16}rem`}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
