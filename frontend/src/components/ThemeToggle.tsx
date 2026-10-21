@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MoonIcon, SunIcon } from './Icons';
 
 type Theme = 'dark' | 'light';
-const THEME_KEY = 'myvoca.theme';
+const THEME_KEY = 'tango-note.theme';
 
 function currentTheme(): Theme {
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';

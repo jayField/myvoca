@@ -14,7 +14,7 @@ export default function App() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand" lang="ja">
-          ことば帳
+          単語ノート
         </div>
         <nav aria-label="주요 메뉴" className="sidebar-nav">
           {NAV.map((n) => (

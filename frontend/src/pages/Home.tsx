@@ -49,7 +49,7 @@ export default function Home() {
       <header className="page-header">
         <div>
           <div className="muted small">{today}</div>
-          <h1>{data ? greeting(data.plan) : 'ことば帳'}</h1>
+          <h1>{data ? greeting(data.plan) : '単語ノート'}</h1>
         </div>
         <ThemeToggle />
       </header>

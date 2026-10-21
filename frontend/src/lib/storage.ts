@@ -1,7 +1,7 @@
 // IndexedDB persistence: one object store each for progress, per-day counts and settings.
 import type { DayCount, Progress, Settings } from '../types';
 
-const DB_NAME = 'myvoca';
+const DB_NAME = 'tango-note';
 const DB_VERSION = 1;
 const PROGRESS = 'progress';
 const DAYS = 'days';

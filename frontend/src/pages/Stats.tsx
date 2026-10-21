@@ -94,7 +94,7 @@ function Backup({ onImported }: { onImported: () => void }) {
       const url = URL.createObjectURL(await api.exportBackup());
       const a = document.createElement('a');
       a.href = url;
-      a.download = `kotobacho-backup-${localDate()}.json`;
+      a.download = `tango-note-backup-${localDate()}.json`;
       a.click();
       URL.revokeObjectURL(url);
       setMessage({ text: '백업 파일을 저장했어요.', ok: true });

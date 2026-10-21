@@ -20,7 +20,7 @@ export const CONFUSING_DECK_ID = CONFUSING_DECK.id;
 export const LOAD_ERROR = '학습 기록을 불러오지 못했어요. 브라우저 저장소가 막혀 있지 않은지 확인해 주세요.';
 
 const GRADE_SET = new Set<Grade>(['again', 'hard', 'good']);
-const BACKUP_APP = 'myvoca';
+const BACKUP_APP = 'tango-note';
 const BACKUP_VERSION = 1;
 
 function validSettings(s: Settings): Settings {
@@ -118,7 +118,7 @@ export const api = {
     } catch {
       throw new Error('백업 파일을 읽을 수 없어요.');
     }
-    if (data?.app !== BACKUP_APP || data.version !== BACKUP_VERSION) throw new Error('ことば帳 백업 파일이 아니에요.');
+    if (data?.app !== BACKUP_APP || data.version !== BACKUP_VERSION) throw new Error('단어 노트 백업 파일이 아니에요.');
     const { progress, days, settings } = data;
     if (!Array.isArray(progress) || !progress.every(isProgress) || !Array.isArray(days) || !days.every(isDayCount)) {
       throw new Error('백업 파일 내용이 올바르지 않아요.');

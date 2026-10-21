@@ -1,6 +1,6 @@
-# ことば帳 (myvoca)
+# 単語ノート (tango-note)
 
-가나부터 JLPT N3까지, 매일 정한 만큼 익히고 잊을 때쯤 복습하는 일본어 단어 학습 웹앱.
+https://tango-note.pages.dev — 가나부터 JLPT N3까지, 매일 정한 만큼 익히고 잊을 때쯤 복습하는 일본어 단어 학습 웹앱.
 
 서버 없이 브라우저만으로 동작하는 정적 사이트다 (React + Vite + TypeScript). 학습 기록은 각자 브라우저의 IndexedDB에 저장된다.
 
@@ -20,6 +20,7 @@ GitHub 저장소를 Cloudflare Pages에 연결하고 다음처럼 설정한다.
 
 | 항목 | 값 |
 |---|---|
+| Project name | `tango-note` (주소가 tango-note.pages.dev가 됨) |
 | Framework preset | React (Vite) |
 | Root directory | `frontend` |
 | Build command | `npm run build` |
