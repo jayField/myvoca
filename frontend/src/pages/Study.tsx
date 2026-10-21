@@ -125,7 +125,6 @@ export default function Study() {
             tag={TAG[current.kind]}
             flipped={flipped}
             onFlip={() => setFlipped((f) => !f)}
-            onSwipe={(g) => void grade(g)}
           />
           {flipped ? (
             <div className="grade-row">
@@ -143,7 +142,7 @@ export default function Study() {
               ))}
             </div>
           ) : (
-            <p className="muted small center">카드를 탭하거나 스페이스를 눌러 뒤집어요. 뒤집은 뒤 오른쪽으로 밀면 알았음, 왼쪽은 몰랐음.</p>
+            <p className="muted small center">카드를 눌러 뒤집은 뒤, 아래 버튼으로 얼마나 알았는지 골라요.</p>
           )}
         </>
       )}

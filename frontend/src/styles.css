@@ -838,9 +838,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 1.375rem;
   background: var(--surface);
-  touch-action: pan-y;
   user-select: none;
-  transition: transform 0.15s ease;
 }
 
 .flashcard-tag {
@@ -1179,7 +1177,6 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flashcard,
   .progress-fill {
     transition: none;
   }
