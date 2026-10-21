@@ -35,6 +35,7 @@ export default function Home() {
   const [data, setData] = useState<HomeData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -50,6 +51,22 @@ export default function Home() {
   useEffect(() => {
     void load();
   }, [load, dataVersion]);
+
+  async function resetTodayDeck(plan: TodayPlan) {
+    const ok = window.confirm(
+      `${plan.deck_title} 학습 기록을 지우고 처음부터 다시 할까요?\n복습 일정과 헷갈리는 단어 표시도 사라지고 되돌릴 수 없어요.`,
+    );
+    if (!ok) return;
+    setResetting(true);
+    try {
+      await api.resetDeck(plan.settings.deck_id);
+      await load();
+    } catch {
+      setError('초기화하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+    } finally {
+      setResetting(false);
+    }
+  }
 
   const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
 
@@ -73,7 +90,14 @@ export default function Home() {
       {data && (
         <>
           <div className="row">
-            <TodayCard plan={data.plan} onStart={() => navigate('/study')} onSettings={() => setSettingsOpen(true)} />
+            <TodayCard
+              plan={data.plan}
+              deckLearned={data.decks.find((d) => d.id === data.plan.settings.deck_id)?.learned ?? 0}
+              resetting={resetting}
+              onStart={() => navigate('/study')}
+              onSettings={() => setSettingsOpen(true)}
+              onReset={() => void resetTodayDeck(data.plan)}
+            />
             <WordOfDay word={data.word} />
           </div>
 
@@ -99,7 +123,6 @@ export default function Home() {
               </Link>
             </div>
           </section>
-
 
           <section aria-labelledby="practice">
             <h2 id="practice" className="section-title">
@@ -143,7 +166,16 @@ export default function Home() {
   );
 }
 
-function TodayCard({ plan, onStart, onSettings }: { plan: TodayPlan; onStart: () => void; onSettings: () => void }) {
+interface TodayCardProps {
+  plan: TodayPlan;
+  deckLearned: number;
+  resetting: boolean;
+  onStart: () => void;
+  onSettings: () => void;
+  onReset: () => void;
+}
+
+function TodayCard({ plan, deckLearned, resetting, onStart, onSettings, onReset }: TodayCardProps) {
   const target = plan.settings.daily_new;
   const percent = Math.min(100, Math.round((plan.new_done / target) * 100));
   const nothingLeft = plan.reviews.length === 0 && plan.new_items.length === 0;
@@ -177,9 +209,20 @@ function TodayCard({ plan, onStart, onSettings }: { plan: TodayPlan; onStart: ()
       {plan.deck_unlearned === 0 && plan.new_items.length === 0 && (
         <p className="muted small">{plan.deck_title} 범위를 모두 시작했어요. 설정에서 다음 범위를 골라 보세요.</p>
       )}
-      <button type="button" className="btn btn--primary btn--lg" onClick={onStart} disabled={nothingLeft}>
-        {nothingLeft ? '오늘 학습 완료' : plan.new_done > 0 || plan.reviewed_today > 0 ? '이어서 학습' : '학습 시작'}
-      </button>
+      <div className="button-row">
+        <button type="button" className="btn btn--primary btn--lg" onClick={onStart} disabled={nothingLeft}>
+          {nothingLeft ? '오늘 학습 완료' : plan.new_done > 0 || plan.reviewed_today > 0 ? '이어서 학습' : '학습 시작'}
+        </button>
+        <button
+          type="button"
+          className="btn btn--danger btn--lg"
+          onClick={onReset}
+          disabled={resetting || deckLearned === 0}
+          title={`${plan.deck_title} 학습 기록 초기화`}
+        >
+          {resetting ? '초기화 중…' : '초기화'}
+        </button>
+      </div>
     </section>
   );
 }
