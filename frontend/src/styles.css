@@ -745,8 +745,7 @@ a {
   position: relative;
 }
 
-.chip input,
-.mode-option input {
+.chip input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
@@ -770,8 +769,7 @@ a {
   font-weight: 500;
 }
 
-.chip input:focus-visible + span,
-.mode-option:has(input:focus-visible) {
+.chip input:focus-visible + span {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -956,33 +954,6 @@ a {
 }
 
 /* ---------- Quiz ---------- */
-
-.mode-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.375rem, 1fr));
-  gap: 0.625rem;
-}
-
-.mode-option {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-height: 4.5rem;
-  padding: 0.875rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.mode-option:has(input:checked) {
-  border-color: var(--accent);
-  background: var(--surface-2);
-}
-
-.mode-label {
-  font-weight: 700;
-}
 
 .quiz-question {
   min-height: 12.5rem;

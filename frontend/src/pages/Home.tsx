@@ -3,18 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type Stats, type TodayPlan } from '../api';
 import { useDataVersion } from '../auth';
 import { Heatmap } from '../components/Heatmap';
+import { PracticeCards } from '../components/PracticeCards';
 import { GearIcon, UserIcon } from '../components/Icons';
 import { SettingsDialog } from '../components/SettingsDialog';
 import { SpeakButton } from '../components/SpeakButton';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ORDER_LABEL } from '../labels';
-
-const PRACTICE = [
-  { to: '/quiz?mode=meaning', title: '뜻 고르기', description: '단어를 보고 뜻을 골라요' },
-  { to: '/quiz?mode=listen', title: '듣기', description: '발음을 듣고 단어를 골라요' },
-  { to: '/quiz?mode=type', title: '직접 입력', description: '읽는 법을 직접 써요' },
-  { to: '/speed', title: '5초 스피드', description: '5초 안에 뜻 맞히기 · 점수 기록', accent: true },
-];
 
 interface HomeData {
   plan: TodayPlan;
@@ -128,14 +122,7 @@ export default function Home() {
             <h2 id="practice" className="section-title">
               퀴즈
             </h2>
-            <div className="deck-grid">
-              {PRACTICE.map((p) => (
-                <Link key={p.to} to={p.to} className={p.accent ? 'card deck-card deck-card--accent' : 'card deck-card'}>
-                  <span className="deck-title">{p.title}</span>
-                  <span className="muted small">{p.description}</span>
-                </Link>
-              ))}
-            </div>
+            <PracticeCards />
           </section>
 
           <section aria-labelledby="grass" className="card card--lg">

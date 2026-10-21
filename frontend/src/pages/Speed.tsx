@@ -44,8 +44,6 @@ export default function Speed() {
     const requested = Number(params.get('count'));
     return [10, 20, 30].includes(requested) ? requested : 10;
   });
-  // Coming from the quiz page with range and count already chosen: skip the setup screen.
-  const autoStart = useRef(params.get('start') === '1');
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<Result[]>([]);
@@ -147,13 +145,6 @@ export default function Speed() {
     }
   }
 
-  useEffect(() => {
-    if (!autoStart.current || !deckId || decks.length === 0) return;
-    autoStart.current = false;
-    void start();
-    // start reads the current deckId and count; running once after they load is the intent.
-  }, [deckId, decks.length]);
-
   async function addMissesToReview() {
     try {
       for (const r of results.filter((x) => !x.correct)) await api.review(r.item.id, 'again');
@@ -168,8 +159,9 @@ export default function Speed() {
       <div className="page page--narrow">
         <header className="page-header">
           <div>
-            <Link to="/" className="back-link">
-              <BackIcon />홈
+            <Link to="/quiz" className="back-link">
+              <BackIcon />
+              퀴즈
             </Link>
             <h1>5초 스피드</h1>
             <p className="muted small">단어가 나오면 5초 안에 뜻을 골라요. 빨리 맞힐수록 점수가 높아요.</p>

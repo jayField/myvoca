@@ -1,18 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
-import { SpeakerIcon } from '../components/Icons';
+import { BackIcon, SpeakerIcon } from '../components/Icons';
+import { PracticeCards } from '../components/PracticeCards';
 import { QuestionCountPicker } from '../components/QuestionCountPicker';
 import { GRADES } from '../labels';
-import { canSpeak, speak } from '../speech';
+import { speak } from '../speech';
 
-type Mode = 'meaning' | 'listen' | 'type' | 'speed';
+type Mode = 'meaning' | 'listen' | 'type';
 
 const MODES: { mode: Mode; label: string; description: string }[] = [
   { mode: 'meaning', label: '뜻 고르기', description: '단어를 보고 뜻을 골라요' },
   { mode: 'listen', label: '듣기', description: '발음을 듣고 단어를 골라요' },
   { mode: 'type', label: '직접 입력', description: '읽는 법을 직접 써요' },
-  { mode: 'speed', label: '5초 스피드', description: '5초 안에 뜻 맞히기 · 점수 기록' },
 ];
 
 const ROMAJI_ALIASES: Record<string, string[]> = {
@@ -46,14 +46,12 @@ function isCorrectReading(item: Item, input: string): boolean {
 
 export default function Quiz() {
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [deckId, setDeckId] = useState(params.get('deck') ?? '');
   const [count, setCount] = useState(10);
-  const [mode, setMode] = useState<Mode>(() => {
-    const requested = params.get('mode');
-    return MODES.some((m) => m.mode === requested) ? (requested as Mode) : 'meaning';
-  });
+  // No mode in the address means the quiz menu; picking a card adds ?mode=.
+  const modeInfo = MODES.find((m) => m.mode === params.get('mode')) ?? null;
+  const mode = modeInfo?.mode ?? null;
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
@@ -80,11 +78,12 @@ export default function Quiz() {
     if (mode === 'listen' && question && !answered) speak(question.item.term);
   }, [mode, question, answered]);
 
+  // Switching mode (or going back to the menu) ends any quiz in progress.
+  useEffect(() => {
+    setQuiz(null);
+  }, [mode]);
+
   async function start() {
-    if (mode === 'speed') {
-      navigate(`/speed?deck=${encodeURIComponent(deckId)}&count=${count}&start=1`);
-      return;
-    }
     try {
       setQuiz(await api.quiz(deckId, count));
       setIndex(0);
@@ -127,11 +126,32 @@ export default function Quiz() {
     }
   }
 
+  if (!mode) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <div>
+            <h1>퀴즈</h1>
+            <p className="muted small">방식을 고르면 범위와 문제 수를 정하고 시작해요.</p>
+          </div>
+        </header>
+        <PracticeCards deckId={params.get('deck')} />
+      </div>
+    );
+  }
+
   if (!quiz) {
     return (
       <div className="page page--narrow">
         <header className="page-header">
-          <h1>퀴즈</h1>
+          <div>
+            <Link to="/quiz" className="back-link">
+              <BackIcon />
+              퀴즈
+            </Link>
+            <h1>{modeInfo!.label}</h1>
+            <p className="muted small">{modeInfo!.description}</p>
+          </div>
         </header>
         {error && <p className="banner-error">{error}</p>}
         <div className="card card--lg stack">
@@ -142,18 +162,6 @@ export default function Quiz() {
                 <label key={d.id} className="chip">
                   <input type="radio" name="deck" checked={deckId === d.id} onChange={() => setDeckId(d.id)} />
                   <span>{d.title}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset className="field">
-            <legend>방식</legend>
-            <div className="mode-grid">
-              {MODES.filter((m) => m.mode !== 'listen' || canSpeak()).map((m) => (
-                <label key={m.mode} className="mode-option">
-                  <input type="radio" name="mode" checked={mode === m.mode} onChange={() => setMode(m.mode)} />
-                  <span className="mode-label">{m.label}</span>
-                  <span className="muted small">{m.description}</span>
                 </label>
               ))}
             </div>
