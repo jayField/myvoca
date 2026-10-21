@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
 import { AuthLayout } from '../components/AuthLayout';
 import { authErrorMessage } from '../lib/authErrors';
@@ -9,14 +9,12 @@ import { toAuthEmail } from '../lib/username';
 export default function Login() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const from = (location.state as { from?: string } | null)?.from ?? '/';
-  if (user) return <Navigate to={from} replace />;
+  if (user) return <Navigate to="/" replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -26,7 +24,7 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email: toAuthEmail(id), password });
     setBusy(false);
     if (error) setError(authErrorMessage(error));
-    else navigate(from, { replace: true });
+    else navigate('/', { replace: true });
   }
 
   return (
@@ -66,9 +64,7 @@ export default function Login() {
       </form>
       <p className="muted small center">
         처음이신가요?{' '}
-        <Link to="/signup" state={location.state}>
-          회원가입
-        </Link>
+        <Link to="/signup">회원가입</Link>
       </p>
     </AuthLayout>
   );
