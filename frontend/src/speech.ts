@@ -1,13 +1,42 @@
-// Japanese text-to-speech with the browser's built-in voices, preferring a female voice.
+// Japanese pronunciation: pre-generated VOICEVOX recordings when available
+// (public/audio, made by scripts/generate-audio.mjs), otherwise the browser's built-in voice.
 
 // Female Japanese voices shipped by Chrome, macOS/iOS, Windows and Edge, best first.
 const FEMALE_VOICES = ['Google 日本語', 'Nanami', 'O-Ren', 'Kyoko', 'Ayumi', 'Haruka', 'Sayaka', 'Mizuki', 'Flo', 'Shelley', 'Sandy'];
 const MALE_VOICES = ['Otoya', 'Hattori', 'Ichiro', 'Keita', 'Daichi', 'Naoki', 'Eddy', 'Reed', 'Rocko', 'Grandpa'];
 
+/** VOICEVOX's terms require naming the voice wherever its audio is used. */
+export const VOICE_CREDIT = 'VOICEVOX:No.7';
+
 let cachedVoice: SpeechSynthesisVoice | null = null;
+let recordings: Promise<Record<string, string>> | null = null;
+let current: HTMLAudioElement | null = null;
+
+function canUseSpeechSynthesis(): boolean {
+  return typeof window !== 'undefined' && 'speechSynthesis' in window;
+}
 
 export function canSpeak(): boolean {
-  return typeof window !== 'undefined' && 'speechSynthesis' in window;
+  return typeof window !== 'undefined' && (typeof Audio !== 'undefined' || canUseSpeechSynthesis());
+}
+
+function loadRecordings(): Promise<Record<string, string>> {
+  recordings ??= fetch('/audio/manifest.json')
+    .then((res) => (res.ok ? res.json() : { files: {} }))
+    .then((m: { files?: Record<string, string> }) => m.files ?? {})
+    .catch(() => ({}));
+  return recordings;
+}
+
+if (typeof window !== 'undefined') {
+  // Fetch the list early so the first tap plays without waiting on it.
+  void loadRecordings();
+  if (canUseSpeechSynthesis()) {
+    // Chrome fills the voice list asynchronously; pick again once it arrives.
+    speechSynthesis.addEventListener?.('voiceschanged', () => {
+      cachedVoice = null;
+    });
+  }
 }
 
 function japaneseVoice(): SpeechSynthesisVoice | null {
@@ -19,19 +48,24 @@ function japaneseVoice(): SpeechSynthesisVoice | null {
   return cachedVoice;
 }
 
-if (canSpeak()) {
-  // Chrome fills the voice list asynchronously; pick again once it arrives.
-  speechSynthesis.addEventListener?.('voiceschanged', () => {
-    cachedVoice = null;
-  });
-}
-
-export function speak(text: string): void {
-  if (!canSpeak()) return;
+function speakWithBrowser(text: string) {
+  if (!canUseSpeechSynthesis()) return;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'ja-JP';
   const voice = japaneseVoice();
   if (voice) utterance.voice = voice;
   speechSynthesis.cancel();
   speechSynthesis.speak(utterance);
+}
+
+export function speak(text: string): void {
+  if (typeof window === 'undefined') return;
+  current?.pause();
+  void loadRecordings().then((files) => {
+    const file = files[text];
+    if (!file) return speakWithBrowser(text);
+    if (canUseSpeechSynthesis()) speechSynthesis.cancel();
+    current = new Audio(`/audio/${file}`);
+    current.play().catch(() => speakWithBrowser(text));
+  });
 }

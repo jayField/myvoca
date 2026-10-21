@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth';
+import { VOICE_CREDIT } from '../speech';
 import { ThemeToggle } from './ThemeToggle';
 
 export function AuthLayout({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
@@ -24,6 +25,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
           <p className="banner-error">로그인 기능이 아직 설정되지 않았어요. 지금은 로그인 없이 이 기기에서만 사용할 수 있어요.</p>
         )}
       </main>
+      <p className="muted xsmall">발음 음성: {VOICE_CREDIT}</p>
       {!enabled && (
         <Link to="/" className="muted small auth-guest">
           로그인 없이 계속하기

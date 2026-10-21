@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../auth';
 import { displayName } from '../lib/username';
+import { VOICE_CREDIT } from '../speech';
 
 function syncLabel(syncing: boolean, error: string | null, lastSynced: Date | null): string {
   if (syncing) return '동기화 중…';
@@ -69,6 +70,8 @@ export default function Account() {
           <p className="muted xsmall">로그아웃하면 이 기기의 기록은 지워지고, 다시 로그인하면 계정에서 불러와요.</p>
         </section>
       )}
+
+      <p className="muted xsmall">발음 음성: {VOICE_CREDIT}</p>
     </div>
   );
 }
