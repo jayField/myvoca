@@ -70,6 +70,14 @@ export default function Home() {
             <WordOfDay word={data.word} />
           </div>
 
+          <Link to="/quiz" className="card card--lg quiz-card quiz-card--wide">
+            <div className="quiz-card-text">
+              <span className="card-title">퀴즈</span>
+              <span className="muted small">뜻 고르기 · 듣기 · 직접 입력. 끝나면 단어마다 몰랐음 / 헷갈림 / 알았음을 골라요.</span>
+            </div>
+            <span className="accent-text link-cta">퀴즈 풀기 →</span>
+          </Link>
+
           <section aria-labelledby="books">
             <h2 id="books" className="section-title">
               단어장
@@ -93,24 +101,18 @@ export default function Home() {
             </div>
           </section>
 
-          <div className="row">
-            <Link to="/quiz" className="card card--lg quiz-card">
-              <span className="card-title">퀴즈</span>
-              <span className="muted small">뜻 고르기 · 듣기 · 직접 입력. 끝나면 단어마다 몰랐음 / 헷갈림 / 알았음을 골라요.</span>
-              <span className="accent-text link-cta">퀴즈 풀기 →</span>
-            </Link>
-            <section aria-labelledby="grass" className="card card--lg grass-card">
-              <div className="card-head">
-                <h2 id="grass" className="card-title">
-                  학습 잔디
-                </h2>
-                <span className="muted small">
-                  연속 <strong className="strong">{data.stats.streak}일</strong>
-                </span>
-              </div>
-              <Heatmap days={data.stats.heatmap} />
-            </section>
-          </div>
+
+          <section aria-labelledby="grass" className="card card--lg">
+            <div className="card-head grass-head">
+              <h2 id="grass" className="card-title">
+                학습 잔디
+              </h2>
+              <span className="muted small">
+                연속 <strong className="strong">{data.stats.streak}일</strong>
+              </span>
+            </div>
+            <Heatmap days={data.stats.heatmap} />
+          </section>
 
           <SettingsDialog
             open={settingsOpen}

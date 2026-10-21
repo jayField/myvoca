@@ -605,13 +605,29 @@ a {
   font-weight: 500;
 }
 
-.grass-card {
-  flex: 2 1 32.5rem;
+.quiz-card--wide {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
 }
 
-.grass-card .card-head {
+.quiz-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.quiz-card--wide .link-cta {
+  margin-top: 0;
+}
+
+.grass-head {
   margin-bottom: 1rem;
 }
+
+
 
 .heatmap-scroll {
   overflow-x: auto;
