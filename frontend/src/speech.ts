@@ -73,5 +73,9 @@ export function speak(text: string): void {
   }
   if (canUseSpeechSynthesis()) speechSynthesis.cancel();
   current = new Audio(`/audio/${file}`);
-  current.play().catch(() => speakWithBrowser(text));
+  current.play().catch((e: unknown) => {
+    // A newer tap pausing this clip rejects with AbortError; that is not a failure, and falling back
+    // would read the word again in a different (browser) voice. Only a clip that can't play falls back.
+    if (e instanceof DOMException && e.name === 'NotSupportedError') speakWithBrowser(text);
+  });
 }
