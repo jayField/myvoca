@@ -39,7 +39,9 @@ export default function App() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand" lang="ja">
-          <span className="brand-full">単語ノート</span>
+          <span className="brand-full">
+            単語ノート <span className="brand-emoji" aria-hidden="true">🌙</span>
+          </span>
           <span className="brand-short" aria-hidden="true">
             単
           </span>

@@ -295,6 +295,10 @@ a {
   display: none;
 }
 
+.brand-emoji {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+}
+
 @media (min-width: 761px) and (max-width: 1080px) {
   .sidebar {
     width: 5rem;

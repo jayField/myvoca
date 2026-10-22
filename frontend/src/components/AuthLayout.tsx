@@ -10,7 +10,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
     <div className="auth-page">
       <div className="auth-top">
         <span className="brand-link" lang="ja">
-          単語ノート
+          単語ノート <span className="brand-emoji" aria-hidden="true">🌙</span>
         </span>
         <ThemeToggle />
       </div>
