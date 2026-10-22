@@ -1327,6 +1327,7 @@ a.device-box:hover {
 }
 
 .kana-cell {
+  transition: transform 0.08s ease;
   min-height: clamp(4.25rem, 7vw, 5.75rem);
   padding: 0.5rem 0.25rem;
   border: 1px solid var(--border);
@@ -1341,6 +1342,11 @@ a.device-box:hover {
 
 button.kana-cell:hover {
   border-color: var(--accent);
+}
+
+button.kana-cell:active {
+  transform: scale(0.95);
+  background: var(--surface-2);
 }
 
 .kana-cell--empty {

@@ -10,6 +10,8 @@ export const VOICE_CREDIT = 'VOICEVOX:No.7';
 
 let cachedVoice: SpeechSynthesisVoice | null = null;
 let recordings: Promise<Record<string, string>> | null = null;
+/** The loaded list, kept so a tap can start playback synchronously, inside the click itself. */
+let loadedFiles: Record<string, string> | null = null;
 let current: HTMLAudioElement | null = null;
 
 function canUseSpeechSynthesis(): boolean {
@@ -23,8 +25,8 @@ export function canSpeak(): boolean {
 function loadRecordings(): Promise<Record<string, string>> {
   recordings ??= fetch('/audio/manifest.json')
     .then((res) => (res.ok ? res.json() : { files: {} }))
-    .then((m: { files?: Record<string, string> }) => m.files ?? {})
-    .catch(() => ({}));
+    .then((m: { files?: Record<string, string> }) => (loadedFiles = m.files ?? {}))
+    .catch(() => (loadedFiles = {}));
   return recordings;
 }
 
@@ -58,14 +60,18 @@ function speakWithBrowser(text: string) {
   speechSynthesis.speak(utterance);
 }
 
+// Safari and iOS only allow sound that starts within the tap itself, so playback must begin
+// synchronously here; waiting on a promise first gets it (and the fallback voice) blocked.
 export function speak(text: string): void {
   if (typeof window === 'undefined') return;
   current?.pause();
-  void loadRecordings().then((files) => {
-    const file = files[text];
-    if (!file) return speakWithBrowser(text);
-    if (canUseSpeechSynthesis()) speechSynthesis.cancel();
-    current = new Audio(`/audio/${file}`);
-    current.play().catch(() => speakWithBrowser(text));
-  });
+  const file = loadedFiles?.[text];
+  if (!file) {
+    speakWithBrowser(text);
+    void loadRecordings();
+    return;
+  }
+  if (canUseSpeechSynthesis()) speechSynthesis.cancel();
+  current = new Audio(`/audio/${file}`);
+  current.play().catch(() => speakWithBrowser(text));
 }
