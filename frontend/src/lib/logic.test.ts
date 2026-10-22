@@ -95,7 +95,7 @@ describe('deckSummaries', () => {
 describe('buildQuiz', () => {
   it('has four distinct choices including the answer', () => {
     const quiz = buildQuiz('n5', 5, []);
-    expect(quiz.source).toBe('all');
+    expect(quiz.source).toBe('mixed');
     expect(quiz.questions).toHaveLength(5);
     for (const q of quiz.questions) {
       const ids = q.choices.map((c) => c.id);
@@ -166,5 +166,17 @@ describe('confusing words by day', () => {
       ['猫', TODAY],
       ['犬', '2026-10-20'],
     ]);
+  });
+});
+
+describe('quiz size', () => {
+  it('tops up a range with only a few studied words so the quiz has the chosen count', () => {
+    const studied = ITEMS_BY_DECK.get('n5')!.slice(0, 9).map((i) => i.id);
+    const quiz = buildQuiz('n5', 10, learn([], studied, 'good'));
+    expect(quiz.questions).toHaveLength(10);
+    expect(quiz.source).toBe('mixed');
+    const ids = quiz.questions.map((q) => q.item.id);
+    expect(new Set(ids).size).toBe(10);
+    expect(studied.every((id) => ids.includes(id))).toBe(true);
   });
 });

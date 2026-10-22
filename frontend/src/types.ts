@@ -65,7 +65,8 @@ export interface QuizQuestion {
 
 export interface Quiz {
   deck_id: string;
-  source: 'learned' | 'all' | 'confusing';
+  /** learned: only studied words; mixed: studied words topped up with others from the range. */
+  source: 'learned' | 'mixed' | 'confusing';
   questions: QuizQuestion[];
 }
 

@@ -196,23 +196,28 @@ export function computeStats(progress: Progress[], days: DayCount[], today: stri
 
 export function buildQuiz(deckId: string, count: number, progress: Progress[], rng: Rng = Math.random): Quiz {
   const byItem = progressMap(progress);
-  let pool: Item[];
+  let picked: Item[];
   let source: Quiz['source'];
   if (deckId === CONFUSING_DECK.id) {
-    pool = [...byItem.values()].filter(isConfusing).map((p) => ITEM_BY_ID.get(p.item_id)!);
+    const pool = [...byItem.values()].filter(isConfusing).map((p) => ITEM_BY_ID.get(p.item_id)!);
+    picked = sample(pool, count, rng);
     source = 'confusing';
   } else {
     deckOrThrow(deckId);
+    // Studied words first; when there are fewer than asked for, fill up with the rest of the range
+    // so a 10-question quiz always has 10 questions.
     const deckItemsAll = ITEMS_BY_DECK.get(deckId)!;
-    pool = deckItemsAll.filter((item) => byItem.has(item.id));
+    const learned = deckItemsAll.filter((item) => byItem.has(item.id));
+    const rest = deckItemsAll.filter((item) => !byItem.has(item.id));
+    picked = sample(learned, count, rng);
     source = 'learned';
-    if (pool.length < 4) {
-      pool = deckItemsAll;
-      source = 'all';
+    if (picked.length < count) {
+      picked = shuffle([...picked, ...sample(rest, count - picked.length, rng)], rng);
+      source = 'mixed';
     }
   }
 
-  const questions = sample(pool, count, rng).map((item) => {
+  const questions = picked.map((item) => {
     const others = ITEMS_BY_DECK.get(item.deck_id)!.filter((x) => x.meaning !== item.meaning);
     return { item, choices: shuffle([...sample(others, 3, rng), item], rng) };
   });

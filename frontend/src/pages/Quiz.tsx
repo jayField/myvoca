@@ -268,8 +268,8 @@ export default function Quiz() {
           {index + 1} / {quiz.questions.length}
         </span>
       </header>
-      {quiz.source === 'all' && index === 0 && (
-        <p className="muted small">아직 이 범위에서 학습한 항목이 4개 미만이라 전체 범위에서 냈어요.</p>
+      {quiz.source === 'mixed' && index === 0 && (
+        <p className="muted small">학습한 단어가 문제 수보다 적어서, 같은 범위의 다른 단어로 채웠어요.</p>
       )}
       <div className="progress">
         <div className="progress-fill" style={{ width: `${(index / quiz.questions.length) * 100}%` }} />
