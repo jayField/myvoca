@@ -12,9 +12,13 @@ create table if not exists public.progress (
   due date not null,
   first_seen date not null,
   last_grade text not null check (last_grade in ('again', 'hard', 'good')),
+  missed_on date,
   updated_at timestamptz not null,
   primary key (user_id, item_id)
 );
+
+-- Added after the first release; safe to run again on an existing project.
+alter table public.progress add column if not exists missed_on date;
 
 create table if not exists public.day_counts (
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,

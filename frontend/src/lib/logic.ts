@@ -20,7 +20,9 @@ import { MASTERED_INTERVAL, NEW_CARD, schedule } from './srs';
 export const DEFAULT_SETTINGS: Settings = { deck_id: 'hiragana', daily_new: 10, order: 'sequential' };
 export const HEATMAP_DAYS = 140;
 
-const isConfusing = (p: Progress) => p.last_grade === 'again' || p.last_grade === 'hard';
+// A miss keeps a word on the 헷갈리는 단어 list even after it is answered right again the same day;
+// only knowing it on a later day takes it off. Rows saved before missed_on existed fall back to last_grade.
+const isConfusing = (p: Progress) => p.last_grade !== 'good' || Boolean(p.missed_on);
 const byOrder = (a: Item, b: Item) => ITEM_ORDER.get(a.id)! - ITEM_ORDER.get(b.id)!;
 
 /** Progress whose item still exists in the bundled lists, keyed by item id. */
@@ -144,6 +146,7 @@ export function applyReview(
     due: addDays(today, interval_days),
     first_seen: prev?.first_seen ?? today,
     last_grade: grade,
+    missed_on: grade !== 'good' ? today : prev?.missed_on === today ? today : null,
     updated_at: now,
   };
 }

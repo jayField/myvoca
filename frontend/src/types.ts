@@ -77,6 +77,8 @@ export interface Progress {
   due: string;
   first_seen: string;
   last_grade: Grade;
+  /** Last day it was graded 몰랐음/헷갈림; cleared once it is known on a later day. */
+  missed_on?: string | null;
   /** ISO timestamp of the last grade; the newer copy wins when syncing between devices. */
   updated_at: string;
 }

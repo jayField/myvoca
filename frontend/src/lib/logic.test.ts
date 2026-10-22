@@ -142,3 +142,17 @@ describe('gradesOnDay', () => {
     expect(gradesOnDay(progress, TODAY, day)).toEqual({ good: 1, hard: 0, again: 2 });
   });
 });
+
+describe('confusing words', () => {
+  it('stay listed after a same-day retry and leave once known on a later day', () => {
+    let p = applyReview(undefined, 'n5:猫', 'again', TODAY);
+    p = applyReview(p, 'n5:猫', 'good', TODAY);
+    expect(deckSummaries([p], TODAY).confusing).toBe(1);
+
+    p = applyReview(p, 'n5:猫', 'good', addDays(TODAY, 1));
+    expect(deckSummaries([p], addDays(TODAY, 1)).confusing).toBe(0);
+
+    p = applyReview(p, 'n5:猫', 'hard', addDays(TODAY, 4));
+    expect(deckSummaries([p], addDays(TODAY, 4)).confusing).toBe(1);
+  });
+});

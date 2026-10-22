@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type Stats, type TodayPlan } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Grade, type Item, type Stats, type TodayPlan } from '../api';
 import { useDataVersion } from '../auth';
 import { Heatmap } from '../components/Heatmap';
 import { PracticeCards } from '../components/PracticeCards';
@@ -16,6 +16,7 @@ interface HomeData {
   confusing: number;
   stats: Stats;
   word: Item;
+  results: Record<Grade, number>;
 }
 
 function greeting(plan: TodayPlan): string {
@@ -33,8 +34,14 @@ export default function Home() {
 
   const load = useCallback(async () => {
     try {
-      const [plan, deckList, stats, word] = await Promise.all([api.today(), api.decks(), api.stats(), api.wordOfDay()]);
-      setData({ plan, decks: deckList.decks, confusing: deckList.confusing, stats, word });
+      const [plan, deckList, stats, word, results] = await Promise.all([
+        api.today(),
+        api.decks(),
+        api.stats(),
+        api.wordOfDay(),
+        api.todayResults(),
+      ]);
+      setData({ plan, decks: deckList.decks, confusing: deckList.confusing, stats, word, results });
       setError(null);
     } catch {
       setError(LOAD_ERROR);
@@ -86,6 +93,7 @@ export default function Home() {
           <div className="row">
             <TodayCard
               plan={data.plan}
+              results={data.results}
               deckLearned={data.decks.find((d) => d.id === data.plan.settings.deck_id)?.learned ?? 0}
               resetting={resetting}
               onStart={() => navigate('/study')}
@@ -155,6 +163,7 @@ export default function Home() {
 
 interface TodayCardProps {
   plan: TodayPlan;
+  results: Record<Grade, number>;
   deckLearned: number;
   resetting: boolean;
   onStart: () => void;
@@ -162,7 +171,8 @@ interface TodayCardProps {
   onReset: () => void;
 }
 
-function TodayCard({ plan, deckLearned, resetting, onStart, onSettings, onReset }: TodayCardProps) {
+function TodayCard({ plan, results, deckLearned, resetting, onStart, onSettings, onReset }: TodayCardProps) {
+  const studied = results.good + results.hard + results.again;
   const target = plan.settings.daily_new;
   const percent = Math.min(100, Math.round((plan.new_done / target) * 100));
   const nothingLeft = plan.reviews.length === 0 && plan.new_items.length === 0;
@@ -195,6 +205,11 @@ function TodayCard({ plan, deckLearned, resetting, onStart, onSettings, onReset 
       </div>
       {plan.deck_unlearned === 0 && plan.new_items.length === 0 && (
         <p className="muted small">{plan.deck_title} 범위를 모두 시작했어요. 설정에서 다음 범위를 골라 보세요.</p>
+      )}
+      {studied > 0 && (
+        <p className="muted small">
+          오늘 {studied}장 · 알았음 {results.good} · 헷갈림 {results.hard} · 몰랐음 {results.again}
+        </p>
       )}
       <div className="button-row">
         <button type="button" className="btn btn--primary btn--lg" onClick={onStart} disabled={nothingLeft}>
