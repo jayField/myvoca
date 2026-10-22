@@ -86,7 +86,10 @@ export function planToday(settings: Settings, progress: Progress[], reviewedToda
 
   const due = [...byItem.values()].filter((p) => p.due <= today);
   due.sort((a, b) => a.due.localeCompare(b.due) || ITEM_ORDER.get(a.item_id)! - ITEM_ORDER.get(b.item_id)!);
-  const newDone = [...byItem.values()].filter((p) => p.first_seen === today).length;
+  // The daily goal belongs to the chosen range: words started today in other ranges don't use it up.
+  const newDone = [...byItem.values()].filter(
+    (p) => p.first_seen === today && ITEM_BY_ID.get(p.item_id)!.deck_id === deck.id,
+  ).length;
 
   // New items only ever come from what the learner has not started, so days never overlap.
   let unlearned = ITEMS_BY_DECK.get(deck.id)!.filter((item) => !byItem.has(item.id));

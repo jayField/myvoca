@@ -47,6 +47,15 @@ describe('planToday', () => {
     expect(tomorrow.new_items[0].term).toBe('さ');
   });
 
+  it('counts the daily goal per range, so switching or resetting a range starts it fresh', () => {
+    const hiragana = planToday(DEFAULT_SETTINGS, [], 0, TODAY).new_items.map((i) => i.id);
+    const progress = learn([], hiragana, 'good');
+    const n5: Settings = { deck_id: 'n5', daily_new: 20, order: 'sequential' };
+    const plan = planToday(n5, progress, 10, TODAY);
+    expect(plan.new_done).toBe(0);
+    expect(plan.new_items).toHaveLength(20);
+  });
+
   it('keeps the random pick stable within a day', () => {
     const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'random' };
     const a = planToday(settings, [], 0, TODAY).new_items.map((i) => i.id);
