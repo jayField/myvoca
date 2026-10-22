@@ -6,6 +6,7 @@ import { AuthProvider } from './auth';
 import { RequireAuth } from './components/RequireAuth';
 import Account from './pages/Account';
 import DeckDetail from './pages/DeckDetail';
+import Feedback from './pages/Feedback';
 import Decks from './pages/Decks';
 import Home from './pages/Home';
 import Kana from './pages/Kana';
@@ -40,6 +41,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="speed" element={<Speed />} />
             <Route path="stats" element={<Stats />} />
             <Route path="account" element={<Account />} />
+            <Route path="feedback" element={<Feedback />} />
           </Route>
         </Routes>
       </BrowserRouter>

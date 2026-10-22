@@ -69,7 +69,7 @@ export default function Home() {
     }
   }
 
-  const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
   return (
     <div className="page">

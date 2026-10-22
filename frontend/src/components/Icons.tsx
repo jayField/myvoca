@@ -38,6 +38,13 @@ export const KanaIcon = () => (
   </Icon>
 );
 
+export const FeedbackIcon = () => (
+  <Icon>
+    <path d="M5 5h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />
+    <path d="M8 10h8M8 13h5" />
+  </Icon>
+);
+
 export const QuizIcon = () => (
   <Icon>
     <circle cx="12" cy="12" r="8" />

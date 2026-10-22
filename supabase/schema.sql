@@ -56,3 +56,49 @@ create policy "own settings" on public.user_settings
   for all to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
+
+-- Feedback board: every signed-in user can read all notes and delete their own.
+-- The author name comes from the account (set by the trigger), never from the browser.
+create table if not exists public.feedback (
+  id bigint generated always as identity primary key,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  author text not null default '',
+  category text not null check (category in ('idea', 'bug', 'etc')),
+  body text not null check (char_length(body) between 1 and 1000),
+  created_at timestamptz not null default now()
+);
+
+alter table public.feedback enable row level security;
+
+drop policy if exists "read feedback" on public.feedback;
+create policy "read feedback" on public.feedback
+  for select to authenticated using (true);
+
+drop policy if exists "write own feedback" on public.feedback;
+create policy "write own feedback" on public.feedback
+  for insert to authenticated with check ((select auth.uid()) = user_id);
+
+drop policy if exists "delete own feedback" on public.feedback;
+create policy "delete own feedback" on public.feedback
+  for delete to authenticated using ((select auth.uid()) = user_id);
+
+create or replace function public.set_feedback_author()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  new.user_id := auth.uid();
+  new.author := coalesce(
+    (select raw_user_meta_data ->> 'username' from auth.users where id = auth.uid()),
+    '익명'
+  );
+  new.created_at := now();
+  return new;
+end;
+$$;
+
+drop trigger if exists feedback_author on public.feedback;
+create trigger feedback_author before insert on public.feedback
+  for each row execute function public.set_feedback_author();
