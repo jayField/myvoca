@@ -117,7 +117,7 @@ export default function Quiz() {
   async function saveGrades() {
     setSaving(true);
     try {
-      for (const a of answers) await api.review(a.item.id, a.grade);
+      for (const a of answers) await api.review(a.item.id, a.grade, 'quiz');
       setSaved(true);
     } catch {
       setError('기록하지 못했어요. 다시 시도해 주세요.');

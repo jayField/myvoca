@@ -132,14 +132,26 @@ describe('content', () => {
 });
 
 describe('gradesOnDay', () => {
-  it('counts each card studied today once, by its latest grade, across sessions', () => {
-    const day = (iso: string) => iso.slice(0, 10);
+  it('counts study cards once by their latest study grade and leaves quizzes out', () => {
     let progress = learn([], ['n5:猫', 'n5:犬', 'n5:水'], 'again', TODAY);
-    // A later session on the same day: 猫 is now known; a card from yesterday does not count.
-    progress = progress.map((p) => (p.item_id === 'n5:猫' ? { ...p, last_grade: 'good' as const } : p));
-    progress = progress.map((p) => ({ ...p, updated_at: `${TODAY}T05:00:00.000Z` }));
-    progress.push({ ...applyReview(undefined, 'n5:本', 'hard', '2026-10-20'), updated_at: '2026-10-20T05:00:00.000Z' });
-    expect(gradesOnDay(progress, TODAY, day)).toEqual({ good: 1, hard: 0, again: 2 });
+    progress = learn(progress, ['n5:猫'], 'good', TODAY);
+    // A quiz grade changes review state but not today's study results.
+    progress = progress.map((p) => (p.item_id === 'n5:水' ? applyReview(p, p.item_id, 'good', TODAY, undefined, 'quiz') : p));
+    progress.push(applyReview(undefined, 'n5:本', 'again', TODAY, undefined, 'quiz'));
+    progress.push(applyReview(undefined, 'n5:山', 'hard', '2026-10-20'));
+    expect(gradesOnDay(progress, TODAY)).toEqual({ good: 1, hard: 0, again: 2 });
+  });
+});
+
+describe('quiz grades and the daily goal', () => {
+  it('a word a quiz adds today does not use up the daily new-word goal', () => {
+    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'sequential' };
+    const fromQuiz = applyReview(undefined, 'n5:猫', 'again', TODAY, undefined, 'quiz');
+    const plan = planToday(settings, [fromQuiz], 0, TODAY);
+    expect(plan.new_done).toBe(0);
+    expect(plan.new_items).toHaveLength(5);
+    expect(plan.new_items.map((i) => i.id)).not.toContain('n5:猫');
+    expect(deckSummaries([fromQuiz], TODAY).confusing).toBe(1);
   });
 });
 

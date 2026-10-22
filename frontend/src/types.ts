@@ -2,6 +2,8 @@ export type Grade = 'again' | 'hard' | 'good';
 export type DeckKind = 'kana' | 'word';
 export type OrderMode = 'sequential' | 'random';
 export type ItemStatus = 'new' | 'due' | 'learning' | 'mastered';
+/** Where a grade came from: the daily study cards, or a quiz (which feeds review but not the daily goal). */
+export type ReviewSource = 'study' | 'quiz';
 
 export interface Item {
   /** `${deck_id}:${term}` — stable across reordering the bundled word lists. */
@@ -82,6 +84,9 @@ export interface Progress {
   last_grade: Grade;
   /** Last day it was graded 몰랐음/헷갈림; cleared once it is known on a later day. */
   missed_on?: string | null;
+  /** Last day it was graded in the study cards, and that grade; quizzes leave these alone. */
+  studied_on?: string | null;
+  study_grade?: Grade | null;
   /** ISO timestamp of the last grade; the newer copy wins when syncing between devices. */
   updated_at: string;
 }

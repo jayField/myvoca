@@ -3,7 +3,7 @@ import type { DayCount, OrderMode, Progress } from '../types';
 import * as storage from './storage';
 import { supabase } from './supabase';
 
-const PROGRESS_COLUMNS = 'item_id, ease, interval_days, reps, lapses, due, first_seen, last_grade, missed_on, updated_at';
+const PROGRESS_COLUMNS = 'item_id, ease, interval_days, reps, lapses, due, first_seen, last_grade, missed_on, studied_on, study_grade, updated_at';
 
 let queue: Promise<unknown> = Promise.resolve();
 

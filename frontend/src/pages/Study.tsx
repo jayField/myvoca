@@ -45,7 +45,7 @@ export default function Study() {
       if (!current || !flipped || saving) return;
       setSaving(true);
       try {
-        await api.review(current.item.id, g);
+        await api.review(current.item.id, g, 'study');
         // Missed cards come back at the end of today's session.
         if (g === 'again') setQueue((q) => q && [...q, { item: current.item, kind: 'again' }]);
         setIndex((i) => i + 1);

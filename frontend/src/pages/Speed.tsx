@@ -147,7 +147,7 @@ export default function Speed() {
 
   async function addMissesToReview() {
     try {
-      for (const r of results.filter((x) => !x.correct)) await api.review(r.item.id, 'again');
+      for (const r of results.filter((x) => !x.correct)) await api.review(r.item.id, 'again', 'quiz');
       setReviewSaved(true);
     } catch {
       setError('복습 목록에 넣지 못했어요. 다시 시도해 주세요.');

@@ -8,6 +8,7 @@ import type {
   ItemStatus,
   Progress,
   Quiz,
+  ReviewSource,
   Settings,
   Stats,
   TodayPlan,
@@ -106,8 +107,9 @@ export function planToday(settings: Settings, progress: Progress[], reviewedToda
   const due = [...byItem.values()].filter((p) => p.due <= today);
   due.sort((a, b) => a.due.localeCompare(b.due) || ITEM_ORDER.get(a.item_id)! - ITEM_ORDER.get(b.item_id)!);
   // The daily goal belongs to the chosen range: words started today in other ranges don't use it up.
+  // Only words first met in the study cards today count; a word a quiz added today does not.
   const newDone = [...byItem.values()].filter(
-    (p) => p.first_seen === today && ITEM_BY_ID.get(p.item_id)!.deck_id === deck.id,
+    (p) => p.first_seen === today && p.studied_on === today && ITEM_BY_ID.get(p.item_id)!.deck_id === deck.id,
   ).length;
 
   // New items only ever come from what the learner has not started, so days never overlap.
@@ -131,17 +133,13 @@ export function planToday(settings: Settings, progress: Progress[], reviewedToda
 }
 
 /**
- * How today's cards ended up: each card studied today counts once, by the last grade it got,
- * so stopping and resuming (or studying on another device) still adds up to one total.
+ * How today's study cards ended up: each card counts once, by the last grade it got in the study
+ * cards, so stopping and resuming (or another device) adds up to one total and quizzes stay out.
  */
-export function gradesOnDay(
-  progress: Progress[],
-  day: string,
-  dayOf: (iso: string) => string = (iso) => localDate(new Date(iso)),
-): Record<Grade, number> {
+export function gradesOnDay(progress: Progress[], day: string): Record<Grade, number> {
   const tally: Record<Grade, number> = { again: 0, hard: 0, good: 0 };
   for (const p of progressMap(progress).values()) {
-    if (dayOf(p.updated_at) === day) tally[p.last_grade]++;
+    if (p.studied_on === day && p.study_grade) tally[p.study_grade]++;
   }
   return tally;
 }
@@ -152,8 +150,10 @@ export function applyReview(
   grade: Grade,
   today: string,
   now = new Date().toISOString(),
+  source: ReviewSource = 'study',
 ): Progress {
   const { ease, interval_days, reps, lapses } = schedule(prev ?? NEW_CARD, grade);
+  const studied = source === 'study';
   return {
     item_id: itemId,
     ease,
@@ -164,6 +164,8 @@ export function applyReview(
     first_seen: prev?.first_seen ?? today,
     last_grade: grade,
     missed_on: grade !== 'good' ? today : prev?.missed_on === today ? today : null,
+    studied_on: studied ? today : (prev?.studied_on ?? null),
+    study_grade: studied ? grade : (prev?.study_grade ?? null),
     updated_at: now,
   };
 }

@@ -14,7 +14,7 @@ import {
 } from './lib/logic';
 import * as storage from './lib/storage';
 import { deleteRemoteStudyData, exclusive } from './lib/sync';
-import type { DayCount, Grade, Progress, Settings } from './types';
+import type { DayCount, Grade, Progress, ReviewSource, Settings } from './types';
 
 export type * from './types';
 
@@ -107,9 +107,10 @@ export const api = {
     return planToday(settings, progress, reviewedToday, today);
   },
 
-  async review(itemId: string, grade: Grade) {
+  /** Grade a card. Quiz grades update review and 헷갈리는 단어 but not today's study goal or results. */
+  async review(itemId: string, grade: Grade, source: ReviewSource = 'study') {
     const today = localDate();
-    const next = applyReview(await storage.getProgress(itemId), itemId, grade, today);
+    const next = applyReview(await storage.getProgress(itemId), itemId, grade, today, undefined, source);
     await storage.saveReview(next, today);
     notifyLocalChange();
     return next;
