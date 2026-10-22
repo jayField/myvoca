@@ -29,6 +29,8 @@ export interface DeckItem extends Item {
   status: ItemStatus;
   due: string | null;
   last_grade: Grade | null;
+  /** For 헷갈리는 단어: the local day it was last missed. */
+  missed_day: string | null;
 }
 
 export interface Settings {

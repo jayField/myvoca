@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
-import { applyReview, buildQuiz, computeStats, deckSummaries, DEFAULT_SETTINGS, gradesOnDay, planToday } from './logic';
+import { applyReview, buildQuiz, computeStats, deckItems, deckSummaries, DEFAULT_SETTINGS, gradesOnDay, planToday } from './logic';
 import { NEW_CARD, schedule } from './srs';
 
 const TODAY = '2026-10-21';
@@ -154,5 +154,17 @@ describe('confusing words', () => {
 
     p = applyReview(p, 'n5:猫', 'hard', addDays(TODAY, 4));
     expect(deckSummaries([p], addDays(TODAY, 4)).confusing).toBe(1);
+  });
+});
+
+describe('confusing words by day', () => {
+  it('lists the most recently missed day first, each word tagged with its day', () => {
+    const older = applyReview(undefined, 'n5:犬', 'again', '2026-10-20');
+    const newer = applyReview(undefined, 'n5:猫', 'hard', TODAY);
+    const { items } = deckItems('confusing', [older, newer], TODAY);
+    expect(items.map((i) => [i.term, i.missed_day])).toEqual([
+      ['猫', TODAY],
+      ['犬', '2026-10-20'],
+    ]);
   });
 });

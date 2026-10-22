@@ -5,6 +5,7 @@ import { api, CONFUSING_DECK_ID, LOAD_ERROR, type DeckItem } from '../api';
 import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { STATUS_LABEL } from '../labels';
+import { addDays, localDate } from '../lib/dates';
 
 export default function DeckDetail() {
   const { deckId = '' } = useParams();
@@ -77,27 +78,62 @@ export default function DeckDetail() {
       {error && <p className="banner-error">{error}</p>}
       {deck && items.length === 0 && <p className="muted">아직 모인 단어가 없어요.</p>}
 
-      <ul className="item-list">
-        {items.map((item) => (
-          <li key={item.id} className="item-row">
-            <span lang="ja" className="item-term">
-              {item.term}
-            </span>
-            <span className="item-text">
-              {item.kind === 'word' ? (
-                <>
-                  <span lang="ja">{item.reading}</span>
-                  <span className="muted">{item.meaning}</span>
-                </>
-              ) : (
-                <span>{item.reading}</span>
-              )}
-            </span>
-            <span className={`badge badge--${item.status}`}>{STATUS_LABEL[item.status]}</span>
-            <SpeakButton text={item.term} />
-          </li>
-        ))}
-      </ul>
+      {deckId === CONFUSING_DECK_ID ? (
+        groupByDay(items).map(([day, group]) => (
+          <section key={day} aria-labelledby={`day-${day}`} className="stack-sm">
+            <h2 id={`day-${day}`} className="section-title day-title">
+              {dayLabel(day)} <span className="muted small">· {group.length}개</span>
+            </h2>
+            <ItemList items={group} />
+          </section>
+        ))
+      ) : (
+        <ItemList items={items} />
+      )}
     </div>
+  );
+}
+
+function groupByDay(items: DeckItem[]): [string, DeckItem[]][] {
+  const groups = new Map<string, DeckItem[]>();
+  for (const item of items) {
+    const day = item.missed_day ?? '';
+    groups.set(day, [...(groups.get(day) ?? []), item]);
+  }
+  return [...groups.entries()];
+}
+
+function dayLabel(day: string): string {
+  if (!day) return '날짜 없음';
+  const today = localDate();
+  const label = new Date(`${day}T00:00:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+  if (day === today) return `${label} (오늘)`;
+  if (day === addDays(today, -1)) return `${label} (어제)`;
+  return label;
+}
+
+function ItemList({ items }: { items: DeckItem[] }) {
+  return (
+    <ul className="item-list">
+      {items.map((item) => (
+        <li key={item.id} className="item-row">
+          <span lang="ja" className="item-term">
+            {item.term}
+          </span>
+          <span className="item-text">
+            {item.kind === 'word' ? (
+              <>
+                <span lang="ja">{item.reading}</span>
+                <span className="muted">{item.meaning}</span>
+              </>
+            ) : (
+              <span>{item.reading}</span>
+            )}
+          </span>
+          <span className={`badge badge--${item.status}`}>{STATUS_LABEL[item.status]}</span>
+          <SpeakButton text={item.term} />
+        </li>
+      ))}
+    </ul>
   );
 }

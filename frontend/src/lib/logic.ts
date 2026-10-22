@@ -60,16 +60,27 @@ export function deckSummaries(progress: Progress[], today: string): { decks: Dec
   return { decks, confusing };
 }
 
-export function deckItems(deckId: string, progress: Progress[], today: string) {
+/** The day a confusing word was last missed; older rows without missed_on use their last study day. */
+function missedDay(p: Progress, dayOf: (iso: string) => string): string {
+  return p.missed_on ?? dayOf(p.updated_at);
+}
+
+export function deckItems(
+  deckId: string,
+  progress: Progress[],
+  today: string,
+  dayOf: (iso: string) => string = (iso) => localDate(new Date(iso)),
+) {
   const byItem = progressMap(progress);
   let deck: { id: string; title: string; description: string };
   let items: Item[];
   if (deckId === CONFUSING_DECK.id) {
     deck = CONFUSING_DECK;
+    // Most recently missed first, so each day's misses read as one group.
     items = [...byItem.values()]
       .filter(isConfusing)
-      .map((p) => ITEM_BY_ID.get(p.item_id)!)
-      .sort(byOrder);
+      .sort((a, b) => missedDay(b, dayOf).localeCompare(missedDay(a, dayOf)) || byOrder(ITEM_BY_ID.get(a.item_id)!, ITEM_BY_ID.get(b.item_id)!))
+      .map((p) => ITEM_BY_ID.get(p.item_id)!);
   } else {
     const { id, title, description } = deckOrThrow(deckId);
     deck = { id, title, description };
@@ -77,7 +88,13 @@ export function deckItems(deckId: string, progress: Progress[], today: string) {
   }
   const rows: DeckItem[] = items.map((item) => {
     const p = byItem.get(item.id);
-    return { ...item, status: itemStatus(p, today), due: p?.due ?? null, last_grade: p?.last_grade ?? null };
+    return {
+      ...item,
+      status: itemStatus(p, today),
+      due: p?.due ?? null,
+      last_grade: p?.last_grade ?? null,
+      missed_day: p && isConfusing(p) ? missedDay(p, dayOf) : null,
+    };
   });
   return { deck, items: rows };
 }

@@ -1365,3 +1365,7 @@ button.kana-cell:active {
   font-size: 0.8125rem;
   color: var(--muted);
 }
+
+.day-title {
+  margin-bottom: 0;
+}
