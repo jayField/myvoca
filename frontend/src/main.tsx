@@ -8,6 +8,7 @@ import Account from './pages/Account';
 import DeckDetail from './pages/DeckDetail';
 import Decks from './pages/Decks';
 import Home from './pages/Home';
+import Kana from './pages/Kana';
 import Login from './pages/Login';
 import Quiz from './pages/Quiz';
 import Signup from './pages/Signup';
@@ -34,6 +35,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="study" element={<Study />} />
             <Route path="decks" element={<Decks />} />
             <Route path="decks/:deckId" element={<DeckDetail />} />
+            <Route path="kana" element={<Kana />} />
             <Route path="quiz" element={<Quiz />} />
             <Route path="speed" element={<Speed />} />
             <Route path="stats" element={<Stats />} />

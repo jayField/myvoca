@@ -31,6 +31,13 @@ export const BookIcon = () => (
   </Icon>
 );
 
+export const KanaIcon = () => (
+  <Icon>
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <path d="M4 12h16M12 4v16" />
+  </Icon>
+);
+
 export const QuizIcon = () => (
   <Icon>
     <circle cx="12" cy="12" r="8" />

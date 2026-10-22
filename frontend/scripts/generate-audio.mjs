@@ -41,11 +41,21 @@ async function synthesizeWav(text, speaker, speed) {
   return Buffer.from(await wav.arrayBuffer());
 }
 
-/** Every distinct text the app can speak: each item's term. */
+const toKatakana = (s) => s.replace(/[\u3041-\u3096]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60));
+
+/** Every distinct text the app can speak: each item's term plus every kana chart cell in both scripts. */
 function allTexts() {
   const texts = new Set();
   for (const file of DECK_FILES) {
     for (const item of JSON.parse(readFileSync(join(DATA_DIR, file), 'utf8'))) texts.add(item.term);
+  }
+  const chart = JSON.parse(readFileSync(join(DATA_DIR, 'kana-chart.json'), 'utf8'));
+  for (const rows of Object.values(chart)) {
+    for (const cell of rows.flat()) {
+      if (!cell) continue;
+      texts.add(cell[0]);
+      texts.add(toKatakana(cell[0]));
+    }
   }
   return [...texts];
 }
