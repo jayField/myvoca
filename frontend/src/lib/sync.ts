@@ -5,6 +5,18 @@ import { supabase } from './supabase';
 
 const PROGRESS_COLUMNS = 'item_id, ease, interval_days, reps, lapses, due, first_seen, last_grade, updated_at';
 
+let queue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Run syncs and resets one at a time. A sync that read the server just before a reset deleted rows
+ * would otherwise write those rows back here and push them up again, undoing the reset.
+ */
+export function exclusive<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.catch(() => undefined);
+  return run;
+}
+
 interface SettingsRow {
   deck_id: string;
   daily_new: number;
@@ -34,7 +46,11 @@ export async function deleteRemoteStudyData(deckId?: string): Promise<void> {
  * Pull the account's rows, merge them into local data (newer wins), then push whatever is newer
  * locally. Returns whether local data changed, so screens know to reload.
  */
-export async function syncNow(userId: string): Promise<boolean> {
+export function syncNow(userId: string): Promise<boolean> {
+  return exclusive(() => syncOnce(userId));
+}
+
+async function syncOnce(userId: string): Promise<boolean> {
   if (!supabase) return false;
   const [progressRes, daysRes, settingsRes] = await Promise.all([
     supabase.from('progress').select(PROGRESS_COLUMNS),

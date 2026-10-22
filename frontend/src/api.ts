@@ -12,7 +12,7 @@ import {
   wordOfDay,
 } from './lib/logic';
 import * as storage from './lib/storage';
-import { deleteRemoteStudyData } from './lib/sync';
+import { deleteRemoteStudyData, exclusive } from './lib/sync';
 import type { DayCount, Grade, Progress, Settings } from './types';
 
 export type * from './types';
@@ -132,15 +132,19 @@ export const api = {
   async resetDeck(deckId: string) {
     const items = ITEMS_BY_DECK.get(deckId);
     if (!items) throw new Error('단어장을 찾을 수 없어요.');
-    await deleteRemoteStudyData(deckId);
-    await storage.deleteProgress(items.map((item) => item.id));
+    await exclusive(async () => {
+      await deleteRemoteStudyData(deckId);
+      await storage.deleteProgress(items.map((item) => item.id));
+    });
     notifyLocalChange();
   },
 
   /** Forget all progress, daily counts and speed-quiz best scores, here and on the account. */
   async resetAll() {
-    await deleteRemoteStudyData();
-    await storage.clearStudyData();
+    await exclusive(async () => {
+      await deleteRemoteStudyData();
+      await storage.clearStudyData();
+    });
     try {
       Object.keys(localStorage)
         .filter((key) => key.startsWith('tango-note.speed.best'))
