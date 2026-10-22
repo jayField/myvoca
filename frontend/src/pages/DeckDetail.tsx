@@ -106,7 +106,7 @@ function groupByDay(items: DeckItem[]): [string, DeckItem[]][] {
 function dayLabel(day: string): string {
   if (!day) return '날짜 없음';
   const today = localDate();
-  const label = new Date(`${day}T00:00:00`).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+  const label = new Date(`${day}T00:00:00`).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
   if (day === today) return `${label} (오늘)`;
   if (day === addDays(today, -1)) return `${label} (어제)`;
   return label;
