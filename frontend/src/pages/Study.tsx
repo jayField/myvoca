@@ -19,7 +19,7 @@ export default function Study() {
   const [flipped, setFlipped] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tally, setTally] = useState<Record<Grade, number>>({ again: 0, hard: 0, good: 0 });
+  const [totals, setTotals] = useState<Record<Grade, number> | null>(null);
 
   useEffect(() => {
     api
@@ -34,6 +34,11 @@ export default function Study() {
   }, []);
 
   const current = queue?.[index];
+  const done = queue !== null && queue.length > 0 && !current;
+
+  useEffect(() => {
+    if (done) api.todayResults().then(setTotals).catch(() => setTotals(null));
+  }, [done]);
 
   const grade = useCallback(
     async (g: Grade) => {
@@ -41,7 +46,6 @@ export default function Study() {
       setSaving(true);
       try {
         await api.review(current.item.id, g);
-        setTally((t) => ({ ...t, [g]: t[g] + 1 }));
         // Missed cards come back at the end of today's session.
         if (g === 'again') setQueue((q) => q && [...q, { item: current.item, kind: 'again' }]);
         setIndex((i) => i + 1);
@@ -101,7 +105,9 @@ export default function Study() {
         <div className="empty">
           <h1>오늘 학습 완료</h1>
           <p className="muted">
-            알았음 {tally.good} · 헷갈림 {tally.hard} · 몰랐음 {tally.again}
+            {totals
+              ? `오늘 전체 ${totals.good + totals.hard + totals.again}장 · 알았음 ${totals.good} · 헷갈림 ${totals.hard} · 몰랐음 ${totals.again}`
+              : ''}
           </p>
           <div className="button-row">
             <Link to="/quiz" className="btn btn--primary">

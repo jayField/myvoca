@@ -8,6 +8,7 @@ import {
   deckItems,
   deckSummaries,
   DEFAULT_SETTINGS,
+  gradesOnDay,
   planToday,
   wordOfDay,
 } from './lib/logic';
@@ -112,6 +113,12 @@ export const api = {
     await storage.saveReview(next, today);
     notifyLocalChange();
     return next;
+  },
+
+  /** Today's results across every session and device: each card by its latest grade. */
+  async todayResults() {
+    const { progress } = await snapshot();
+    return gradesOnDay(progress, localDate());
   },
 
   async stats() {

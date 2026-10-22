@@ -13,7 +13,7 @@ import type {
   TodayPlan,
 } from '../types';
 import { CONFUSING_DECK, DECK_BY_ID, DECKS, ITEM_BY_ID, ITEM_ORDER, ITEMS_BY_DECK, WORD_OF_DAY_DECK } from './content';
-import { addDays, dayNumber } from './dates';
+import { addDays, dayNumber, localDate } from './dates';
 import { sample, seededRng, shuffle, type Rng } from './random';
 import { MASTERED_INTERVAL, NEW_CARD, schedule } from './srs';
 
@@ -109,6 +109,22 @@ export function planToday(settings: Settings, progress: Progress[], reviewedToda
     deck_unlearned: unlearned.length,
     reviewed_today: reviewedToday,
   };
+}
+
+/**
+ * How today's cards ended up: each card studied today counts once, by the last grade it got,
+ * so stopping and resuming (or studying on another device) still adds up to one total.
+ */
+export function gradesOnDay(
+  progress: Progress[],
+  day: string,
+  dayOf: (iso: string) => string = (iso) => localDate(new Date(iso)),
+): Record<Grade, number> {
+  const tally: Record<Grade, number> = { again: 0, hard: 0, good: 0 };
+  for (const p of progressMap(progress).values()) {
+    if (dayOf(p.updated_at) === day) tally[p.last_grade]++;
+  }
+  return tally;
 }
 
 export function applyReview(

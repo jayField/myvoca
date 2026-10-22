@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
-import { applyReview, buildQuiz, computeStats, deckSummaries, DEFAULT_SETTINGS, planToday } from './logic';
+import { applyReview, buildQuiz, computeStats, deckSummaries, DEFAULT_SETTINGS, gradesOnDay, planToday } from './logic';
 import { NEW_CARD, schedule } from './srs';
 
 const TODAY = '2026-10-21';
@@ -128,5 +128,17 @@ describe('content', () => {
       expect(item.reading && item.meaning).toBeTruthy();
     }
     expect(ITEMS_BY_DECK.get('n5')!.length).toBeGreaterThan(300);
+  });
+});
+
+describe('gradesOnDay', () => {
+  it('counts each card studied today once, by its latest grade, across sessions', () => {
+    const day = (iso: string) => iso.slice(0, 10);
+    let progress = learn([], ['n5:猫', 'n5:犬', 'n5:水'], 'again', TODAY);
+    // A later session on the same day: 猫 is now known; a card from yesterday does not count.
+    progress = progress.map((p) => (p.item_id === 'n5:猫' ? { ...p, last_grade: 'good' as const } : p));
+    progress = progress.map((p) => ({ ...p, updated_at: `${TODAY}T05:00:00.000Z` }));
+    progress.push({ ...applyReview(undefined, 'n5:本', 'hard', '2026-10-20'), updated_at: '2026-10-20T05:00:00.000Z' });
+    expect(gradesOnDay(progress, TODAY, day)).toEqual({ good: 1, hard: 0, again: 2 });
   });
 });
