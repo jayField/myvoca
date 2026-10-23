@@ -15,7 +15,7 @@ import type {
 } from '../types';
 import { CONFUSING_DECK, DECK_BY_ID, DECKS, ITEM_BY_ID, ITEM_ORDER, ITEMS_BY_DECK, WORD_OF_DAY_DECK } from './content';
 import { addDays, dayNumber, localDate } from './dates';
-import { sample, seededRng, shuffle, type Rng } from './random';
+import { sample, shuffle, type Rng } from './random';
 import { MASTERED_INTERVAL, NEW_CARD, schedule } from './srs';
 
 export const DEFAULT_SETTINGS: Settings = { deck_id: 'hiragana', daily_new: 10, order: 'sequential' };
@@ -100,7 +100,13 @@ export function deckItems(
   return { deck, items: rows };
 }
 
-export function planToday(settings: Settings, progress: Progress[], reviewedToday: number, today: string): TodayPlan {
+export function planToday(
+  settings: Settings,
+  progress: Progress[],
+  reviewedToday: number,
+  today: string,
+  rng: Rng = Math.random,
+): TodayPlan {
   const deck = deckOrThrow(settings.deck_id);
   const byItem = progressMap(progress);
 
@@ -115,8 +121,8 @@ export function planToday(settings: Settings, progress: Progress[], reviewedToda
   // New items only ever come from what the learner has not started, so days never overlap.
   let unlearned = ITEMS_BY_DECK.get(deck.id)!.filter((item) => !byItem.has(item.id));
   if (settings.order === 'random') {
-    // Seeded by day and deck so reloading the page does not reshuffle today's picks.
-    unlearned = shuffle(unlearned, seededRng(`${today}:${deck.id}`));
+    // A fresh pick every time, so starting again (or after a reset) brings different words.
+    unlearned = shuffle(unlearned, rng);
   }
   const remaining = Math.max(0, settings.daily_new - newDone);
 

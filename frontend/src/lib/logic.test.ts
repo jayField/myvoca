@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
+import { seededRng } from './random';
 import { applyReview, buildQuiz, computeStats, deckItems, deckSummaries, DEFAULT_SETTINGS, gradesOnDay, planToday } from './logic';
 import { NEW_CARD, schedule } from './srs';
 
@@ -56,11 +57,11 @@ describe('planToday', () => {
     expect(plan.new_items).toHaveLength(20);
   });
 
-  it('keeps the random pick stable within a day', () => {
+  it('picks different words each time in random mode', () => {
     const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'random' };
-    const a = planToday(settings, [], 0, TODAY).new_items.map((i) => i.id);
-    const b = planToday(settings, [], 0, TODAY).new_items.map((i) => i.id);
-    expect(a).toEqual(b);
+    const a = planToday(settings, [], 0, TODAY, seededRng('first')).new_items.map((i) => i.id);
+    const b = planToday(settings, [], 0, TODAY, seededRng('second')).new_items.map((i) => i.id);
+    expect(a).not.toEqual(b);
     expect(a).toHaveLength(5);
   });
 

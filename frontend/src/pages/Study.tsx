@@ -4,6 +4,7 @@ import { api, LOAD_ERROR, type Grade, type Item } from '../api';
 import { Flashcard } from '../components/Flashcard';
 import { BackIcon } from '../components/Icons';
 import { GRADES } from '../labels';
+import { shuffle } from '../lib/random';
 
 type Kind = 'review' | 'new' | 'again';
 const TAG: Record<Kind, string> = { review: '복습', new: '새 단어', again: '다시' };
@@ -26,8 +27,9 @@ export default function Study() {
       .today()
       .then((plan) =>
         setQueue([
-          ...plan.reviews.map((item) => ({ item, kind: 'review' as const })),
-          ...plan.new_items.map((item) => ({ item, kind: 'new' as const })),
+          // Reviews first, then new words, each in a fresh order every session.
+          ...shuffle(plan.reviews).map((item) => ({ item, kind: 'review' as const })),
+          ...shuffle(plan.new_items).map((item) => ({ item, kind: 'new' as const })),
         ]),
       )
       .catch(() => setError(LOAD_ERROR));
