@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type QuizQuestion } from '../api';
 import { BackIcon } from '../components/Icons';
-import { QuestionCountPicker } from '../components/QuestionCountPicker';
+import { clampQuestionCount, QuestionCountPicker } from '../components/QuestionCountPicker';
 
 const TIME_LIMIT_MS = 5000;
 const FEEDBACK_MS = 900;
@@ -42,7 +42,7 @@ export default function Speed() {
   const [deckId, setDeckId] = useState(params.get('deck') ?? '');
   const [count, setCount] = useState(() => {
     const requested = Number(params.get('count'));
-    return [10, 20, 30].includes(requested) ? requested : 10;
+    return requested > 0 ? clampQuestionCount(requested) : 10;
   });
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [index, setIndex] = useState(0);
