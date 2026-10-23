@@ -157,16 +157,20 @@ describe('quiz grades and the daily goal', () => {
 });
 
 describe('confusing words', () => {
-  it('stay listed after a same-day retry and leave once known on a later day', () => {
-    let p = applyReview(undefined, 'n5:猫', 'again', TODAY);
-    p = applyReview(p, 'n5:猫', 'good', TODAY);
-    expect(deckSummaries([p], TODAY).confusing).toBe(1);
+  it('stay listed under the day they were missed, marked recovered once known on a later day', () => {
+    const day = (iso: string) => iso.slice(0, 10);
+    let p = applyReview(undefined, 'n5:猫', 'again', TODAY, `${TODAY}T01:00:00.000Z`);
+    p = applyReview(p, 'n5:猫', 'good', TODAY, `${TODAY}T02:00:00.000Z`);
+    expect(deckItems('confusing', [p], TODAY, day).items[0]).toMatchObject({ missed_day: TODAY, recovered: false });
 
-    p = applyReview(p, 'n5:猫', 'good', addDays(TODAY, 1));
-    expect(deckSummaries([p], addDays(TODAY, 1)).confusing).toBe(0);
+    const next = addDays(TODAY, 1);
+    p = applyReview(p, 'n5:猫', 'good', next, `${next}T01:00:00.000Z`);
+    expect(deckSummaries([p], next).confusing).toBe(1);
+    expect(deckItems('confusing', [p], next, day).items[0]).toMatchObject({ missed_day: TODAY, recovered: true });
 
-    p = applyReview(p, 'n5:猫', 'hard', addDays(TODAY, 4));
-    expect(deckSummaries([p], addDays(TODAY, 4)).confusing).toBe(1);
+    const later = addDays(TODAY, 4);
+    p = applyReview(p, 'n5:猫', 'hard', later, `${later}T01:00:00.000Z`);
+    expect(deckItems('confusing', [p], later, day).items[0]).toMatchObject({ missed_day: later, recovered: false });
   });
 });
 

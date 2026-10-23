@@ -33,6 +33,8 @@ export interface DeckItem extends Item {
   last_grade: Grade | null;
   /** For 헷갈리는 단어: the local day it was last missed. */
   missed_day: string | null;
+  /** Answered right on a later day than its last miss. */
+  recovered: boolean;
 }
 
 export interface Settings {
@@ -82,7 +84,7 @@ export interface Progress {
   due: string;
   first_seen: string;
   last_grade: Grade;
-  /** Last day it was graded 몰랐음/헷갈림; cleared once it is known on a later day. */
+  /** Last day it was graded 몰랐음/헷갈림. Kept after later right answers so the 오답 노트 keeps its history. */
   missed_on?: string | null;
   /** Last day it was graded in the study cards, and that grade; quizzes leave these alone. */
   studied_on?: string | null;

@@ -130,6 +130,7 @@ function ItemList({ items }: { items: DeckItem[] }) {
               <span>{item.reading}</span>
             )}
           </span>
+          {item.recovered && <span className="badge badge--mastered">이후 맞힘 ✓</span>}
           <span className={`badge badge--${item.status}`}>{STATUS_LABEL[item.status]}</span>
           <SpeakButton text={item.term} />
         </li>

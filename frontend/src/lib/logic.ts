@@ -21,8 +21,8 @@ import { MASTERED_INTERVAL, NEW_CARD, schedule } from './srs';
 export const DEFAULT_SETTINGS: Settings = { deck_id: 'hiragana', daily_new: 10, order: 'sequential' };
 export const HEATMAP_DAYS = 140;
 
-// A miss keeps a word on the 헷갈리는 단어 list even after it is answered right again the same day;
-// only knowing it on a later day takes it off. Rows saved before missed_on existed fall back to last_grade.
+// The 헷갈리는 단어 list is an 오답 노트: once missed, a word stays under the day it was last missed even after
+// later right answers (those are marked as recovered). Rows saved before missed_on existed fall back to last_grade.
 const isConfusing = (p: Progress) => p.last_grade !== 'good' || Boolean(p.missed_on);
 const byOrder = (a: Item, b: Item) => ITEM_ORDER.get(a.id)! - ITEM_ORDER.get(b.id)!;
 
@@ -95,6 +95,7 @@ export function deckItems(
       due: p?.due ?? null,
       last_grade: p?.last_grade ?? null,
       missed_day: p && isConfusing(p) ? missedDay(p, dayOf) : null,
+      recovered: Boolean(p && p.last_grade === 'good' && p.missed_on && dayOf(p.updated_at) > p.missed_on),
     };
   });
   return { deck, items: rows };
@@ -169,7 +170,7 @@ export function applyReview(
     due: addDays(today, interval_days),
     first_seen: prev?.first_seen ?? today,
     last_grade: grade,
-    missed_on: grade !== 'good' ? today : prev?.missed_on === today ? today : null,
+    missed_on: grade !== 'good' ? today : (prev?.missed_on ?? null),
     studied_on: studied ? today : (prev?.studied_on ?? null),
     study_grade: studied ? grade : (prev?.study_grade ?? null),
     updated_at: now,
