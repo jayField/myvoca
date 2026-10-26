@@ -1098,11 +1098,23 @@ a {
   flex-wrap: wrap;
 }
 
-/* Kanji form shown beside a word written in kana at its level. */
+/* A word written in kana at its level, with its kanji form under it. */
+.term--stacked {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.item-term.term--stacked {
+  align-items: flex-start;
+}
+
 .term-kanji {
-  margin-left: 0.3em;
+  margin-top: 0.15em;
   font-size: max(0.4em, 0.8125rem);
   font-weight: 500;
+  line-height: 1.2;
   color: var(--muted);
 }
 
