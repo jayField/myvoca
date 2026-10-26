@@ -4,6 +4,7 @@ import { useDataVersion } from '../auth';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type DeckItem } from '../api';
 import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
+import { showsReading, Term } from '../components/Term';
 import { STATUS_LABEL } from '../labels';
 import { addDays, localDate } from '../lib/dates';
 
@@ -31,7 +32,7 @@ export default function DeckDetail() {
   async function resetDeck() {
     if (!deck) return;
     const ok = window.confirm(
-      `${deck.title}의 학습 기록을 모두 지울까요?\n복습 일정과 헷갈리는 단어 표시도 사라지고 되돌릴 수 없어요.`,
+      `${deck.title}의 학습 기록을 모두 지울까요?\n복습 일정이 사라지고 되돌릴 수 없어요. 헷갈리는 단어 목록은 그대로 남아요.`,
     );
     if (!ok) return;
     setResetting(true);
@@ -117,13 +118,11 @@ function ItemList({ items }: { items: DeckItem[] }) {
     <ul className="item-list">
       {items.map((item) => (
         <li key={item.id} className="item-row">
-          <span lang="ja" className="item-term">
-            {item.term}
-          </span>
+          <Term item={item} className="item-term" />
           <span className="item-text">
             {item.kind === 'word' ? (
               <>
-                <span lang="ja">{item.reading}</span>
+                {showsReading(item) && <span lang="ja">{item.reading}</span>}
                 <span className="muted">{item.meaning}</span>
               </>
             ) : (

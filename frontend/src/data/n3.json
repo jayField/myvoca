@@ -1,21 +1,25 @@
 [
  {
   "term": "状態",
+  "display": "じょうたい",
   "reading": "じょうたい",
   "meaning": "상태"
  },
  {
   "term": "状況",
+  "display": "じょうきょう",
   "reading": "じょうきょう",
   "meaning": "상황"
  },
  {
   "term": "環境",
+  "display": "かんきょう",
   "reading": "かんきょう",
   "meaning": "환경"
  },
  {
   "term": "影響",
+  "display": "えいきょう",
   "reading": "えいきょう",
   "meaning": "영향"
  },
@@ -36,6 +40,7 @@
  },
  {
   "term": "目標",
+  "display": "もくひょう",
   "reading": "もくひょう",
   "meaning": "목표"
  },
@@ -46,6 +51,7 @@
  },
  {
   "term": "価値",
+  "display": "かち",
   "reading": "かち",
   "meaning": "가치"
  },
@@ -61,6 +67,7 @@
  },
  {
   "term": "義務",
+  "display": "ぎむ",
   "reading": "ぎむ",
   "meaning": "의무"
  },
@@ -71,11 +78,13 @@
  },
  {
   "term": "資源",
+  "display": "しげん",
   "reading": "しげん",
   "meaning": "자원"
  },
  {
   "term": "技術",
+  "display": "ぎじゅつ",
   "reading": "ぎじゅつ",
   "meaning": "기술"
  },
@@ -96,6 +105,7 @@
  },
  {
   "term": "記録",
+  "display": "きろく",
   "reading": "きろく",
   "meaning": "기록"
  },
@@ -111,6 +121,7 @@
  },
  {
   "term": "調査",
+  "display": "ちょうさ",
   "reading": "ちょうさ",
   "meaning": "조사"
  },
@@ -126,6 +137,7 @@
  },
  {
   "term": "比較",
+  "display": "ひかく",
   "reading": "ひかく",
   "meaning": "비교"
  },
@@ -136,6 +148,7 @@
  },
  {
   "term": "発展",
+  "display": "はってん",
   "reading": "はってん",
   "meaning": "발전"
  },
@@ -146,11 +159,13 @@
  },
  {
   "term": "成功",
+  "display": "せいこう",
   "reading": "せいこう",
   "meaning": "성공"
  },
  {
   "term": "減少",
+  "display": "げんしょう",
   "reading": "げんしょう",
   "meaning": "감소"
  },
@@ -166,11 +181,13 @@
  },
  {
   "term": "輸入",
+  "display": "ゆにゅう",
   "reading": "ゆにゅう",
   "meaning": "수입 (무역)"
  },
  {
   "term": "輸出",
+  "display": "ゆしゅつ",
   "reading": "ゆしゅつ",
   "meaning": "수출"
  },
@@ -181,6 +198,7 @@
  },
  {
   "term": "税金",
+  "display": "ぜいきん",
   "reading": "ぜいきん",
   "meaning": "세금"
  },
@@ -201,6 +219,7 @@
  },
  {
   "term": "平均",
+  "display": "へいきん",
   "reading": "へいきん",
   "meaning": "평균"
  },
@@ -231,6 +250,7 @@
  },
  {
   "term": "周り",
+  "display": "まわり",
   "reading": "まわり",
   "meaning": "주위"
  },
@@ -241,11 +261,13 @@
  },
  {
   "term": "距離",
+  "display": "きょり",
   "reading": "きょり",
   "meaning": "거리"
  },
  {
   "term": "範囲",
+  "display": "はんい",
   "reading": "はんい",
   "meaning": "범위"
  },
@@ -256,6 +278,7 @@
  },
  {
   "term": "地域",
+  "display": "ちいき",
   "reading": "ちいき",
   "meaning": "지역"
  },
@@ -271,6 +294,7 @@
  },
  {
   "term": "郊外",
+  "display": "こうがい",
   "reading": "こうがい",
   "meaning": "교외"
  },
@@ -281,11 +305,13 @@
  },
  {
   "term": "事故",
+  "display": "じこ",
   "reading": "じこ",
   "meaning": "사고"
  },
  {
   "term": "渋滞",
+  "display": "じゅうたい",
   "reading": "じゅうたい",
   "meaning": "교통 정체"
  },
@@ -301,6 +327,7 @@
  },
  {
   "term": "免許",
+  "display": "めんきょ",
   "reading": "めんきょ",
   "meaning": "면허"
  },
@@ -316,6 +343,7 @@
  },
  {
   "term": "上司",
+  "display": "じょうし",
   "reading": "じょうし",
   "meaning": "상사"
  },
@@ -326,21 +354,25 @@
  },
  {
   "term": "同僚",
+  "display": "どうりょう",
   "reading": "どうりょう",
   "meaning": "동료"
  },
  {
   "term": "先輩",
+  "display": "せんぱい",
   "reading": "せんぱい",
   "meaning": "선배"
  },
  {
   "term": "後輩",
+  "display": "こうはい",
   "reading": "こうはい",
   "meaning": "후배"
  },
  {
   "term": "恋人",
+  "display": "こいびと",
   "reading": "こいびと",
   "meaning": "연인"
  },
@@ -356,6 +388,7 @@
  },
  {
   "term": "親戚",
+  "display": "しんせき",
   "reading": "しんせき",
   "meaning": "친척"
  },
@@ -366,6 +399,7 @@
  },
  {
   "term": "個人",
+  "display": "こじん",
   "reading": "こじん",
   "meaning": "개인"
  },
@@ -376,6 +410,7 @@
  },
  {
   "term": "態度",
+  "display": "たいど",
   "reading": "たいど",
   "meaning": "태도"
  },
@@ -391,6 +426,7 @@
  },
  {
   "term": "感謝",
+  "display": "かんしゃ",
   "reading": "かんしゃ",
   "meaning": "감사"
  },
@@ -411,6 +447,7 @@
  },
  {
   "term": "我慢",
+  "display": "がまん",
   "reading": "がまん",
   "meaning": "참음, 인내"
  },
@@ -421,6 +458,7 @@
  },
  {
   "term": "希望",
+  "display": "きぼう",
   "reading": "きぼう",
   "meaning": "희망"
  },
@@ -431,6 +469,7 @@
  },
  {
   "term": "将来",
+  "display": "しょうらい",
   "reading": "しょうらい",
   "meaning": "장래"
  },
@@ -476,6 +515,7 @@
  },
  {
   "term": "締め切り",
+  "display": "しめきり",
   "reading": "しめきり",
   "meaning": "마감"
  },
@@ -506,11 +546,13 @@
  },
  {
   "term": "慌てる",
+  "display": "あわてる",
   "reading": "あわてる",
   "meaning": "허둥대다"
  },
  {
   "term": "祝う",
+  "display": "いわう",
   "reading": "いわう",
   "meaning": "축하하다"
  },
@@ -521,21 +563,25 @@
  },
  {
   "term": "訴える",
+  "display": "うったえる",
   "reading": "うったえる",
   "meaning": "호소하다, 고소하다"
  },
  {
   "term": "埋める",
+  "display": "うめる",
   "reading": "うめる",
   "meaning": "묻다, 메우다"
  },
  {
   "term": "補う",
+  "display": "おぎなう",
   "reading": "おぎなう",
   "meaning": "보충하다"
  },
  {
   "term": "抑える",
+  "display": "おさえる",
   "reading": "おさえる",
   "meaning": "억누르다"
  },
@@ -546,6 +592,7 @@
  },
  {
   "term": "隠す",
+  "display": "かくす",
   "reading": "かくす",
   "meaning": "숨기다"
  },
@@ -556,16 +603,19 @@
  },
  {
   "term": "稼ぐ",
+  "display": "かせぐ",
   "reading": "かせぐ",
   "meaning": "(돈을) 벌다"
  },
  {
   "term": "片付ける",
+  "display": "かたづける",
   "reading": "かたづける",
   "meaning": "정리하다"
  },
  {
   "term": "叶う",
+  "display": "かなう",
   "reading": "かなう",
   "meaning": "이루어지다"
  },
@@ -576,21 +626,25 @@
  },
  {
   "term": "乾かす",
+  "display": "かわかす",
   "reading": "かわかす",
   "meaning": "말리다"
  },
  {
   "term": "効く",
+  "display": "きく",
   "reading": "きく",
   "meaning": "효과가 있다"
  },
  {
   "term": "鍛える",
+  "display": "きたえる",
   "reading": "きたえる",
   "meaning": "단련하다"
  },
  {
   "term": "崩れる",
+  "display": "くずれる",
   "reading": "くずれる",
   "meaning": "무너지다"
  },
@@ -616,6 +670,7 @@
  },
  {
   "term": "誘う",
+  "display": "さそう",
   "reading": "さそう",
   "meaning": "권유하다"
  },
@@ -626,16 +681,19 @@
  },
  {
   "term": "従う",
+  "display": "したがう",
   "reading": "したがう",
   "meaning": "따르다"
  },
  {
   "term": "沈む",
+  "display": "しずむ",
   "reading": "しずむ",
   "meaning": "가라앉다"
  },
  {
   "term": "縛る",
+  "display": "しばる",
   "reading": "しばる",
   "meaning": "묶다"
  },
@@ -646,6 +704,7 @@
  },
  {
   "term": "迫る",
+  "display": "せまる",
   "reading": "せまる",
   "meaning": "다가오다"
  },
@@ -671,11 +730,13 @@
  },
  {
   "term": "叩く",
+  "display": "たたく",
   "reading": "たたく",
   "meaning": "두드리다"
  },
  {
   "term": "畳む",
+  "display": "たたむ",
   "reading": "たたむ",
   "meaning": "개다, 접다"
  },
@@ -691,6 +752,7 @@
  },
  {
   "term": "縮む",
+  "display": "ちぢむ",
   "reading": "ちぢむ",
   "meaning": "줄어들다"
  },
@@ -706,11 +768,13 @@
  },
  {
   "term": "繋ぐ",
+  "display": "つなぐ",
   "reading": "つなぐ",
   "meaning": "잇다, 연결하다"
  },
  {
   "term": "潰す",
+  "display": "つぶす",
   "reading": "つぶす",
   "meaning": "찌그러뜨리다, (시간을) 때우다"
  },
@@ -721,6 +785,7 @@
  },
  {
   "term": "照らす",
+  "display": "てらす",
   "reading": "てらす",
   "meaning": "비추다"
  },
@@ -731,16 +796,19 @@
  },
  {
   "term": "整える",
+  "display": "ととのえる",
   "reading": "ととのえる",
   "meaning": "정돈하다"
  },
  {
   "term": "怠ける",
+  "display": "なまける",
   "reading": "なまける",
   "meaning": "게으름 피우다"
  },
  {
   "term": "悩む",
+  "display": "なやむ",
   "reading": "なやむ",
   "meaning": "고민하다"
  },
@@ -761,16 +829,19 @@
  },
  {
   "term": "測る",
+  "display": "はかる",
   "reading": "はかる",
   "meaning": "재다"
  },
  {
   "term": "省く",
+  "display": "はぶく",
   "reading": "はぶく",
   "meaning": "생략하다"
  },
  {
   "term": "離れる",
+  "display": "はなれる",
   "reading": "はなれる",
   "meaning": "떨어지다, 멀어지다"
  },
@@ -786,16 +857,19 @@
  },
  {
   "term": "防ぐ",
+  "display": "ふせぐ",
   "reading": "ふせぐ",
   "meaning": "막다, 방지하다"
  },
  {
   "term": "震える",
+  "display": "ふるえる",
   "reading": "ふるえる",
   "meaning": "떨다"
  },
  {
   "term": "減らす",
+  "display": "へらす",
   "reading": "へらす",
   "meaning": "줄이다"
  },
@@ -806,6 +880,7 @@
  },
  {
   "term": "混ぜる",
+  "display": "まぜる",
   "reading": "まぜる",
   "meaning": "섞다"
  },
@@ -846,6 +921,7 @@
  },
  {
   "term": "譲る",
+  "display": "ゆずる",
   "reading": "ゆずる",
   "meaning": "양보하다"
  },
@@ -856,16 +932,19 @@
  },
  {
   "term": "汚す",
+  "display": "よごす",
   "reading": "よごす",
   "meaning": "더럽히다"
  },
  {
   "term": "酔う",
+  "display": "よう",
   "reading": "よう",
   "meaning": "취하다"
  },
  {
   "term": "怪しい",
+  "display": "あやしい",
   "reading": "あやしい",
   "meaning": "수상하다"
  },
@@ -876,6 +955,7 @@
  },
  {
   "term": "惜しい",
+  "display": "おしい",
   "reading": "おしい",
   "meaning": "아깝다"
  },
@@ -886,16 +966,19 @@
  },
  {
   "term": "賢い",
+  "display": "かしこい",
   "reading": "かしこい",
   "meaning": "현명하다"
  },
  {
   "term": "悔しい",
+  "display": "くやしい",
   "reading": "くやしい",
   "meaning": "분하다"
  },
  {
   "term": "詳しい",
+  "display": "くわしい",
   "reading": "くわしい",
   "meaning": "자세하다"
  },
@@ -906,11 +989,13 @@
  },
  {
   "term": "鋭い",
+  "display": "するどい",
   "reading": "するどい",
   "meaning": "날카롭다"
  },
  {
   "term": "激しい",
+  "display": "はげしい",
   "reading": "はげしい",
   "meaning": "격렬하다"
  },
@@ -921,16 +1006,19 @@
  },
  {
   "term": "眩しい",
+  "display": "まぶしい",
   "reading": "まぶしい",
   "meaning": "눈부시다"
  },
  {
   "term": "緩い",
+  "display": "ゆるい",
   "reading": "ゆるい",
   "meaning": "느슨하다"
  },
  {
   "term": "曖昧",
+  "display": "あいまい",
   "reading": "あいまい",
   "meaning": "애매함"
  },
@@ -941,6 +1029,7 @@
  },
  {
   "term": "穏やか",
+  "display": "おだやか",
   "reading": "おだやか",
   "meaning": "온화함"
  },
@@ -951,11 +1040,13 @@
  },
  {
   "term": "複雑",
+  "display": "ふくざつ",
   "reading": "ふくざつ",
   "meaning": "복잡함"
  },
  {
   "term": "単純",
+  "display": "たんじゅん",
   "reading": "たんじゅん",
   "meaning": "단순함"
  },
@@ -966,16 +1057,19 @@
  },
  {
   "term": "真剣",
+  "display": "しんけん",
   "reading": "しんけん",
   "meaning": "진지함"
  },
  {
   "term": "素直",
+  "display": "すなお",
   "reading": "すなお",
   "meaning": "순수함, 고분고분함"
  },
  {
   "term": "退屈",
+  "display": "たいくつ",
   "reading": "たいくつ",
   "meaning": "지루함"
  },
@@ -986,31 +1080,37 @@
  },
  {
   "term": "独特",
+  "display": "どくとく",
   "reading": "どくとく",
   "meaning": "독특함"
  },
  {
   "term": "豊か",
+  "display": "ゆたか",
   "reading": "ゆたか",
   "meaning": "풍부함"
  },
  {
   "term": "立派",
+  "display": "りっぱ",
   "reading": "りっぱ",
   "meaning": "훌륭함"
  },
  {
   "term": "改めて",
+  "display": "あらためて",
   "reading": "あらためて",
   "meaning": "새삼, 다시"
  },
  {
   "term": "一応",
+  "display": "いちおう",
   "reading": "いちおう",
   "meaning": "일단"
  },
  {
   "term": "一層",
+  "display": "いっそう",
   "reading": "いっそう",
   "meaning": "한층"
  },
@@ -1026,6 +1126,7 @@
  },
  {
   "term": "再び",
+  "display": "ふたたび",
   "reading": "ふたたび",
   "meaning": "다시"
  },
@@ -1036,6 +1137,7 @@
  },
  {
   "term": "次第に",
+  "display": "しだいに",
   "reading": "しだいに",
   "meaning": "점점"
  },
@@ -1046,11 +1148,13 @@
  },
  {
   "term": "既に",
+  "display": "すでに",
   "reading": "すでに",
   "meaning": "이미"
  },
  {
   "term": "直接",
+  "display": "ちょくせつ",
   "reading": "ちょくせつ",
   "meaning": "직접"
  },

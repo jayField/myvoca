@@ -15,6 +15,7 @@ create table if not exists public.progress (
   missed_on date,
   studied_on date,
   study_grade text check (study_grade in ('again', 'hard', 'good')),
+  reset_on date,
   updated_at timestamptz not null,
   primary key (user_id, item_id)
 );
@@ -23,6 +24,7 @@ create table if not exists public.progress (
 alter table public.progress add column if not exists missed_on date;
 alter table public.progress add column if not exists studied_on date;
 alter table public.progress add column if not exists study_grade text check (study_grade in ('again', 'hard', 'good'));
+alter table public.progress add column if not exists reset_on date;
 
 create table if not exists public.day_counts (
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,

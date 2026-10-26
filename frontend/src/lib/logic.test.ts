@@ -3,7 +3,17 @@ import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
 import { seededRng } from './random';
-import { applyReview, buildQuiz, computeStats, deckItems, deckSummaries, DEFAULT_SETTINGS, gradesOnDay, planToday } from './logic';
+import {
+  applyReview,
+  buildQuiz,
+  computeStats,
+  deckItems,
+  deckSummaries,
+  DEFAULT_SETTINGS,
+  gradesOnDay,
+  keepThroughReset,
+  planToday,
+} from './logic';
 import { NEW_CARD, schedule } from './srs';
 
 const TODAY = '2026-10-21';
@@ -66,9 +76,9 @@ describe('planToday', () => {
   });
 
   it('returns only what is left at the end of a deck', () => {
-    const settings: Settings = { deck_id: 'hiragana', daily_new: 100, order: 'sequential' };
+    const settings: Settings = { deck_id: 'hiragana', daily_new: 200, order: 'sequential' };
     const plan = planToday(settings, [], 0, TODAY);
-    expect(plan.new_items).toHaveLength(46);
+    expect(plan.new_items).toHaveLength(104);
     const progress = learn([], plan.new_items.map((i) => i.id), 'good');
     const next = planToday(settings, progress, 0, addDays(TODAY, 1));
     expect(next.new_items).toEqual([]);
@@ -89,7 +99,7 @@ describe('deckSummaries', () => {
     progress = learn(progress, ids.slice(3), 'good');
     const { decks, confusing } = deckSummaries(progress, TODAY);
     expect(confusing).toBe(3);
-    expect(decks.find((d) => d.id === 'hiragana')).toMatchObject({ total: 46, learned: 10, due: 0 });
+    expect(decks.find((d) => d.id === 'hiragana')).toMatchObject({ total: 104, learned: 10, due: 0 });
   });
 });
 
@@ -122,8 +132,12 @@ describe('computeStats', () => {
 });
 
 describe('content', () => {
-  it('offers JLPT N5 to N3 with unique, complete items', () => {
+  it('offers kana and JLPT N5 to N3 with unique, complete items', () => {
     expect(DECKS.map((d) => d.id)).toEqual(['hiragana', 'katakana', 'n5', 'n4', 'n3']);
+    // Basic 46, then 탁음·반탁음 25, then 요음 33.
+    const katakana = ITEMS_BY_DECK.get('katakana')!.map((i) => i.term);
+    expect(katakana).toHaveLength(104);
+    expect([katakana[0], katakana[46], katakana[71]]).toEqual(['ア', 'ガ', 'キャ']);
     expect(new Set(ITEMS.map((i) => i.id)).size).toBe(ITEMS.length);
     for (const item of ITEMS) {
       expect(item.reading && item.meaning).toBeTruthy();
@@ -171,6 +185,24 @@ describe('confusing words', () => {
     const later = addDays(TODAY, 4);
     p = applyReview(p, 'n5:猫', 'hard', later, `${later}T01:00:00.000Z`);
     expect(deckItems('confusing', [p], later, day).items[0]).toMatchObject({ missed_day: later, recovered: false });
+  });
+});
+
+describe('confusing words through a deck reset', () => {
+  it('stay listed while the deck starts over, and start over as new cards when studied again', () => {
+    const missed = applyReview(undefined, 'n5:猫', 'again', TODAY);
+    const kept = keepThroughReset(missed, TODAY);
+    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'sequential' };
+
+    expect(deckSummaries([kept], TODAY)).toMatchObject({ confusing: 1 });
+    expect(deckSummaries([kept], TODAY).decks.find((d) => d.id === 'n5')).toMatchObject({ learned: 0, due: 0 });
+    expect(deckItems('confusing', [kept], TODAY).items[0]).toMatchObject({ term: '猫', status: 'new', missed_day: TODAY });
+    expect(planToday(settings, [kept], 0, TODAY).new_items[0].id).toBe('n5:猫');
+    expect(planToday(settings, [kept], 0, TODAY).reviews).toEqual([]);
+
+    const next = addDays(TODAY, 1);
+    const again = applyReview(kept, 'n5:猫', 'good', next);
+    expect(again).toMatchObject({ reset_on: null, reps: 1, lapses: 0, first_seen: next, missed_on: TODAY });
   });
 });
 

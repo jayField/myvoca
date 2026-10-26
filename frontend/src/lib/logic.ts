@@ -23,12 +23,22 @@ export const HEATMAP_DAYS = 140;
 
 // The 헷갈리는 단어 list is an 오답 노트: once missed, a word stays under the day it was last missed even after
 // later right answers (those are marked as recovered). Rows saved before missed_on existed fall back to last_grade.
-const isConfusing = (p: Progress) => p.last_grade !== 'good' || Boolean(p.missed_on);
+export const isConfusing = (p: Progress) => p.last_grade !== 'good' || Boolean(p.missed_on);
 const byOrder = (a: Item, b: Item) => ITEM_ORDER.get(a.id)! - ITEM_ORDER.get(b.id)!;
 
-/** Progress whose item still exists in the bundled lists, keyed by item id. */
-function progressMap(progress: Progress[]): Map<string, Progress> {
+/** Every saved row whose item still exists in the bundled lists, keyed by item id; the 헷갈리는 단어 list reads this. */
+function recordMap(progress: Progress[]): Map<string, Progress> {
   return new Map(progress.filter((p) => ITEM_BY_ID.has(p.item_id)).map((p) => [p.item_id, p]));
+}
+
+/** Items the learner has started: rows kept through a deck reset only for 헷갈리는 단어 are left out. */
+function progressMap(progress: Progress[]): Map<string, Progress> {
+  return new Map([...recordMap(progress)].filter(([, p]) => !p.reset_on));
+}
+
+/** What a deck reset keeps of a 헷갈리는 단어: its miss history, marked as no longer started. */
+export function keepThroughReset(p: Progress, today: string, now = new Date().toISOString()): Progress {
+  return { ...p, reset_on: today, updated_at: now };
 }
 
 function deckOrThrow(deckId: string) {
@@ -57,7 +67,7 @@ export function deckSummaries(progress: Progress[], today: string): { decks: Dec
     }
     return { ...deck, total: items.length, learned, due };
   });
-  const confusing = [...byItem.values()].filter(isConfusing).length;
+  const confusing = [...recordMap(progress).values()].filter(isConfusing).length;
   return { decks, confusing };
 }
 
@@ -72,13 +82,13 @@ export function deckItems(
   today: string,
   dayOf: (iso: string) => string = (iso) => localDate(new Date(iso)),
 ) {
-  const byItem = progressMap(progress);
+  const records = recordMap(progress);
   let deck: { id: string; title: string; description: string };
   let items: Item[];
   if (deckId === CONFUSING_DECK.id) {
     deck = CONFUSING_DECK;
     // Most recently missed first, so each day's misses read as one group.
-    items = [...byItem.values()]
+    items = [...records.values()]
       .filter(isConfusing)
       .sort((a, b) => missedDay(b, dayOf).localeCompare(missedDay(a, dayOf)) || byOrder(ITEM_BY_ID.get(a.item_id)!, ITEM_BY_ID.get(b.item_id)!))
       .map((p) => ITEM_BY_ID.get(p.item_id)!);
@@ -88,14 +98,15 @@ export function deckItems(
     items = ITEMS_BY_DECK.get(deckId)!;
   }
   const rows: DeckItem[] = items.map((item) => {
-    const p = byItem.get(item.id);
+    const p = records.get(item.id);
+    const started = p && !p.reset_on ? p : undefined;
     return {
       ...item,
-      status: itemStatus(p, today),
-      due: p?.due ?? null,
-      last_grade: p?.last_grade ?? null,
+      status: itemStatus(started, today),
+      due: started?.due ?? null,
+      last_grade: started?.last_grade ?? null,
       missed_day: p && isConfusing(p) ? missedDay(p, dayOf) : null,
-      recovered: Boolean(p && p.last_grade === 'good' && p.missed_on && dayOf(p.updated_at) > p.missed_on),
+      recovered: Boolean(started && started.last_grade === 'good' && started.missed_on && dayOf(started.updated_at) > started.missed_on),
     };
   });
   return { deck, items: rows };
@@ -159,7 +170,9 @@ export function applyReview(
   now = new Date().toISOString(),
   source: ReviewSource = 'study',
 ): Progress {
-  const { ease, interval_days, reps, lapses } = schedule(prev ?? NEW_CARD, grade);
+  // A row kept through a deck reset starts over as a new card but keeps its miss history.
+  const started = prev && !prev.reset_on ? prev : undefined;
+  const { ease, interval_days, reps, lapses } = schedule(started ?? NEW_CARD, grade);
   const studied = source === 'study';
   return {
     item_id: itemId,
@@ -168,11 +181,12 @@ export function applyReview(
     reps,
     lapses,
     due: addDays(today, interval_days),
-    first_seen: prev?.first_seen ?? today,
+    first_seen: started?.first_seen ?? today,
     last_grade: grade,
     missed_on: grade !== 'good' ? today : (prev?.missed_on ?? null),
-    studied_on: studied ? today : (prev?.studied_on ?? null),
-    study_grade: studied ? grade : (prev?.study_grade ?? null),
+    studied_on: studied ? today : (started?.studied_on ?? null),
+    study_grade: studied ? grade : (started?.study_grade ?? null),
+    reset_on: null,
     updated_at: now,
   };
 }
@@ -208,7 +222,7 @@ export function buildQuiz(deckId: string, count: number, progress: Progress[], r
   let picked: Item[];
   let source: Quiz['source'];
   if (deckId === CONFUSING_DECK.id) {
-    const pool = [...byItem.values()].filter(isConfusing).map((p) => ITEM_BY_ID.get(p.item_id)!);
+    const pool = [...recordMap(progress).values()].filter(isConfusing).map((p) => ITEM_BY_ID.get(p.item_id)!);
     picked = sample(pool, count, rng);
     source = 'confusing';
   } else {

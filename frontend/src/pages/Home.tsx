@@ -7,6 +7,7 @@ import { PracticeCards } from '../components/PracticeCards';
 import { GearIcon, UserIcon } from '../components/Icons';
 import { SettingsDialog } from '../components/SettingsDialog';
 import { SpeakButton } from '../components/SpeakButton';
+import { showsReading, Term } from '../components/Term';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ORDER_LABEL } from '../labels';
 
@@ -55,7 +56,7 @@ export default function Home() {
 
   async function resetTodayDeck(plan: TodayPlan) {
     const ok = window.confirm(
-      `${plan.deck_title} 학습 기록을 지우고 처음부터 다시 할까요?\n복습 일정과 헷갈리는 단어 표시도 사라지고 되돌릴 수 없어요.`,
+      `${plan.deck_title} 학습 기록을 지우고 처음부터 다시 할까요?\n복습 일정이 사라지고 되돌릴 수 없어요. 헷갈리는 단어 목록은 그대로 남아요.`,
     );
     if (!ok) return;
     setResetting(true);
@@ -237,13 +238,13 @@ function WordOfDay({ word }: { word: Item }) {
         <SpeakButton text={word.term} />
       </div>
       <div className="word-main">
-        <span lang="ja" className="word-term">
-          {word.term}
-        </span>
+        <Term item={word} className="word-term" />
         <div>
-          <div lang="ja" className="word-reading">
-            {word.reading}
-          </div>
+          {showsReading(word) && (
+            <div lang="ja" className="word-reading">
+              {word.reading}
+            </div>
+          )}
           <div className="muted">{word.meaning}</div>
         </div>
       </div>

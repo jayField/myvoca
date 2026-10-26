@@ -4,9 +4,12 @@ import n3 from '../data/n3.json';
 import n4 from '../data/n4.json';
 import n5 from '../data/n5.json';
 import type { DeckKind, Item } from '../types';
+import { inScript, KANA_SECTIONS, type KanaScript, type KanaSection } from './kana';
 
 interface RawItem {
   term: string;
+  /** Set by scripts/apply-notation.mjs when the word is written in kana at this level. */
+  display?: string;
   reading: string;
   meaning: string;
   example_ja?: string;
@@ -21,9 +24,28 @@ interface DeckDef {
   items: RawItem[];
 }
 
+/** 탁음·반탁음 and 요음 come straight from the kana chart, so the chart and the kana decks never disagree. */
+function chartItems(section: KanaSection['id'], script: KanaScript): RawItem[] {
+  const rows = KANA_SECTIONS.find((s) => s.id === section)!.rows;
+  return rows.flat().flatMap((cell) => (cell ? [{ term: inScript(cell[0], script), reading: cell[1], meaning: cell[1] }] : []));
+}
+
+/** One deck per script: the basic 46 first, then 탁음·반탁음 and 요음, so sequential study goes in that order. */
+function kanaDeck(id: KanaScript, title: string, basic: RawItem[]): DeckDef {
+  const dakuon = chartItems('dakuon', id);
+  const yoon = chartItems('yoon', id);
+  return {
+    id,
+    title,
+    description: `기본 ${basic.length}자 · 탁음·반탁음 ${dakuon.length}자 · 요음 ${yoon.length}자`,
+    kind: 'kana',
+    items: [...basic, ...dakuon, ...yoon],
+  };
+}
+
 const DECK_DEFS: DeckDef[] = [
-  { id: 'hiragana', title: '히라가나', description: '기본 46자', kind: 'kana', items: hiragana },
-  { id: 'katakana', title: '가타카나', description: '기본 46자', kind: 'kana', items: katakana },
+  kanaDeck('hiragana', '히라가나', hiragana),
+  kanaDeck('katakana', '가타카나', katakana),
   { id: 'n5', title: 'JLPT N5', description: `기초 단어 ${n5.length}개`, kind: 'word', items: n5 },
   { id: 'n4', title: 'JLPT N4', description: `초급 단어 ${n4.length}개`, kind: 'word', items: n4 },
   { id: 'n3', title: 'JLPT N3', description: `중급 단어 ${n3.length}개`, kind: 'word', items: n3 },
@@ -43,6 +65,7 @@ export const ITEMS_BY_DECK = new Map<string, Item[]>(
       deck_id: deck.id,
       kind: deck.kind,
       term: raw.term,
+      display: raw.display ?? raw.term,
       reading: raw.reading,
       meaning: raw.meaning,
       example_ja: raw.example_ja ?? null,

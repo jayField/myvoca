@@ -61,6 +61,23 @@ beforeEach(async () => {
 });
 
 describe('sync and reset', () => {
+  it('a deck reset keeps 헷갈리는 단어 on the account but starts the deck over', async () => {
+    const plan = await api.today();
+    const [missed, ...known] = plan.new_items;
+    await api.review(missed.id, 'again');
+    for (const item of known) await api.review(item.id, 'good');
+    await syncNow('user-1');
+
+    await api.resetDeck('hiragana');
+    await syncNow('user-1');
+
+    expect(tables.progress.map((p) => [p.item_id, p.reset_on])).toEqual([[missed.id, expect.any(String)]]);
+    expect((await api.decks()).confusing).toBe(1);
+    const after = await api.today();
+    expect(after.new_items.map((i) => i.id)).toContain(missed.id);
+    expect(after.reviews).toEqual([]);
+  });
+
   it('a sync already running when a deck is reset does not bring the reset words back', async () => {
     const plan = await api.today();
     for (const item of plan.new_items) await api.review(item.id, 'good');

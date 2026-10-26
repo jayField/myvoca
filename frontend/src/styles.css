@@ -1098,6 +1098,14 @@ a {
   flex-wrap: wrap;
 }
 
+/* Kanji form shown beside a word written in kana at its level. */
+.term-kanji {
+  margin-left: 0.3em;
+  font-size: max(0.4em, 0.8125rem);
+  font-weight: 500;
+  color: var(--muted);
+}
+
 .item-term {
   min-width: 4.5rem;
   font-size: 1.5rem;

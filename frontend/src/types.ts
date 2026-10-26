@@ -10,7 +10,10 @@ export interface Item {
   id: string;
   deck_id: string;
   kind: DeckKind;
+  /** Dictionary form, usually kanji; also what gets spoken. */
   term: string;
+  /** How the word is written at its deck's level: kana when its kanji are beyond the level, else `term`. */
+  display: string;
   reading: string;
   meaning: string;
   example_ja: string | null;
@@ -89,6 +92,11 @@ export interface Progress {
   /** Last day it was graded in the study cards, and that grade; quizzes leave these alone. */
   studied_on?: string | null;
   study_grade?: Grade | null;
+  /**
+   * Day its deck was reset while it was a 헷갈리는 단어. The row is kept only for that list;
+   * everything else treats the item as not started until it is graded again.
+   */
+  reset_on?: string | null;
   /** ISO timestamp of the last grade; the newer copy wins when syncing between devices. */
   updated_at: string;
 }

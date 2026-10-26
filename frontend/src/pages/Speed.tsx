@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type QuizQuestion } from '../api';
 import { BackIcon } from '../components/Icons';
 import { clampQuestionCount, QuestionCountPicker } from '../components/QuestionCountPicker';
+import { showsReading, Term } from '../components/Term';
 
 const TIME_LIMIT_MS = 5000;
 const FEEDBACK_MS = 900;
@@ -243,11 +244,9 @@ export default function Speed() {
             <ul className="item-list">
               {misses.map((r, i) => (
                 <li key={`${r.item.id}-${i}`} className="item-row">
-                  <span lang="ja" className="item-term">
-                    {r.item.term}
-                  </span>
+                  <Term item={r.item} className="item-term" />
                   <span className="item-text">
-                    {r.item.kind === 'word' && <span lang="ja">{r.item.reading}</span>}
+                    {r.item.kind === 'word' && showsReading(r.item) && <span lang="ja">{r.item.reading}</span>}
                     <span className="muted">{r.item.meaning}</span>
                   </span>
                   <span className="muted small">{r.ms >= TIME_LIMIT_MS ? '시간 초과' : '오답'}</span>
@@ -303,9 +302,7 @@ export default function Speed() {
       </div>
 
       <div className="card card--lg quiz-question">
-        <span lang="ja" className="quiz-term">
-          {q.item.term}
-        </span>
+        <Term item={q.item} className="quiz-term" />
         <p className={answered ? (last.correct ? 'success-text' : 'danger-text') : 'muted small'} aria-live="polite">
           {answered
             ? last.correct

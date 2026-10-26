@@ -4,6 +4,7 @@ import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Grade, type Item, t
 import { BackIcon, SpeakerIcon } from '../components/Icons';
 import { PracticeCards } from '../components/PracticeCards';
 import { QuestionCountPicker } from '../components/QuestionCountPicker';
+import { showsReading, Term } from '../components/Term';
 import { GRADES } from '../labels';
 import { speak } from '../speech';
 
@@ -22,6 +23,17 @@ const ROMAJI_ALIASES: Record<string, string[]> = {
   fu: ['hu'],
   wo: ['o'],
   n: ['nn'],
+  ji: ['zi', 'di'],
+  zu: ['du'],
+  sha: ['sya'],
+  shu: ['syu'],
+  sho: ['syo'],
+  cha: ['tya', 'cya'],
+  chu: ['tyu', 'cyu'],
+  cho: ['tyo', 'cyo'],
+  ja: ['zya', 'jya'],
+  ju: ['zyu', 'jyu'],
+  jo: ['zyo', 'jyo'],
 };
 
 interface Answer {
@@ -205,9 +217,7 @@ export default function Quiz() {
         <ul className="item-list">
           {answers.map((a, i) => (
             <li key={`${a.item.id}-${i}`} className="item-row item-row--quiz">
-              <span lang="ja" className="item-term">
-                {a.item.term}
-              </span>
+              <Term item={a.item} className="item-term" />
               <span className="item-text">
                 <span>{a.item.kind === 'kana' ? a.item.reading : a.item.meaning}</span>
                 <span className={a.correct ? 'success-text small' : 'danger-text small'}>{a.correct ? '정답' : '오답'}</span>
@@ -256,7 +266,7 @@ export default function Quiz() {
   const q = question!;
   const lastAnswer = answers[index];
   const showTerm = mode !== 'listen';
-  const choiceLabel = (c: Item) => (mode === 'listen' ? c.term : c.meaning);
+  const choiceLabel = (c: Item) => (mode === 'listen' ? <Term item={c} /> : c.meaning);
 
   return (
     <div className="page page--narrow">
@@ -277,9 +287,14 @@ export default function Quiz() {
 
       <div className="card card--lg quiz-question">
         {showTerm ? (
-          <span lang="ja" className="quiz-term">
-            {q.item.term}
-          </span>
+          // Typing the reading tests the kanji, so that mode always shows the kanji form.
+          mode === 'type' ? (
+            <span lang="ja" className="quiz-term">
+              {q.item.term}
+            </span>
+          ) : (
+            <Term item={q.item} className="quiz-term" />
+          )
         ) : (
           <button type="button" className="listen-btn" aria-label="다시 듣기" onClick={() => speak(q.item.term)}>
             <SpeakerIcon />
@@ -288,7 +303,8 @@ export default function Quiz() {
         {answered && (
           <p className={lastAnswer.correct ? 'success-text' : 'danger-text'}>
             {lastAnswer.correct ? '정답이에요' : '아쉬워요'} ·{' '}
-            <span lang="ja">{q.item.term}</span> {q.item.reading}
+            <Term item={q.item} />
+            {showsReading(q.item) && ` ${q.item.reading}`}
             {q.item.kind === 'word' && ` · ${q.item.meaning}`}
           </p>
         )}

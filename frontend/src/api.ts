@@ -9,6 +9,8 @@ import {
   deckSummaries,
   DEFAULT_SETTINGS,
   gradesOnDay,
+  isConfusing,
+  keepThroughReset,
   planToday,
   wordOfDay,
 } from './lib/logic';
@@ -136,13 +138,21 @@ export const api = {
     return wordOfDay(localDate());
   },
 
-  /** Forget all progress in one deck, here and on the account. */
+  /**
+   * Forget all progress in one deck, here and on the account. 헷갈리는 단어 stay on that list: their rows
+   * are kept but marked as reset, so the deck starts over. The next sync pushes them back up.
+   */
   async resetDeck(deckId: string) {
     const items = ITEMS_BY_DECK.get(deckId);
     if (!items) throw new Error('단어장을 찾을 수 없어요.');
+    const ids = new Set(items.map((item) => item.id));
     await exclusive(async () => {
       await deleteRemoteStudyData(deckId);
-      await storage.deleteProgress(items.map((item) => item.id));
+      const { progress } = await storage.loadSnapshot();
+      const today = localDate();
+      const keep = progress.filter((p) => ids.has(p.item_id) && isConfusing(p)).map((p) => keepThroughReset(p, today));
+      const kept = new Set(keep.map((p) => p.item_id));
+      await storage.rewriteProgress([...ids].filter((id) => !kept.has(id)), keep);
     });
     notifyLocalChange();
   },

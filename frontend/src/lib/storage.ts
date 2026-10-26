@@ -181,6 +181,16 @@ export async function deleteProgress(itemIds: string[]): Promise<void> {
   await committed(tx);
 }
 
+/** Replace progress rows in one go: delete some, write others (e.g. what a deck reset keeps). */
+export async function rewriteProgress(deleteIds: string[], keep: Progress[]): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction(PROGRESS, 'readwrite');
+  const store = tx.objectStore(PROGRESS);
+  deleteIds.forEach((id) => store.delete(id));
+  keep.forEach((p) => store.put(p));
+  await committed(tx);
+}
+
 /** Remove all progress and daily counts but keep settings and account ownership. */
 export async function clearStudyData(): Promise<void> {
   const db = await openDb();

@@ -1,6 +1,7 @@
 [
  {
   "term": "猫",
+  "display": "ねこ",
   "reading": "ねこ",
   "meaning": "고양이",
   "example_ja": "猫が好きです。",
@@ -8,6 +9,7 @@
  },
  {
   "term": "犬",
+  "display": "いぬ",
   "reading": "いぬ",
   "meaning": "개",
   "example_ja": "犬と散歩します。",
@@ -48,6 +50,7 @@
  },
  {
   "term": "友達",
+  "display": "ともだち",
   "reading": "ともだち",
   "meaning": "친구",
   "example_ja": "友達と話します。",
@@ -55,6 +58,7 @@
  },
  {
   "term": "家",
+  "display": "いえ",
   "reading": "いえ",
   "meaning": "집"
  },
@@ -67,6 +71,7 @@
  },
  {
   "term": "駅",
+  "display": "えき",
   "reading": "えき",
   "meaning": "역"
  },
@@ -84,21 +89,25 @@
  },
  {
   "term": "明日",
+  "display": "あした",
   "reading": "あした",
   "meaning": "내일"
  },
  {
   "term": "昨日",
+  "display": "きのう",
   "reading": "きのう",
   "meaning": "어제"
  },
  {
   "term": "朝",
+  "display": "あさ",
   "reading": "あさ",
   "meaning": "아침"
  },
  {
   "term": "夜",
+  "display": "よる",
   "reading": "よる",
   "meaning": "밤"
  },
@@ -126,31 +135,37 @@
  },
  {
   "term": "花",
+  "display": "はな",
   "reading": "はな",
   "meaning": "꽃"
  },
  {
   "term": "魚",
+  "display": "さかな",
   "reading": "さかな",
   "meaning": "생선, 물고기"
  },
  {
   "term": "肉",
+  "display": "にく",
   "reading": "にく",
   "meaning": "고기"
  },
  {
   "term": "お茶",
+  "display": "おちゃ",
   "reading": "おちゃ",
   "meaning": "차 (마시는 차)"
  },
  {
   "term": "ご飯",
+  "display": "ごはん",
   "reading": "ごはん",
   "meaning": "밥"
  },
  {
   "term": "店",
+  "display": "みせ",
   "reading": "みせ",
   "meaning": "가게"
  },
@@ -166,6 +181,7 @@
  },
  {
   "term": "道",
+  "display": "みち",
   "reading": "みち",
   "meaning": "길"
  },
@@ -178,46 +194,55 @@
  },
  {
   "term": "言葉",
+  "display": "ことば",
   "reading": "ことば",
   "meaning": "말, 단어"
  },
  {
   "term": "手",
+  "display": "て",
   "reading": "て",
   "meaning": "손"
  },
  {
   "term": "目",
+  "display": "め",
   "reading": "め",
   "meaning": "눈"
  },
  {
   "term": "耳",
+  "display": "みみ",
   "reading": "みみ",
   "meaning": "귀"
  },
  {
   "term": "口",
+  "display": "くち",
   "reading": "くち",
   "meaning": "입"
  },
  {
   "term": "足",
+  "display": "あし",
   "reading": "あし",
   "meaning": "다리, 발"
  },
  {
   "term": "部屋",
+  "display": "へや",
   "reading": "へや",
   "meaning": "방"
  },
  {
   "term": "机",
+  "display": "つくえ",
   "reading": "つくえ",
   "meaning": "책상"
  },
  {
   "term": "窓",
+  "display": "まど",
   "reading": "まど",
   "meaning": "창문"
  },
@@ -230,6 +255,7 @@
  },
  {
   "term": "飲む",
+  "display": "のむ",
   "reading": "のむ",
   "meaning": "마시다",
   "example_ja": "コーヒーを飲みます。",
@@ -274,6 +300,7 @@
  },
  {
   "term": "買う",
+  "display": "かう",
   "reading": "かう",
   "meaning": "사다",
   "example_ja": "新しい靴を買いました。",
@@ -281,6 +308,7 @@
  },
  {
   "term": "待つ",
+  "display": "まつ",
   "reading": "まつ",
   "meaning": "기다리다",
   "example_ja": "ちょっと待ってください。",
@@ -288,16 +316,19 @@
  },
  {
   "term": "起きる",
+  "display": "おきる",
   "reading": "おきる",
   "meaning": "일어나다"
  },
  {
   "term": "寝る",
+  "display": "ねる",
   "reading": "ねる",
   "meaning": "자다"
  },
  {
   "term": "帰る",
+  "display": "かえる",
   "reading": "かえる",
   "meaning": "돌아가다"
  },
@@ -323,6 +354,7 @@
  },
  {
   "term": "安い",
+  "display": "やすい",
   "reading": "やすい",
   "meaning": "싸다",
   "example_ja": "この店は安いです。",
@@ -330,31 +362,37 @@
  },
  {
   "term": "新しい",
+  "display": "あたらしい",
   "reading": "あたらしい",
   "meaning": "새롭다"
  },
  {
   "term": "古い",
+  "display": "ふるい",
   "reading": "ふるい",
   "meaning": "오래되다, 낡다"
  },
  {
   "term": "暑い",
+  "display": "あつい",
   "reading": "あつい",
   "meaning": "덥다"
  },
  {
   "term": "寒い",
+  "display": "さむい",
   "reading": "さむい",
   "meaning": "춥다"
  },
  {
   "term": "楽しい",
+  "display": "たのしい",
   "reading": "たのしい",
   "meaning": "즐겁다"
  },
  {
   "term": "美味しい",
+  "display": "おいしい",
   "reading": "おいしい",
   "meaning": "맛있다",
   "example_ja": "このラーメンはおいしいです。",
@@ -362,11 +400,13 @@
  },
  {
   "term": "好き",
+  "display": "すき",
   "reading": "すき",
   "meaning": "좋아함"
  },
  {
   "term": "元気",
+  "display": "げんき",
   "reading": "げんき",
   "meaning": "건강함, 활기참",
   "example_ja": "お元気ですか。",
@@ -374,16 +414,19 @@
  },
  {
   "term": "静か",
+  "display": "しずか",
   "reading": "しずか",
   "meaning": "조용함"
  },
  {
   "term": "有名",
+  "display": "ゆうめい",
   "reading": "ゆうめい",
   "meaning": "유명함"
  },
  {
   "term": "大丈夫",
+  "display": "だいじょうぶ",
   "reading": "だいじょうぶ",
   "meaning": "괜찮음"
  },
@@ -404,6 +447,7 @@
  },
  {
   "term": "誰",
+  "display": "だれ",
   "reading": "だれ",
   "meaning": "누구"
  },
@@ -431,11 +475,13 @@
  },
  {
   "term": "映画",
+  "display": "えいが",
   "reading": "えいが",
   "meaning": "영화"
  },
  {
   "term": "音楽",
+  "display": "おんがく",
   "reading": "おんがく",
   "meaning": "음악"
  },
@@ -501,16 +547,19 @@
  },
  {
   "term": "今週",
+  "display": "こんしゅう",
   "reading": "こんしゅう",
   "meaning": "이번 주"
  },
  {
   "term": "来週",
+  "display": "らいしゅう",
   "reading": "らいしゅう",
   "meaning": "다음 주"
  },
  {
   "term": "先週",
+  "display": "せんしゅう",
   "reading": "せんしゅう",
   "meaning": "지난주"
  },
@@ -541,21 +590,25 @@
  },
  {
   "term": "去年",
+  "display": "きょねん",
   "reading": "きょねん",
   "meaning": "작년"
  },
  {
   "term": "毎朝",
+  "display": "まいあさ",
   "reading": "まいあさ",
   "meaning": "매일 아침"
  },
  {
   "term": "毎晩",
+  "display": "まいばん",
   "reading": "まいばん",
   "meaning": "매일 밤"
  },
  {
   "term": "毎週",
+  "display": "まいしゅう",
   "reading": "まいしゅう",
   "meaning": "매주"
  },
@@ -571,101 +624,121 @@
  },
  {
   "term": "晩",
+  "display": "ばん",
   "reading": "ばん",
   "meaning": "저녁, 밤"
  },
  {
   "term": "昼",
+  "display": "ひる",
   "reading": "ひる",
   "meaning": "낮, 점심"
  },
  {
   "term": "夕方",
+  "display": "ゆうがた",
   "reading": "ゆうがた",
   "meaning": "저녁 무렵"
  },
  {
   "term": "今朝",
+  "display": "けさ",
   "reading": "けさ",
   "meaning": "오늘 아침"
  },
  {
   "term": "今晩",
+  "display": "こんばん",
   "reading": "こんばん",
   "meaning": "오늘 밤"
  },
  {
   "term": "一昨日",
+  "display": "おととい",
   "reading": "おととい",
   "meaning": "그저께"
  },
  {
   "term": "明後日",
+  "display": "あさって",
   "reading": "あさって",
   "meaning": "모레"
  },
  {
   "term": "月曜日",
+  "display": "げつようび",
   "reading": "げつようび",
   "meaning": "월요일"
  },
  {
   "term": "火曜日",
+  "display": "かようび",
   "reading": "かようび",
   "meaning": "화요일"
  },
  {
   "term": "水曜日",
+  "display": "すいようび",
   "reading": "すいようび",
   "meaning": "수요일"
  },
  {
   "term": "木曜日",
+  "display": "もくようび",
   "reading": "もくようび",
   "meaning": "목요일"
  },
  {
   "term": "金曜日",
+  "display": "きんようび",
   "reading": "きんようび",
   "meaning": "금요일"
  },
  {
   "term": "土曜日",
+  "display": "どようび",
   "reading": "どようび",
   "meaning": "토요일"
  },
  {
   "term": "日曜日",
+  "display": "にちようび",
   "reading": "にちようび",
   "meaning": "일요일"
  },
  {
   "term": "春",
+  "display": "はる",
   "reading": "はる",
   "meaning": "봄"
  },
  {
   "term": "夏",
+  "display": "なつ",
   "reading": "なつ",
   "meaning": "여름"
  },
  {
   "term": "秋",
+  "display": "あき",
   "reading": "あき",
   "meaning": "가을"
  },
  {
   "term": "冬",
+  "display": "ふゆ",
   "reading": "ふゆ",
   "meaning": "겨울"
  },
  {
   "term": "時計",
+  "display": "とけい",
   "reading": "とけい",
   "meaning": "시계"
  },
  {
   "term": "誕生日",
+  "display": "たんじょうび",
   "reading": "たんじょうび",
   "meaning": "생일"
  },
@@ -676,6 +749,7 @@
  },
  {
   "term": "夏休み",
+  "display": "なつやすみ",
   "reading": "なつやすみ",
   "meaning": "여름 방학"
  },
@@ -701,36 +775,43 @@
  },
  {
   "term": "兄",
+  "display": "あに",
   "reading": "あに",
   "meaning": "(나의) 형, 오빠"
  },
  {
   "term": "姉",
+  "display": "あね",
   "reading": "あね",
   "meaning": "(나의) 누나, 언니"
  },
  {
   "term": "弟",
+  "display": "おとうと",
   "reading": "おとうと",
   "meaning": "남동생"
  },
  {
   "term": "妹",
+  "display": "いもうと",
   "reading": "いもうと",
   "meaning": "여동생"
  },
  {
   "term": "兄弟",
+  "display": "きょうだい",
   "reading": "きょうだい",
   "meaning": "형제"
  },
  {
   "term": "家族",
+  "display": "かぞく",
   "reading": "かぞく",
   "meaning": "가족"
  },
  {
   "term": "子供",
+  "display": "こども",
   "reading": "こども",
   "meaning": "아이"
  },
@@ -766,11 +847,13 @@
  },
  {
   "term": "医者",
+  "display": "いしゃ",
   "reading": "いしゃ",
   "meaning": "의사"
  },
  {
   "term": "警官",
+  "display": "けいかん",
   "reading": "けいかん",
   "meaning": "경찰관"
  },
@@ -781,11 +864,13 @@
  },
  {
   "term": "自分",
+  "display": "じぶん",
   "reading": "じぶん",
   "meaning": "자기, 자신"
  },
  {
   "term": "皆",
+  "display": "みんな",
   "reading": "みんな",
   "meaning": "모두"
  },
@@ -801,26 +886,31 @@
  },
  {
   "term": "町",
+  "display": "まち",
   "reading": "まち",
   "meaning": "동네, 마을"
  },
  {
   "term": "銀行",
+  "display": "ぎんこう",
   "reading": "ぎんこう",
   "meaning": "은행"
  },
  {
   "term": "郵便局",
+  "display": "ゆうびんきょく",
   "reading": "ゆうびんきょく",
   "meaning": "우체국"
  },
  {
   "term": "病院",
+  "display": "びょういん",
   "reading": "びょういん",
   "meaning": "병원"
  },
  {
   "term": "図書館",
+  "display": "としょかん",
   "reading": "としょかん",
   "meaning": "도서관"
  },
@@ -831,76 +921,91 @@
  },
  {
   "term": "会社",
+  "display": "かいしゃ",
   "reading": "かいしゃ",
   "meaning": "회사"
  },
  {
   "term": "公園",
+  "display": "こうえん",
   "reading": "こうえん",
   "meaning": "공원"
  },
  {
   "term": "食堂",
+  "display": "しょくどう",
   "reading": "しょくどう",
   "meaning": "식당"
  },
  {
   "term": "喫茶店",
+  "display": "きっさてん",
   "reading": "きっさてん",
   "meaning": "찻집, 카페"
  },
  {
   "term": "交番",
+  "display": "こうばん",
   "reading": "こうばん",
   "meaning": "파출소"
  },
  {
   "term": "大使館",
+  "display": "たいしかん",
   "reading": "たいしかん",
   "meaning": "대사관"
  },
  {
   "term": "庭",
+  "display": "にわ",
   "reading": "にわ",
   "meaning": "마당, 정원"
  },
  {
   "term": "台所",
+  "display": "だいどころ",
   "reading": "だいどころ",
   "meaning": "부엌"
  },
  {
   "term": "玄関",
+  "display": "げんかん",
   "reading": "げんかん",
   "meaning": "현관"
  },
  {
   "term": "階段",
+  "display": "かいだん",
   "reading": "かいだん",
   "meaning": "계단"
  },
  {
   "term": "教室",
+  "display": "きょうしつ",
   "reading": "きょうしつ",
   "meaning": "교실"
  },
  {
   "term": "建物",
+  "display": "たてもの",
   "reading": "たてもの",
   "meaning": "건물"
  },
  {
   "term": "池",
+  "display": "いけ",
   "reading": "いけ",
   "meaning": "연못"
  },
  {
   "term": "海",
+  "display": "うみ",
   "reading": "うみ",
   "meaning": "바다"
  },
  {
   "term": "空",
+  "display": "そら",
   "reading": "そら",
   "meaning": "하늘"
  },
@@ -911,71 +1016,85 @@
  },
  {
   "term": "傘",
+  "display": "かさ",
   "reading": "かさ",
   "meaning": "우산"
  },
  {
   "term": "靴",
+  "display": "くつ",
   "reading": "くつ",
   "meaning": "신발"
  },
  {
   "term": "帽子",
+  "display": "ぼうし",
   "reading": "ぼうし",
   "meaning": "모자"
  },
  {
   "term": "眼鏡",
+  "display": "めがね",
   "reading": "めがね",
   "meaning": "안경"
  },
  {
   "term": "服",
+  "display": "ふく",
   "reading": "ふく",
   "meaning": "옷"
  },
  {
   "term": "財布",
+  "display": "さいふ",
   "reading": "さいふ",
   "meaning": "지갑"
  },
  {
   "term": "鉛筆",
+  "display": "えんぴつ",
   "reading": "えんぴつ",
   "meaning": "연필"
  },
  {
   "term": "紙",
+  "display": "かみ",
   "reading": "かみ",
   "meaning": "종이"
  },
  {
   "term": "辞書",
+  "display": "じしょ",
   "reading": "じしょ",
   "meaning": "사전"
  },
  {
   "term": "新聞",
+  "display": "しんぶん",
   "reading": "しんぶん",
   "meaning": "신문"
  },
  {
   "term": "雑誌",
+  "display": "ざっし",
   "reading": "ざっし",
   "meaning": "잡지"
  },
  {
   "term": "手紙",
+  "display": "てがみ",
   "reading": "てがみ",
   "meaning": "편지"
  },
  {
   "term": "切手",
+  "display": "きって",
   "reading": "きって",
   "meaning": "우표"
  },
  {
   "term": "写真",
+  "display": "しゃしん",
   "reading": "しゃしん",
   "meaning": "사진"
  },
@@ -986,46 +1105,55 @@
  },
  {
   "term": "椅子",
+  "display": "いす",
   "reading": "いす",
   "meaning": "의자"
  },
  {
   "term": "箱",
+  "display": "はこ",
   "reading": "はこ",
   "meaning": "상자"
  },
  {
   "term": "鍵",
+  "display": "かぎ",
   "reading": "かぎ",
   "meaning": "열쇠"
  },
  {
   "term": "冷蔵庫",
+  "display": "れいぞうこ",
   "reading": "れいぞうこ",
   "meaning": "냉장고"
  },
  {
   "term": "自転車",
+  "display": "じてんしゃ",
   "reading": "じてんしゃ",
   "meaning": "자전거"
  },
  {
   "term": "飛行機",
+  "display": "ひこうき",
   "reading": "ひこうき",
   "meaning": "비행기"
  },
  {
   "term": "地下鉄",
+  "display": "ちかてつ",
   "reading": "ちかてつ",
   "meaning": "지하철"
  },
  {
   "term": "切符",
+  "display": "きっぷ",
   "reading": "きっぷ",
   "meaning": "표, 승차권"
  },
  {
   "term": "荷物",
+  "display": "にもつ",
   "reading": "にもつ",
   "meaning": "짐"
  },
@@ -1036,116 +1164,139 @@
  },
  {
   "term": "朝ご飯",
+  "display": "あさごはん",
   "reading": "あさごはん",
   "meaning": "아침밥"
  },
  {
   "term": "昼ご飯",
+  "display": "ひるごはん",
   "reading": "ひるごはん",
   "meaning": "점심밥"
  },
  {
   "term": "晩ご飯",
+  "display": "ばんごはん",
   "reading": "ばんごはん",
   "meaning": "저녁밥"
  },
  {
   "term": "卵",
+  "display": "たまご",
   "reading": "たまご",
   "meaning": "달걀"
  },
  {
   "term": "野菜",
+  "display": "やさい",
   "reading": "やさい",
   "meaning": "채소"
  },
  {
   "term": "果物",
+  "display": "くだもの",
   "reading": "くだもの",
   "meaning": "과일"
  },
  {
   "term": "牛乳",
+  "display": "ぎゅうにゅう",
   "reading": "ぎゅうにゅう",
   "meaning": "우유"
  },
  {
   "term": "お酒",
+  "display": "おさけ",
   "reading": "おさけ",
   "meaning": "술"
  },
  {
   "term": "料理",
+  "display": "りょうり",
   "reading": "りょうり",
   "meaning": "요리"
  },
  {
   "term": "頭",
+  "display": "あたま",
   "reading": "あたま",
   "meaning": "머리"
  },
  {
   "term": "顔",
+  "display": "かお",
   "reading": "かお",
   "meaning": "얼굴"
  },
  {
   "term": "体",
+  "display": "からだ",
   "reading": "からだ",
   "meaning": "몸"
  },
  {
   "term": "鼻",
+  "display": "はな",
   "reading": "はな",
   "meaning": "코"
  },
  {
   "term": "歯",
+  "display": "は",
   "reading": "は",
   "meaning": "이, 치아"
  },
  {
   "term": "お腹",
+  "display": "おなか",
   "reading": "おなか",
   "meaning": "배 (신체)"
  },
  {
   "term": "背",
+  "display": "せ",
   "reading": "せ",
   "meaning": "키"
  },
  {
   "term": "声",
+  "display": "こえ",
   "reading": "こえ",
   "meaning": "목소리"
  },
  {
   "term": "病気",
+  "display": "びょうき",
   "reading": "びょうき",
   "meaning": "병"
  },
  {
   "term": "薬",
+  "display": "くすり",
   "reading": "くすり",
   "meaning": "약"
  },
  {
   "term": "風",
+  "display": "かぜ",
   "reading": "かぜ",
   "meaning": "바람"
  },
  {
   "term": "雪",
+  "display": "ゆき",
   "reading": "ゆき",
   "meaning": "눈 (날씨)"
  },
  {
   "term": "晴れ",
+  "display": "はれ",
   "reading": "はれ",
   "meaning": "맑음"
  },
  {
   "term": "曇り",
+  "display": "くもり",
   "reading": "くもり",
   "meaning": "흐림"
  },
@@ -1156,46 +1307,55 @@
  },
  {
   "term": "動物",
+  "display": "どうぶつ",
   "reading": "どうぶつ",
   "meaning": "동물"
  },
  {
   "term": "鳥",
+  "display": "とり",
   "reading": "とり",
   "meaning": "새"
  },
  {
   "term": "仕事",
+  "display": "しごと",
   "reading": "しごと",
   "meaning": "일, 직업"
  },
  {
   "term": "宿題",
+  "display": "しゅくだい",
   "reading": "しゅくだい",
   "meaning": "숙제"
  },
  {
   "term": "質問",
+  "display": "しつもん",
   "reading": "しつもん",
   "meaning": "질문"
  },
  {
   "term": "問題",
+  "display": "もんだい",
   "reading": "もんだい",
   "meaning": "문제"
  },
  {
   "term": "意味",
+  "display": "いみ",
   "reading": "いみ",
   "meaning": "의미, 뜻"
  },
  {
   "term": "漢字",
+  "display": "かんじ",
   "reading": "かんじ",
   "meaning": "한자"
  },
  {
   "term": "英語",
+  "display": "えいご",
   "reading": "えいご",
   "meaning": "영어"
  },
@@ -1206,51 +1366,61 @@
  },
  {
   "term": "旅行",
+  "display": "りょこう",
   "reading": "りょこう",
   "meaning": "여행"
  },
  {
   "term": "買い物",
+  "display": "かいもの",
   "reading": "かいもの",
   "meaning": "쇼핑, 장보기"
  },
  {
   "term": "散歩",
+  "display": "さんぽ",
   "reading": "さんぽ",
   "meaning": "산책"
  },
  {
   "term": "勉強",
+  "display": "べんきょう",
   "reading": "べんきょう",
   "meaning": "공부"
  },
  {
   "term": "練習",
+  "display": "れんしゅう",
   "reading": "れんしゅう",
   "meaning": "연습"
  },
  {
   "term": "掃除",
+  "display": "そうじ",
   "reading": "そうじ",
   "meaning": "청소"
  },
  {
   "term": "洗濯",
+  "display": "せんたく",
   "reading": "せんたく",
   "meaning": "세탁, 빨래"
  },
  {
   "term": "結婚",
+  "display": "けっこん",
   "reading": "けっこん",
   "meaning": "결혼"
  },
  {
   "term": "色",
+  "display": "いろ",
   "reading": "いろ",
   "meaning": "색"
  },
  {
   "term": "歌",
+  "display": "うた",
   "reading": "うた",
   "meaning": "노래"
  },
@@ -1321,51 +1491,61 @@
  },
  {
   "term": "横",
+  "display": "よこ",
   "reading": "よこ",
   "meaning": "옆, 가로"
  },
  {
   "term": "隣",
+  "display": "となり",
   "reading": "となり",
   "meaning": "이웃, 바로 옆"
  },
  {
   "term": "近く",
+  "display": "ちかく",
   "reading": "ちかく",
   "meaning": "근처"
  },
  {
   "term": "会う",
+  "display": "あう",
   "reading": "あう",
   "meaning": "만나다"
  },
  {
   "term": "開ける",
+  "display": "あける",
   "reading": "あける",
   "meaning": "열다"
  },
  {
   "term": "閉める",
+  "display": "しめる",
   "reading": "しめる",
   "meaning": "닫다"
  },
  {
   "term": "遊ぶ",
+  "display": "あそぶ",
   "reading": "あそぶ",
   "meaning": "놀다"
  },
  {
   "term": "洗う",
+  "display": "あらう",
   "reading": "あらう",
   "meaning": "씻다"
  },
  {
   "term": "歩く",
+  "display": "あるく",
   "reading": "あるく",
   "meaning": "걷다"
  },
  {
   "term": "言う",
+  "display": "いう",
   "reading": "いう",
   "meaning": "말하다"
  },
@@ -1386,146 +1566,175 @@
  },
  {
   "term": "歌う",
+  "display": "うたう",
   "reading": "うたう",
   "meaning": "노래하다"
  },
  {
   "term": "売る",
+  "display": "うる",
   "reading": "うる",
   "meaning": "팔다"
  },
  {
   "term": "教える",
+  "display": "おしえる",
   "reading": "おしえる",
   "meaning": "가르치다"
  },
  {
   "term": "覚える",
+  "display": "おぼえる",
   "reading": "おぼえる",
   "meaning": "외우다, 기억하다"
  },
  {
   "term": "泳ぐ",
+  "display": "およぐ",
   "reading": "およぐ",
   "meaning": "헤엄치다"
  },
  {
   "term": "終わる",
+  "display": "おわる",
   "reading": "おわる",
   "meaning": "끝나다"
  },
  {
   "term": "始まる",
+  "display": "はじまる",
   "reading": "はじまる",
   "meaning": "시작되다"
  },
  {
   "term": "始める",
+  "display": "はじめる",
   "reading": "はじめる",
   "meaning": "시작하다"
  },
  {
   "term": "借りる",
+  "display": "かりる",
   "reading": "かりる",
   "meaning": "빌리다"
  },
  {
   "term": "貸す",
+  "display": "かす",
   "reading": "かす",
   "meaning": "빌려주다"
  },
  {
   "term": "返す",
+  "display": "かえす",
   "reading": "かえす",
   "meaning": "돌려주다"
  },
  {
   "term": "消す",
+  "display": "けす",
   "reading": "けす",
   "meaning": "끄다, 지우다"
  },
  {
   "term": "着る",
+  "display": "きる",
   "reading": "きる",
   "meaning": "입다 (상의)"
  },
  {
   "term": "脱ぐ",
+  "display": "ぬぐ",
   "reading": "ぬぐ",
   "meaning": "벗다"
  },
  {
   "term": "切る",
+  "display": "きる",
   "reading": "きる",
   "meaning": "자르다"
  },
  {
   "term": "困る",
+  "display": "こまる",
   "reading": "こまる",
   "meaning": "곤란하다"
  },
  {
   "term": "咲く",
+  "display": "さく",
   "reading": "さく",
   "meaning": "(꽃이) 피다"
  },
  {
   "term": "死ぬ",
+  "display": "しぬ",
   "reading": "しぬ",
   "meaning": "죽다"
  },
  {
   "term": "知る",
+  "display": "しる",
   "reading": "しる",
   "meaning": "알다"
  },
  {
   "term": "吸う",
+  "display": "すう",
   "reading": "すう",
   "meaning": "들이마시다, 피우다"
  },
  {
   "term": "住む",
+  "display": "すむ",
   "reading": "すむ",
   "meaning": "살다, 거주하다"
  },
  {
   "term": "座る",
+  "display": "すわる",
   "reading": "すわる",
   "meaning": "앉다"
  },
  {
   "term": "立つ",
+  "display": "たつ",
   "reading": "たつ",
   "meaning": "서다"
  },
  {
   "term": "頼む",
+  "display": "たのむ",
   "reading": "たのむ",
   "meaning": "부탁하다"
  },
  {
   "term": "使う",
+  "display": "つかう",
   "reading": "つかう",
   "meaning": "사용하다"
  },
  {
   "term": "疲れる",
+  "display": "つかれる",
   "reading": "つかれる",
   "meaning": "지치다, 피곤하다"
  },
  {
   "term": "着く",
+  "display": "つく",
   "reading": "つく",
   "meaning": "도착하다"
  },
  {
   "term": "作る",
+  "display": "つくる",
   "reading": "つくる",
   "meaning": "만들다"
  },
  {
   "term": "勤める",
+  "display": "つとめる",
   "reading": "つとめる",
   "meaning": "근무하다"
  },
@@ -1536,86 +1745,103 @@
  },
  {
   "term": "飛ぶ",
+  "display": "とぶ",
   "reading": "とぶ",
   "meaning": "날다"
  },
  {
   "term": "止まる",
+  "display": "とまる",
   "reading": "とまる",
   "meaning": "멈추다"
  },
  {
   "term": "取る",
+  "display": "とる",
   "reading": "とる",
   "meaning": "잡다, 집다"
  },
  {
   "term": "撮る",
+  "display": "とる",
   "reading": "とる",
   "meaning": "(사진을) 찍다"
  },
  {
   "term": "習う",
+  "display": "ならう",
   "reading": "ならう",
   "meaning": "배우다"
  },
  {
   "term": "並ぶ",
+  "display": "ならぶ",
   "reading": "ならぶ",
   "meaning": "줄 서다"
  },
  {
   "term": "登る",
+  "display": "のぼる",
   "reading": "のぼる",
   "meaning": "오르다"
  },
  {
   "term": "乗る",
+  "display": "のる",
   "reading": "のる",
   "meaning": "타다"
  },
  {
   "term": "降りる",
+  "display": "おりる",
   "reading": "おりる",
   "meaning": "내리다"
  },
  {
   "term": "走る",
+  "display": "はしる",
   "reading": "はしる",
   "meaning": "달리다"
  },
  {
   "term": "働く",
+  "display": "はたらく",
   "reading": "はたらく",
   "meaning": "일하다"
  },
  {
   "term": "貼る",
+  "display": "はる",
   "reading": "はる",
   "meaning": "붙이다"
  },
  {
   "term": "弾く",
+  "display": "ひく",
   "reading": "ひく",
   "meaning": "(악기를) 연주하다"
  },
  {
   "term": "引く",
+  "display": "ひく",
   "reading": "ひく",
   "meaning": "당기다"
  },
  {
   "term": "降る",
+  "display": "ふる",
   "reading": "ふる",
   "meaning": "(비·눈이) 내리다"
  },
  {
   "term": "曲がる",
+  "display": "まがる",
   "reading": "まがる",
   "meaning": "돌다, 구부러지다"
  },
  {
   "term": "磨く",
+  "display": "みがく",
   "reading": "みがく",
   "meaning": "닦다"
  },
@@ -1626,6 +1852,7 @@
  },
  {
   "term": "持つ",
+  "display": "もつ",
   "reading": "もつ",
   "meaning": "들다, 가지다"
  },
@@ -1636,26 +1863,31 @@
  },
  {
   "term": "呼ぶ",
+  "display": "よぶ",
   "reading": "よぶ",
   "meaning": "부르다"
  },
  {
   "term": "渡る",
+  "display": "わたる",
   "reading": "わたる",
   "meaning": "건너다"
  },
  {
   "term": "渡す",
+  "display": "わたす",
   "reading": "わたす",
   "meaning": "건네주다"
  },
  {
   "term": "忘れる",
+  "display": "わすれる",
   "reading": "わすれる",
   "meaning": "잊다"
  },
  {
   "term": "浴びる",
+  "display": "あびる",
   "reading": "あびる",
   "meaning": "(샤워를) 하다, 뒤집어쓰다"
  },
@@ -1666,31 +1898,37 @@
  },
  {
   "term": "置く",
+  "display": "おく",
   "reading": "おく",
   "meaning": "두다, 놓다"
  },
  {
   "term": "押す",
+  "display": "おす",
   "reading": "おす",
   "meaning": "누르다, 밀다"
  },
  {
   "term": "掛ける",
+  "display": "かける",
   "reading": "かける",
   "meaning": "걸다"
  },
  {
   "term": "被る",
+  "display": "かぶる",
   "reading": "かぶる",
   "meaning": "(모자를) 쓰다"
  },
  {
   "term": "答える",
+  "display": "こたえる",
   "reading": "こたえる",
   "meaning": "대답하다"
  },
  {
   "term": "締める",
+  "display": "しめる",
   "reading": "しめる",
   "meaning": "매다, 조이다"
  },
@@ -1721,86 +1959,103 @@
  },
  {
   "term": "明るい",
+  "display": "あかるい",
   "reading": "あかるい",
   "meaning": "밝다"
  },
  {
   "term": "暗い",
+  "display": "くらい",
   "reading": "くらい",
   "meaning": "어둡다"
  },
  {
   "term": "暖かい",
+  "display": "あたたかい",
   "reading": "あたたかい",
   "meaning": "따뜻하다"
  },
  {
   "term": "熱い",
+  "display": "あつい",
   "reading": "あつい",
   "meaning": "뜨겁다"
  },
  {
   "term": "危ない",
+  "display": "あぶない",
   "reading": "あぶない",
   "meaning": "위험하다"
  },
  {
   "term": "甘い",
+  "display": "あまい",
   "reading": "あまい",
   "meaning": "달다"
  },
  {
   "term": "忙しい",
+  "display": "いそがしい",
   "reading": "いそがしい",
   "meaning": "바쁘다"
  },
  {
   "term": "痛い",
+  "display": "いたい",
   "reading": "いたい",
   "meaning": "아프다"
  },
  {
   "term": "薄い",
+  "display": "うすい",
   "reading": "うすい",
   "meaning": "얇다, 연하다"
  },
  {
   "term": "厚い",
+  "display": "あつい",
   "reading": "あつい",
   "meaning": "두껍다"
  },
  {
   "term": "美しい",
+  "display": "うつくしい",
   "reading": "うつくしい",
   "meaning": "아름답다"
  },
  {
   "term": "多い",
+  "display": "おおい",
   "reading": "おおい",
   "meaning": "많다"
  },
  {
   "term": "少ない",
+  "display": "すくない",
   "reading": "すくない",
   "meaning": "적다"
  },
  {
   "term": "重い",
+  "display": "おもい",
   "reading": "おもい",
   "meaning": "무겁다"
  },
  {
   "term": "軽い",
+  "display": "かるい",
   "reading": "かるい",
   "meaning": "가볍다"
  },
  {
   "term": "面白い",
+  "display": "おもしろい",
   "reading": "おもしろい",
   "meaning": "재미있다"
  },
  {
   "term": "辛い",
+  "display": "からい",
   "reading": "からい",
   "meaning": "맵다"
  },
@@ -1811,11 +2066,13 @@
  },
  {
   "term": "汚い",
+  "display": "きたない",
   "reading": "きたない",
   "meaning": "더럽다"
  },
  {
   "term": "黒い",
+  "display": "くろい",
   "reading": "くろい",
   "meaning": "검다"
  },
@@ -1826,61 +2083,73 @@
  },
  {
   "term": "赤い",
+  "display": "あかい",
   "reading": "あかい",
   "meaning": "빨갛다"
  },
  {
   "term": "青い",
+  "display": "あおい",
   "reading": "あおい",
   "meaning": "파랗다"
  },
  {
   "term": "黄色い",
+  "display": "きいろい",
   "reading": "きいろい",
   "meaning": "노랗다"
  },
  {
   "term": "寂しい",
+  "display": "さびしい",
   "reading": "さびしい",
   "meaning": "쓸쓸하다"
  },
  {
   "term": "涼しい",
+  "display": "すずしい",
   "reading": "すずしい",
   "meaning": "시원하다"
  },
  {
   "term": "狭い",
+  "display": "せまい",
   "reading": "せまい",
   "meaning": "좁다"
  },
  {
   "term": "広い",
+  "display": "ひろい",
   "reading": "ひろい",
   "meaning": "넓다"
  },
  {
   "term": "近い",
+  "display": "ちかい",
   "reading": "ちかい",
   "meaning": "가깝다"
  },
  {
   "term": "遠い",
+  "display": "とおい",
   "reading": "とおい",
   "meaning": "멀다"
  },
  {
   "term": "強い",
+  "display": "つよい",
   "reading": "つよい",
   "meaning": "강하다"
  },
  {
   "term": "弱い",
+  "display": "よわい",
   "reading": "よわい",
   "meaning": "약하다"
  },
  {
   "term": "冷たい",
+  "display": "つめたい",
   "reading": "つめたい",
   "meaning": "차갑다"
  },
@@ -1891,31 +2160,37 @@
  },
  {
   "term": "短い",
+  "display": "みじかい",
   "reading": "みじかい",
   "meaning": "짧다"
  },
  {
   "term": "早い",
+  "display": "はやい",
   "reading": "はやい",
   "meaning": "이르다"
  },
  {
   "term": "速い",
+  "display": "はやい",
   "reading": "はやい",
   "meaning": "빠르다"
  },
  {
   "term": "低い",
+  "display": "ひくい",
   "reading": "ひくい",
   "meaning": "낮다"
  },
  {
   "term": "太い",
+  "display": "ふとい",
   "reading": "ふとい",
   "meaning": "굵다"
  },
  {
   "term": "細い",
+  "display": "ほそい",
   "reading": "ほそい",
   "meaning": "가늘다"
  },
@@ -1926,31 +2201,37 @@
  },
  {
   "term": "丸い",
+  "display": "まるい",
   "reading": "まるい",
   "meaning": "둥글다"
  },
  {
   "term": "難しい",
+  "display": "むずかしい",
   "reading": "むずかしい",
   "meaning": "어렵다"
  },
  {
   "term": "易しい",
+  "display": "やさしい",
   "reading": "やさしい",
   "meaning": "쉽다"
  },
  {
   "term": "優しい",
+  "display": "やさしい",
   "reading": "やさしい",
   "meaning": "상냥하다"
  },
  {
   "term": "若い",
+  "display": "わかい",
   "reading": "わかい",
   "meaning": "젊다"
  },
  {
   "term": "悪い",
+  "display": "わるい",
   "reading": "わるい",
   "meaning": "나쁘다"
  },
@@ -1961,16 +2242,19 @@
  },
  {
   "term": "嫌い",
+  "display": "きらい",
   "reading": "きらい",
   "meaning": "싫어함"
  },
  {
   "term": "上手",
+  "display": "じょうず",
   "reading": "じょうず",
   "meaning": "잘함, 능숙함"
  },
  {
   "term": "下手",
+  "display": "へた",
   "reading": "へた",
   "meaning": "서투름"
  },
@@ -1981,41 +2265,49 @@
  },
  {
   "term": "便利",
+  "display": "べんり",
   "reading": "べんり",
   "meaning": "편리함"
  },
  {
   "term": "暇",
+  "display": "ひま",
   "reading": "ひま",
   "meaning": "한가함"
  },
  {
   "term": "賑やか",
+  "display": "にぎやか",
   "reading": "にぎやか",
   "meaning": "번화함, 떠들썩함"
  },
  {
   "term": "丈夫",
+  "display": "じょうぶ",
   "reading": "じょうぶ",
   "meaning": "튼튼함"
  },
  {
   "term": "親切",
+  "display": "しんせつ",
   "reading": "しんせつ",
   "meaning": "친절함"
  },
  {
   "term": "色々",
+  "display": "いろいろ",
   "reading": "いろいろ",
   "meaning": "여러 가지"
  },
  {
   "term": "同じ",
+  "display": "おなじ",
   "reading": "おなじ",
   "meaning": "같음"
  },
  {
   "term": "少し",
+  "display": "すこし",
   "reading": "すこし",
   "meaning": "조금"
  },
@@ -2026,11 +2318,13 @@
  },
  {
   "term": "全部",
+  "display": "ぜんぶ",
   "reading": "ぜんぶ",
   "meaning": "전부"
  },
  {
   "term": "一緒に",
+  "display": "いっしょに",
   "reading": "いっしょに",
   "meaning": "함께"
  },
@@ -2066,11 +2360,13 @@
  },
  {
   "term": "一番",
+  "display": "いちばん",
   "reading": "いちばん",
   "meaning": "가장, 제일"
  },
  {
   "term": "本当",
+  "display": "ほんとう",
   "reading": "ほんとう",
   "meaning": "정말"
  },

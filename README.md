@@ -37,7 +37,7 @@ GitHub 저장소를 Cloudflare Pages(`tango-note`)에 연결해 main에 push하�
    - 로컬: `frontend/.env.local` (`.env.example` 참고)
    - Cloudflare: 프로젝트 Settings → 빌드 변수에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` 추가 후 다시 배포
 
-동기화 규칙: 카드·설정은 마지막으로 바뀐 쪽(`updated_at`)이 이기고, 하루 학습량은 큰 값을 남긴다. 로그아웃하면 이 기기의 기록을 지운다(다시 로그인하면 계정에서 불러옴).
+동기화 규칙: 카드·설정은 마지막으로 바뀐 쪽(`updated_at`)이 이기고, 하루 학습량은 큰 값을 남긴다. 단어장을 초기화해도 헷갈리는 단어는 행을 지우지 않고 `reset_on`만 찍어 목록에 남긴다(그 단어장에서는 새 단어로 다시 나옴). `schema.sql`은 여러 번 실행해도 안전하므로, 열이 추가되면 다시 실행한다. 로그아웃하면 이 기기의 기록을 지운다(다시 로그인하면 계정에서 불러옴).
 
 ## 구조 메모
 
@@ -47,8 +47,9 @@ GitHub 저장소를 Cloudflare Pages(`tango-note`)에 연결해 main에 push하�
 - `src/lib/storage.ts` — IndexedDB (`progress`, `days`, `meta`).
 - `src/lib/sync.ts`, `src/auth.tsx` — Supabase 로그인 상태와 양방향 동기화.
 - `src/data/` — 단어 데이터. 항목 ID는 `단어장:단어`라서 목록 순서를 바꾸거나 단어를 추가해도 기존 기록이 유지된다. JLPT N5(412)·N4(264)·N3(213)는 공개 목록을 옮기지 않고 자주 쓰는 단어를 직접 골라 한국어 뜻을 단 것이다. 공식 어휘 목록은 2010년 이후 공개되지 않아 레벨 구분은 일반적인 학습 자료 기준이다.
+- **표기**: 시험지처럼 그 레벨까지 배우는 한자로만 된 단어는 한자로, 범위 밖 한자가 섞인 단어는 가나로 보여주고 한자는 옆에 작게 단다(N5의 猫 → ねこ 猫, N3에서는 레벨이 높아 한자 그대로인 단어가 늘어남). `node scripts/apply-notation.mjs`가 `scripts/jlpt-kanji.json`(비공식 N5~N3 한자 목록)으로 각 단어의 `display`를 채우므로, 단어를 추가하면 다시 실행한다. ID·발음은 계속 `term`(한자)을 쓴다.
 - **오늘의 학습**: 오늘 복습일이 된 카드 → 오늘의 새 항목 순서. 새 항목은 아직 시작하지 않은 항목에서만 뽑아 날마다 겹치지 않는다. 랜덤 모드는 날짜로 시드를 고정해 새로고침해도 같은 묶음이 나온다.
-- **가나표** (`/kana`): `src/data/kana-chart.json`의 청음·탁음/반탁음·요음 표. 히라가나/가타카나 전환, 칸을 누르면 발음.
+- **가나표** (`/kana`): `src/data/kana-chart.json`의 청음·탁음/반탁음·요음 표. 히라가나/가타카나 전환, 칸을 누르면 발음. 히라가나·가타카나 단어장은 기본 46자 뒤에 이 표의 탁음·반탁음, 요음을 이어 붙인다(순서대로 학습하면 기본 → 탁음 → 요음).
 - **피드백** (`/feedback`): 로그인한 사람끼리 보는 의견 게시판. Supabase `feedback` 표(작성자 이름은 트리거가 계정에서 채움), 본인 글만 삭제.
 - **백업**: 기록 화면에서 JSON 파일로 내보내기/가져오기.
 - **발음**: `frontend/public/audio/`의 VOICEVOX(No.7 アナウンス, 0.75배속) 녹음을 재생하고, 녹음이 없는 단어는 브라우저 내장 TTS(여자 목소리 우선)로 읽는다. 단어를 추가하면 VOICEVOX 엔진을 띄우고 `node scripts/generate-audio.mjs --speaker 30 --speed 0.75 --credit "VOICEVOX:No.7"`(frontend에서)을 다시 실행한다 — 새 단어만 만든다. 크레딧 표기는 계정·로그인 화면에 있다.
