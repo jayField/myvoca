@@ -6,8 +6,8 @@ import { BackIcon } from '../components/Icons';
 import { GRADES } from '../labels';
 import { shuffle } from '../lib/random';
 
-type Kind = 'review' | 'new' | 'again';
-const TAG: Record<Kind, string> = { review: '복습', new: '새 단어', again: '다시' };
+type Kind = 'review' | 'new';
+const TAG: Record<Kind, string> = { review: '복습', new: '새 단어' };
 
 interface Card {
   item: Item;
@@ -47,9 +47,8 @@ export default function Study() {
       if (!current || !flipped || saving) return;
       setSaving(true);
       try {
+        // Each card is shown once; a missed one comes back as tomorrow's review instead of growing today's session.
         await api.review(current.item.id, g, 'study');
-        // Missed cards come back at the end of today's session.
-        if (g === 'again') setQueue((q) => q && [...q, { item: current.item, kind: 'again' }]);
         setIndex((i) => i + 1);
         setFlipped(false);
         setError(null);
