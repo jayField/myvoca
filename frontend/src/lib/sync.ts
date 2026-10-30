@@ -21,6 +21,7 @@ interface SettingsRow {
   deck_id: string;
   daily_new: number;
   order_mode: OrderMode;
+  include_reviews: boolean;
   updated_at: string;
 }
 
@@ -55,7 +56,7 @@ async function syncOnce(userId: string): Promise<boolean> {
   const [progressRes, daysRes, settingsRes] = await Promise.all([
     supabase.from('progress').select(PROGRESS_COLUMNS),
     supabase.from('day_counts').select('day, count'),
-    supabase.from('user_settings').select('deck_id, daily_new, order_mode, updated_at').maybeSingle<SettingsRow>(),
+    supabase.from('user_settings').select('deck_id, daily_new, order_mode, include_reviews, updated_at').maybeSingle<SettingsRow>(),
   ]);
   if (progressRes.error) throw progressRes.error;
   if (daysRes.error) throw daysRes.error;
@@ -69,6 +70,7 @@ async function syncOnce(userId: string): Promise<boolean> {
           deck_id: settingsRes.data.deck_id,
           daily_new: settingsRes.data.daily_new,
           order: settingsRes.data.order_mode,
+          include_reviews: settingsRes.data.include_reviews,
         },
         updated_at: settingsRes.data.updated_at,
       }
@@ -95,13 +97,14 @@ async function syncOnce(userId: string): Promise<boolean> {
     writes.push(supabase.from('day_counts').upsert(daysToPush.map((d) => ({ ...d, user_id: userId }))));
   }
   if (pushSettings && local.settings) {
-    const { deck_id, daily_new, order } = local.settings.value;
+    const { deck_id, daily_new, order, include_reviews } = local.settings.value;
     writes.push(
       supabase.from('user_settings').upsert({
         user_id: userId,
         deck_id,
         daily_new,
         order_mode: order,
+        include_reviews: include_reviews !== false,
         updated_at: local.settings.updated_at,
       }),
     );

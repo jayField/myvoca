@@ -44,6 +44,8 @@ export interface Settings {
   deck_id: string;
   daily_new: number;
   order: OrderMode;
+  /** Off: today's study serves new items only; due cards keep their schedule and wait. */
+  include_reviews: boolean;
 }
 
 export interface TodayPlan {

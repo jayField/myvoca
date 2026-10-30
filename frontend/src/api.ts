@@ -42,7 +42,13 @@ function notifyLocalChange() {
 function validSettings(s: Settings): Settings {
   if (!DECK_BY_ID.has(s.deck_id)) throw new Error('단어장을 찾을 수 없어요.');
   const daily_new = Math.max(1, Math.min(100, Math.round(s.daily_new)));
-  return { deck_id: s.deck_id, daily_new, order: s.order === 'random' ? 'random' : 'sequential' };
+  // Settings saved before the review switch existed have no include_reviews; they keep reviews on.
+  return {
+    deck_id: s.deck_id,
+    daily_new,
+    order: s.order === 'random' ? 'random' : 'sequential',
+    include_reviews: s.include_reviews !== false,
+  };
 }
 
 function settingsOrDefault(s: Settings | undefined): Settings {

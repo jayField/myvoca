@@ -120,6 +120,28 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
           </p>
         </fieldset>
 
+        <fieldset className="field">
+          <legend>복습</legend>
+          <div className="choice-row">
+            {[true, false].map((on) => (
+              <label key={String(on)} className="chip">
+                <input
+                  type="radio"
+                  name="reviews"
+                  checked={draft.include_reviews === on}
+                  onChange={() => setDraft({ ...draft, include_reviews: on })}
+                />
+                <span>{on ? '포함' : '빼기'}</span>
+              </label>
+            ))}
+          </div>
+          <p className="hint">
+            {draft.include_reviews
+              ? '새 항목 전에 다시 볼 때가 된 항목을 먼저 보여줘요.'
+              : '새 항목만 보여줘요. 복습 일정은 그대로 남아서 다시 포함하면 그때 나와요.'}
+          </p>
+        </fieldset>
+
         {error && <p className="error-text">{error}</p>}
 
         <div className="dialog-actions">

@@ -18,7 +18,7 @@ import { addDays, dayNumber, localDate } from './dates';
 import { sample, shuffle, type Rng } from './random';
 import { MASTERED_INTERVAL, NEW_CARD, schedule } from './srs';
 
-export const DEFAULT_SETTINGS: Settings = { deck_id: 'hiragana', daily_new: 10, order: 'sequential' };
+export const DEFAULT_SETTINGS: Settings = { deck_id: 'hiragana', daily_new: 10, order: 'sequential', include_reviews: true };
 export const HEATMAP_DAYS = 140;
 
 // The 헷갈리는 단어 list is an 오답 노트: once missed, a word stays under the day it was last missed even after
@@ -122,7 +122,11 @@ export function planToday(
   const deck = deckOrThrow(settings.deck_id);
   const byItem = progressMap(progress);
 
-  const due = [...byItem.values()].filter((p) => p.due <= today);
+  // Reviews belong to the chosen range too: other ranges' due cards wait until that range is picked again.
+  // With reviews switched off none are served; their due dates stay, so switching back brings them all.
+  const due = settings.include_reviews
+    ? [...byItem.values()].filter((p) => p.due <= today && ITEM_BY_ID.get(p.item_id)!.deck_id === deck.id)
+    : [];
   due.sort((a, b) => a.due.localeCompare(b.due) || ITEM_ORDER.get(a.item_id)! - ITEM_ORDER.get(b.item_id)!);
   // The daily goal belongs to the chosen range: words started today in other ranges don't use it up.
   // Only words first met in the study cards today count; a word a quiz added today does not.

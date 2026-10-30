@@ -38,8 +38,12 @@ create table if not exists public.user_settings (
   deck_id text not null,
   daily_new integer not null check (daily_new between 1 and 100),
   order_mode text not null check (order_mode in ('sequential', 'random')),
+  include_reviews boolean not null default true,
   updated_at timestamptz not null
 );
+
+-- Added after launch: today's study can leave reviews out.
+alter table public.user_settings add column if not exists include_reviews boolean not null default true;
 
 alter table public.progress enable row level security;
 alter table public.day_counts enable row level security;

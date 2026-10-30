@@ -185,14 +185,17 @@ function TodayCard({ plan, results, deckLearned, resetting, onStart, onSettings,
         </h2>
         <button type="button" className="setting-pill" onClick={onSettings}>
           {plan.deck_title} · {ORDER_LABEL[plan.settings.order]}
+          {!plan.settings.include_reviews && ' · 복습 빼기'}
           <GearIcon />
         </button>
       </div>
       <div className="today-numbers">
-        <div>
-          <div className="muted small">복습</div>
-          <div className="big-number accent-text">{plan.reviews.length}</div>
-        </div>
+        {plan.settings.include_reviews && (
+          <div>
+            <div className="muted small">복습</div>
+            <div className="big-number accent-text">{plan.reviews.length}</div>
+          </div>
+        )}
         <div>
           <div className="muted small">새 단어</div>
           <div className="big-number">
@@ -221,7 +224,7 @@ function TodayCard({ plan, results, deckLearned, resetting, onStart, onSettings,
           className="btn btn--danger btn--lg"
           onClick={onReset}
           disabled={resetting || deckLearned === 0}
-          title={`${plan.deck_title} 학습 기록 초기화`}
+          title={deckLearned === 0 ? `${plan.deck_title}는 아직 지울 학습 기록이 없어요` : `${plan.deck_title} 학습 기록 초기화`}
         >
           {resetting ? '초기화 중…' : '초기화'}
         </button>

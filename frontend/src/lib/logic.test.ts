@@ -61,14 +61,35 @@ describe('planToday', () => {
   it('counts the daily goal per range, so switching or resetting a range starts it fresh', () => {
     const hiragana = planToday(DEFAULT_SETTINGS, [], 0, TODAY).new_items.map((i) => i.id);
     const progress = learn([], hiragana, 'good');
-    const n5: Settings = { deck_id: 'n5', daily_new: 20, order: 'sequential' };
+    const n5: Settings = { deck_id: 'n5', daily_new: 20, order: 'sequential', include_reviews: true };
     const plan = planToday(n5, progress, 10, TODAY);
     expect(plan.new_done).toBe(0);
     expect(plan.new_items).toHaveLength(20);
   });
 
+  it('reviews only the chosen range, so another range or a reset one brings none of its cards', () => {
+    const n5: Settings = { deck_id: 'n5', daily_new: 10, order: 'sequential', include_reviews: true };
+    const words = planToday(n5, [], 0, TODAY).new_items.map((i) => i.id);
+    const progress = learn([], words, 'again');
+    const tomorrow = addDays(TODAY, 1);
+    expect(planToday(n5, progress, 0, tomorrow).reviews).toHaveLength(10);
+    const hiragana = planToday({ ...DEFAULT_SETTINGS, order: 'random', include_reviews: true }, progress, 0, tomorrow);
+    expect(hiragana.reviews).toEqual([]);
+    expect(hiragana.new_items.every((i) => i.deck_id === 'hiragana')).toBe(true);
+  });
+
+  it('serves new items only with reviews off, and brings the due cards back when switched on', () => {
+    const first = planToday(DEFAULT_SETTINGS, [], 0, TODAY).new_items.map((i) => i.id);
+    const progress = learn([], first, 'good');
+    const tomorrow = addDays(TODAY, 1);
+    const off = planToday({ ...DEFAULT_SETTINGS, include_reviews: false }, progress, 0, tomorrow);
+    expect(off.reviews).toEqual([]);
+    expect(off.new_items).toHaveLength(10);
+    expect(planToday(DEFAULT_SETTINGS, progress, 0, tomorrow).reviews).toHaveLength(10);
+  });
+
   it('picks different words each time in random mode', () => {
-    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'random' };
+    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'random', include_reviews: true };
     const a = planToday(settings, [], 0, TODAY, seededRng('first')).new_items.map((i) => i.id);
     const b = planToday(settings, [], 0, TODAY, seededRng('second')).new_items.map((i) => i.id);
     expect(a).not.toEqual(b);
@@ -76,7 +97,7 @@ describe('planToday', () => {
   });
 
   it('returns only what is left at the end of a deck', () => {
-    const settings: Settings = { deck_id: 'hiragana', daily_new: 200, order: 'sequential' };
+    const settings: Settings = { deck_id: 'hiragana', daily_new: 200, order: 'sequential', include_reviews: true };
     const plan = planToday(settings, [], 0, TODAY);
     expect(plan.new_items).toHaveLength(104);
     const progress = learn([], plan.new_items.map((i) => i.id), 'good');
@@ -160,7 +181,7 @@ describe('gradesOnDay', () => {
 
 describe('quiz grades and the daily goal', () => {
   it('a word a quiz adds today does not use up the daily new-word goal', () => {
-    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'sequential' };
+    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'sequential', include_reviews: true };
     const fromQuiz = applyReview(undefined, 'n5:猫', 'again', TODAY, undefined, 'quiz');
     const plan = planToday(settings, [fromQuiz], 0, TODAY);
     expect(plan.new_done).toBe(0);
@@ -192,7 +213,7 @@ describe('confusing words through a deck reset', () => {
   it('stay listed while the deck starts over, and start over as new cards when studied again', () => {
     const missed = applyReview(undefined, 'n5:猫', 'again', TODAY);
     const kept = keepThroughReset(missed, TODAY);
-    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'sequential' };
+    const settings: Settings = { deck_id: 'n5', daily_new: 5, order: 'sequential', include_reviews: true };
 
     expect(deckSummaries([kept], TODAY)).toMatchObject({ confusing: 1 });
     expect(deckSummaries([kept], TODAY).decks.find((d) => d.id === 'n5')).toMatchObject({ learned: 0, due: 0 });
