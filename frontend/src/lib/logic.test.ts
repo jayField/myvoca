@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
+import { toRomaji } from './kana';
 import { seededRng } from './random';
 import {
   applyReview,
@@ -149,6 +150,15 @@ describe('computeStats', () => {
     expect(stats.heatmap).toHaveLength(140);
     expect(stats.heatmap.at(-1)).toEqual({ date: TODAY, count: 2 });
     expect(computeStats([], days.slice(0, 2), TODAY).streak).toBe(2);
+  });
+});
+
+describe('toRomaji', () => {
+  it('spells readings in Hepburn', () => {
+    expect(toRomaji('ねこ')).toBe('neko');
+    expect(toRomaji('ちょっと')).toBe('chotto');
+    expect(toRomaji('きんえん')).toBe("kin'en");
+    expect(toRomaji('コーヒー')).toBe('koohii');
   });
 });
 

@@ -6,6 +6,7 @@ import { PracticeCards } from '../components/PracticeCards';
 import { QuestionCountPicker } from '../components/QuestionCountPicker';
 import { showsReading, Term } from '../components/Term';
 import { GRADES } from '../labels';
+import { toRomaji } from '../lib/kana';
 import { speak } from '../speech';
 
 type Mode = 'meaning' | 'listen' | 'type';
@@ -305,7 +306,7 @@ export default function Quiz() {
             {lastAnswer.correct ? '정답이에요' : '아쉬워요'} ·{' '}
             <Term item={q.item} />
             {showsReading(q.item) && ` ${q.item.reading}`}
-            {q.item.kind === 'word' && ` · ${q.item.meaning}`}
+            {q.item.kind === 'word' && ` (${toRomaji(q.item.reading)}) · ${q.item.meaning}`}
           </p>
         )}
       </div>

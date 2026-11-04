@@ -10,6 +10,7 @@ import { SpeakButton } from '../components/SpeakButton';
 import { showsReading, Term } from '../components/Term';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ORDER_LABEL } from '../labels';
+import { toRomaji } from '../lib/kana';
 
 interface HomeData {
   plan: TodayPlan;
@@ -248,6 +249,7 @@ function WordOfDay({ word }: { word: Item }) {
               {word.reading}
             </div>
           )}
+          {word.kind === 'word' && <div className="muted small">{toRomaji(word.reading)}</div>}
           <div className="muted">{word.meaning}</div>
         </div>
       </div>
