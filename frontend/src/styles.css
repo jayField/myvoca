@@ -1473,6 +1473,56 @@ button.kana-cell:active {
 
 /* ---------- 복습표 ---------- */
 
+.log-fold > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  list-style: none;
+}
+
+.log-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.log-fold > summary::before {
+  content: '▸';
+  color: var(--muted);
+}
+
+.log-fold[open] > summary::before {
+  content: '▾';
+}
+
+.log-year > summary {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.log-month > summary {
+  font-weight: 500;
+}
+
+.log-months {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-left: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+.log-days {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
 .log-scroll {
   overflow-x: auto;
   background: var(--surface);
@@ -1483,6 +1533,8 @@ button.kana-cell:active {
 .log-table {
   width: 100%;
   min-width: 36rem;
+  /* Same column widths in every day's table, so the tables line up down the page. */
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.9375rem;
 }
@@ -1493,6 +1545,10 @@ button.kana-cell:active {
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: middle;
+}
+
+.log-table th:last-child {
+  width: 3.5rem;
 }
 
 .log-table tbody tr:last-child td {
