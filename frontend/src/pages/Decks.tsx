@@ -37,7 +37,7 @@ export default function Decks() {
                 <div className="progress-fill" style={{ width: `${(deck.learned / deck.total) * 100}%` }} />
               </div>
               <span className="muted small">
-                {deck.total}개 중 {deck.learned}개 학습{deck.due > 0 && ` · 오늘 복습 ${deck.due}`}
+                {deck.total}개 중 {deck.learned}개 학습
               </span>
             </div>
           </Link>

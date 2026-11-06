@@ -6,6 +6,8 @@ import type {
   Grade,
   Item,
   ItemStatus,
+  LogDay,
+  LogEntry,
   Progress,
   Quiz,
   ReviewSource,
@@ -20,6 +22,7 @@ import { MASTERED_INTERVAL, NEW_CARD, schedule } from './srs';
 
 export const DEFAULT_SETTINGS: Settings = { deck_id: 'hiragana', daily_new: 10, order: 'sequential', include_reviews: true };
 export const HEATMAP_DAYS = 140;
+export const DAILY_REVIEWS = 5;
 
 // The 헷갈리는 단어 list is an 오답 노트: once missed, a word stays under the day it was last missed even after
 // later right answers (those are marked as recovered). Rows saved before missed_on existed fall back to last_grade.
@@ -122,12 +125,6 @@ export function planToday(
   const deck = deckOrThrow(settings.deck_id);
   const byItem = progressMap(progress);
 
-  // Reviews belong to the chosen range too: other ranges' due cards wait until that range is picked again.
-  // With reviews switched off none are served; their due dates stay, so switching back brings them all.
-  const due = settings.include_reviews
-    ? [...byItem.values()].filter((p) => p.due <= today && ITEM_BY_ID.get(p.item_id)!.deck_id === deck.id)
-    : [];
-  due.sort((a, b) => a.due.localeCompare(b.due) || ITEM_ORDER.get(a.item_id)! - ITEM_ORDER.get(b.item_id)!);
   // The daily goal belongs to the chosen range: words started today in other ranges don't use it up.
   // Only words first met in the study cards today count; a word a quiz added today does not.
   const newDone = [...byItem.values()].filter(
@@ -142,11 +139,20 @@ export function planToday(
   }
   const remaining = Math.max(0, settings.daily_new - newDone);
 
+  // Reviews are a few random 헷갈리는 단어 from any range. Words first met today are not reviews yet, and a word
+  // studied today is not served twice; those already reviewed today use up the day's count, so resuming adds no more.
+  const known = [...byItem.values()];
+  const reviewsDone = known.filter((p) => p.studied_on === today && p.first_seen !== today).length;
+  const reviewPool = settings.include_reviews
+    ? known.filter((p) => isConfusing(p) && p.first_seen !== today && p.studied_on !== today)
+    : [];
+  const reviews = sample(reviewPool, Math.max(0, DAILY_REVIEWS - reviewsDone), rng);
+
   return {
     date: today,
     settings,
     deck_title: deck.title,
-    reviews: due.map((p) => ITEM_BY_ID.get(p.item_id)!),
+    reviews: reviews.map((p) => ITEM_BY_ID.get(p.item_id)!),
     new_items: unlearned.slice(0, remaining),
     new_done: newDone,
     deck_unlearned: unlearned.length,
@@ -193,6 +199,27 @@ export function applyReview(
     reset_on: null,
     updated_at: now,
   };
+}
+
+/**
+ * 복습표: what was studied, newest day first. A word appears on the day it was first met and on its
+ * latest study day. Only the latest study is stored per word, so reviews in between are not listed.
+ */
+export function studyLog(progress: Progress[]): LogDay[] {
+  const byDay = new Map<string, LogEntry[]>();
+  const add = (day: string, entry: LogEntry) => byDay.set(day, [...(byDay.get(day) ?? []), entry]);
+  for (const p of progressMap(progress).values()) {
+    const item = ITEM_BY_ID.get(p.item_id)!;
+    const gradeOn = (day: string) => (p.studied_on === day ? (p.study_grade ?? null) : null);
+    add(p.first_seen, { item, kind: 'new', grade: gradeOn(p.first_seen) });
+    if (p.studied_on && p.studied_on !== p.first_seen) add(p.studied_on, { item, kind: 'review', grade: gradeOn(p.studied_on) });
+  }
+  return [...byDay]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([day, entries]) => ({
+      day,
+      entries: entries.sort((a, b) => a.kind.localeCompare(b.kind) || byOrder(a.item, b.item)),
+    }));
 }
 
 export function computeStats(progress: Progress[], days: DayCount[], today: string): Stats {

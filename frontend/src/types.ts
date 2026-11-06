@@ -40,6 +40,19 @@ export interface DeckItem extends Item {
   recovered: boolean;
 }
 
+/** One line of 복습표: a word on a day it was first met or studied. */
+export interface LogEntry {
+  item: Item;
+  kind: 'new' | 'review';
+  /** The study card's grade; null when that day's grade was not kept (a later study replaced it) or it came from a quiz. */
+  grade: Grade | null;
+}
+
+export interface LogDay {
+  day: string;
+  entries: LogEntry[];
+}
+
 export interface Settings {
   deck_id: string;
   daily_new: number;

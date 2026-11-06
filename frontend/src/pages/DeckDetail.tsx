@@ -6,7 +6,7 @@ import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { showsReading, Term } from '../components/Term';
 import { STATUS_LABEL } from '../labels';
-import { addDays, localDate } from '../lib/dates';
+import { dayLabel } from '../lib/dates';
 
 export default function DeckDetail() {
   const { deckId = '' } = useParams();
@@ -102,15 +102,6 @@ function groupByDay(items: DeckItem[]): [string, DeckItem[]][] {
     groups.set(day, [...(groups.get(day) ?? []), item]);
   }
   return [...groups.entries()];
-}
-
-function dayLabel(day: string): string {
-  if (!day) return '날짜 없음';
-  const today = localDate();
-  const label = new Date(`${day}T00:00:00`).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-  if (day === today) return `${label} (오늘)`;
-  if (day === addDays(today, -1)) return `${label} (어제)`;
-  return label;
 }
 
 function ItemList({ items }: { items: DeckItem[] }) {

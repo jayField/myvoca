@@ -47,7 +47,7 @@ export default function Study() {
       if (!current || !flipped || saving) return;
       setSaving(true);
       try {
-        // Each card is shown once; a missed one comes back as tomorrow's review instead of growing today's session.
+        // Each card is shown once; a missed one joins 헷갈리는 단어 for a later review instead of growing today's session.
         await api.review(current.item.id, g, 'study');
         setIndex((i) => i + 1);
         setFlipped(false);

@@ -2,13 +2,14 @@ import type { ReactNode } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './auth';
 import { displayName } from './lib/username';
-import { BookIcon, ChartIcon, DeviceIcon, FeedbackIcon, HomeIcon, KanaIcon, QuizIcon } from './components/Icons';
+import { BookIcon, ChartIcon, DeviceIcon, FeedbackIcon, HomeIcon, KanaIcon, QuizIcon, TableIcon } from './components/Icons';
 
 const NAV: { to: string; label: string; icon: ReactNode; end?: boolean }[] = [
   { to: '/', label: '홈', icon: <HomeIcon />, end: true },
   { to: '/decks', label: '단어장', icon: <BookIcon /> },
   { to: '/kana', label: '가나표', icon: <KanaIcon /> },
   { to: '/quiz', label: '퀴즈', icon: <QuizIcon /> },
+  { to: '/log', label: '복습표', icon: <TableIcon /> },
   { to: '/stats', label: '기록', icon: <ChartIcon /> },
   { to: '/feedback', label: '피드백', icon: <FeedbackIcon /> },
 ];

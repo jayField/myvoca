@@ -14,6 +14,7 @@ import {
   gradesOnDay,
   keepThroughReset,
   planToday,
+  studyLog,
 } from './logic';
 import { NEW_CARD, schedule } from './srs';
 
@@ -43,7 +44,7 @@ describe('srs', () => {
 });
 
 describe('planToday', () => {
-  it('serves new items in order, then brings them back as reviews without repeating', () => {
+  it('serves new items in order without repeating, and known words are not reviews', () => {
     const plan = planToday(DEFAULT_SETTINGS, [], 0, TODAY);
     expect(plan.reviews).toEqual([]);
     expect(plan.new_items.map((i) => i.term).slice(0, 3)).toEqual(['あ', 'い', 'う']);
@@ -55,7 +56,7 @@ describe('planToday', () => {
     expect(later.new_done).toBe(10);
 
     const tomorrow = planToday(DEFAULT_SETTINGS, progress, 0, addDays(TODAY, 1));
-    expect(tomorrow.reviews).toHaveLength(10);
+    expect(tomorrow.reviews).toEqual([]);
     expect(tomorrow.new_items[0].term).toBe('さ');
   });
 
@@ -68,25 +69,44 @@ describe('planToday', () => {
     expect(plan.new_items).toHaveLength(20);
   });
 
-  it('reviews only the chosen range, so another range or a reset one brings none of its cards', () => {
+  it('reviews five random confusing words from any range, none on the day they were first met', () => {
     const n5: Settings = { deck_id: 'n5', daily_new: 10, order: 'sequential', include_reviews: true };
     const words = planToday(n5, [], 0, TODAY).new_items.map((i) => i.id);
     const progress = learn([], words, 'again');
     const tomorrow = addDays(TODAY, 1);
-    expect(planToday(n5, progress, 0, tomorrow).reviews).toHaveLength(10);
-    const hiragana = planToday({ ...DEFAULT_SETTINGS, order: 'random', include_reviews: true }, progress, 0, tomorrow);
-    expect(hiragana.reviews).toEqual([]);
+    expect(planToday(n5, progress, 0, TODAY).reviews).toEqual([]);
+    const reviews = planToday(n5, progress, 0, tomorrow).reviews.map((i) => i.id);
+    expect(reviews).toHaveLength(5);
+    expect(new Set(reviews).size).toBe(5);
+    expect(reviews.every((id) => words.includes(id))).toBe(true);
+    const hiragana = planToday(DEFAULT_SETTINGS, progress, 0, tomorrow);
+    expect(hiragana.reviews).toHaveLength(5);
     expect(hiragana.new_items.every((i) => i.deck_id === 'hiragana')).toBe(true);
   });
 
-  it('serves new items only with reviews off, and brings the due cards back when switched on', () => {
+  it('keeps reviews to five a day across sessions without repeating a word', () => {
+    const n5: Settings = { deck_id: 'n5', daily_new: 10, order: 'sequential', include_reviews: true };
+    const words = planToday(n5, [], 0, TODAY).new_items.map((i) => i.id);
+    let progress = learn([], words, 'again');
+    const tomorrow = addDays(TODAY, 1);
+    const first = words.slice(0, 2);
+    progress = learn(progress, first, 'good', tomorrow);
+    const resumed = planToday(n5, progress, 2, tomorrow).reviews.map((i) => i.id);
+    expect(resumed).toHaveLength(3);
+    expect(resumed.some((id) => first.includes(id))).toBe(false);
+    progress = learn(progress, resumed, 'again', tomorrow);
+    expect(planToday(n5, progress, 5, tomorrow).reviews).toEqual([]);
+    expect(planToday(n5, progress, 0, addDays(tomorrow, 1)).reviews).toHaveLength(5);
+  });
+
+  it('serves new items only with reviews off, and brings confusing words back when switched on', () => {
     const first = planToday(DEFAULT_SETTINGS, [], 0, TODAY).new_items.map((i) => i.id);
-    const progress = learn([], first, 'good');
+    const progress = learn([], first, 'again');
     const tomorrow = addDays(TODAY, 1);
     const off = planToday({ ...DEFAULT_SETTINGS, include_reviews: false }, progress, 0, tomorrow);
     expect(off.reviews).toEqual([]);
     expect(off.new_items).toHaveLength(10);
-    expect(planToday(DEFAULT_SETTINGS, progress, 0, tomorrow).reviews).toHaveLength(10);
+    expect(planToday(DEFAULT_SETTINGS, progress, 0, tomorrow).reviews).toHaveLength(5);
   });
 
   it('picks different words each time in random mode', () => {
@@ -135,6 +155,25 @@ describe('buildQuiz', () => {
       expect(new Set(ids).size).toBe(4);
       expect(ids).toContain(q.item.id);
     }
+  });
+});
+
+describe('studyLog', () => {
+  it('lists words on the day first met and the latest study day, newest first', () => {
+    const tomorrow = addDays(TODAY, 1);
+    let progress = learn([], ['n5:猫', 'n5:犬'], 'again');
+    progress = learn(progress, ['n5:猫'], 'good', tomorrow);
+    const log = studyLog(progress);
+    expect(log.map((d) => d.day)).toEqual([tomorrow, TODAY]);
+    expect(log[0].entries).toMatchObject([{ item: { id: 'n5:猫' }, kind: 'review', grade: 'good' }]);
+    expect(log[1].entries).toMatchObject([
+      { item: { id: 'n5:猫' }, kind: 'new', grade: null },
+      { item: { id: 'n5:犬' }, kind: 'new', grade: 'again' },
+    ]);
+  });
+
+  it('leaves out a reset deck', () => {
+    expect(studyLog([keepThroughReset(applyReview(undefined, 'n5:猫', 'again', TODAY), TODAY)])).toEqual([]);
   });
 });
 

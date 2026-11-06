@@ -191,12 +191,6 @@ function TodayCard({ plan, results, deckLearned, resetting, onStart, onSettings,
         </button>
       </div>
       <div className="today-numbers">
-        {plan.settings.include_reviews && (
-          <div>
-            <div className="muted small">복습</div>
-            <div className="big-number accent-text">{plan.reviews.length}</div>
-          </div>
-        )}
         <div>
           <div className="muted small">새 단어</div>
           <div className="big-number">

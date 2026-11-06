@@ -137,8 +137,8 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
           </div>
           <p className="hint">
             {draft.include_reviews
-              ? '새 항목 전에 다시 볼 때가 된 항목을 먼저 보여줘요.'
-              : '새 항목만 보여줘요. 복습 일정은 그대로 남아서 다시 포함하면 그때 나와요.'}
+              ? '새 항목 전에 헷갈리는 단어에서 랜덤으로 5개를 먼저 보여줘요.'
+              : '새 항목만 보여줘요. 다시 포함하면 헷갈리는 단어가 복습으로 나와요.'}
           </p>
         </fieldset>
 

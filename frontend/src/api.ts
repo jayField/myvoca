@@ -12,6 +12,7 @@ import {
   isConfusing,
   keepThroughReset,
   planToday,
+  studyLog,
   wordOfDay,
 } from './lib/logic';
 import * as storage from './lib/storage';
@@ -133,6 +134,11 @@ export const api = {
   async stats() {
     const { progress, days } = await snapshot();
     return computeStats(progress, days, localDate());
+  },
+
+  async studyLog() {
+    const { progress } = await snapshot();
+    return studyLog(progress);
   },
 
   async quiz(deckId: string, count = 10) {

@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import Quiz from './pages/Quiz';
 import Signup from './pages/Signup';
 import Speed from './pages/Speed';
+import Log from './pages/Log';
 import Stats from './pages/Stats';
 import Study from './pages/Study';
 import './styles.css';
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="kana" element={<Kana />} />
             <Route path="quiz" element={<Quiz />} />
             <Route path="speed" element={<Speed />} />
+            <Route path="log" element={<Log />} />
             <Route path="stats" element={<Stats />} />
             <Route path="account" element={<Account />} />
             <Route path="feedback" element={<Feedback />} />

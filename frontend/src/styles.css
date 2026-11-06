@@ -268,7 +268,7 @@ a {
     inset: auto 0 0 0;
     z-index: 10;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--surface);
     border-top: 1px solid var(--border-soft);
@@ -1469,4 +1469,54 @@ button.kana-cell:active {
   .tab-link {
     font-size: 0.6875rem;
   }
+}
+
+/* ---------- 복습표 ---------- */
+
+.log-scroll {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.log-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.log-table th,
+.log-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.log-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.log-table th {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.log-term {
+  font-size: 1.0625rem;
+}
+
+.log-grade--again {
+  color: var(--danger);
+}
+
+.log-grade--hard {
+  color: var(--warn);
+}
+
+.log-grade--good {
+  color: var(--success);
 }
