@@ -1,14 +1,23 @@
 // 회화 노트: expressions picked up in conversation, translated by /api/translate and saved per account.
 // Unlike the bundled decks these live only in Supabase, so they need a signed-in account.
 import type { Item, Phrase, Translation } from '../types';
+import { toHangul } from './kana';
 import { supabase } from './supabase';
 
 export const TALK_DECK = { id: 'talk', title: '회화 노트', description: '대화하면서 배운 표현을 번역해서 모아요' };
 
-const COLUMNS = 'id, input, japanese, reading, meaning, note, example_ja, example_ko, created_at';
 const SIGN_IN = '회화 노트는 로그인해야 쓸 수 있어요.';
 const NETWORK = '인터넷 연결을 확인하고 다시 시도해 주세요.';
 
+
+/**
+ * How a phrase sounds in Hangul, spaced the way Korean is (君を思っている → 키미오 오못테이루) when its word
+ * breakdown is known; otherwise the whole reading run together.
+ */
+export function phraseSound(p: Pick<Translation, 'reading' | 'words'>): string {
+  if (p.words.length < 2) return toHangul(p.reading);
+  return p.words.map((w, i) => (i > 0 && !w.attach ? ' ' : '') + toHangul(w.reading)).join('');
+}
 
 /** A phrase as a quiz item, so the existing quiz screens can ask it like a word. */
 export function phraseItem(p: Phrase): Item {
@@ -30,16 +39,25 @@ function client() {
   return supabase;
 }
 
+/** Rows saved before the word breakdown existed (or before its column was added) have no words. */
+const withWords = (row: Omit<Phrase, 'words'> & { words?: Phrase['words'] | null }): Phrase => ({ ...row, words: row.words ?? [] });
+
 export async function listPhrases(): Promise<Phrase[]> {
-  const { data, error } = await client().from('phrases').select(COLUMNS).order('created_at', { ascending: false });
+  const { data, error } = await client().from('phrases').select('*').order('created_at', { ascending: false });
   if (error) throw new Error(NETWORK);
-  return data as Phrase[];
+  return data.map(withWords);
 }
 
 export async function savePhrase(input: string, t: Translation): Promise<Phrase> {
-  const { data, error } = await client().from('phrases').insert({ input, ...t }).select(COLUMNS).single();
-  if (error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
-  return data as Phrase;
+  const phrases = client().from('phrases');
+  let res = await phrases.insert({ input, ...t }).select('*').single();
+  // PGRST204: the project has not run the schema update that adds `words` yet; save the rest.
+  if (res.error?.code === 'PGRST204') {
+    const { words: _words, ...rest } = t;
+    res = await phrases.insert({ input, ...rest }).select('*').single();
+  }
+  if (res.error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
+  return withWords(res.data);
 }
 
 export async function deletePhrase(id: string): Promise<void> {

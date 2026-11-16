@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
 import { BackIcon, CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
+import { WordBreakdown } from '../components/WordBreakdown';
 import { dayLabel, localDate } from '../lib/dates';
-import { toHangul } from '../lib/kana';
-import { deletePhrase, listPhrases, TALK_DECK } from '../lib/phrases';
+import { deletePhrase, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
 
 /** Saved phrases by the day they were saved, newest day first (the list already arrives newest first). */
 function groupByDay(phrases: Phrase[]): [string, Phrase[]][] {
@@ -17,10 +17,26 @@ function groupByDay(phrases: Phrase[]): [string, Phrase[]][] {
   return [...groups.entries()];
 }
 
+const PHONE = '(max-width: 760px)';
+
+/** Whether the screen is phone-sized, following rotation and window resizes. */
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia(PHONE).matches);
+  useEffect(() => {
+    const query = window.matchMedia(PHONE);
+    const update = () => setNarrow(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  return narrow;
+}
+
 /** 회화 노트 as a deck: everything saved so far, like the other decks' word lists. Adding happens on /talk. */
 export default function PhraseDeck() {
   const [phrases, setPhrases] = useState<Phrase[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Phones skip the reading and example columns; leaving them out (not hiding them) keeps the breakdown row's span right.
+  const narrow = useNarrow();
 
   useEffect(() => {
     listPhrases()
@@ -79,49 +95,70 @@ export default function PhraseDeck() {
               <table className="log-table phrase-table">
                 <thead>
                   <tr>
-                    <th scope="col">표현</th>
-                    <th scope="col">읽기</th>
-                    <th scope="col">발음</th>
-                    <th scope="col">뜻</th>
-                    <th scope="col">예문</th>
-                    <th scope="col" aria-label="듣기" />
-                    <th scope="col" aria-label="삭제" />
+                    <th scope="col" className="col-term">
+                      표현
+                    </th>
+                    {!narrow && (
+                      <th scope="col" className="col-reading">
+                        읽기
+                      </th>
+                    )}
+                    <th scope="col" className="col-sound">
+                      발음
+                    </th>
+                    <th scope="col" className="col-meaning">
+                      뜻
+                    </th>
+                    {!narrow && <th scope="col">예시</th>}
+                    <th scope="col" className="col-button" aria-label="듣기" />
+                    <th scope="col" className="col-button" aria-label="삭제" />
                   </tr>
                 </thead>
                 <tbody>
                   {group.map((p) => (
-                    <tr key={p.id}>
-                      <td lang="ja" className="log-term">
-                        {p.japanese}
-                      </td>
-                      <td lang="ja">{p.reading}</td>
-                      <td>{toHangul(p.reading)}</td>
-                      <td>{p.meaning}</td>
-                      <td>
-                        {p.example_ja ? (
-                          <span className="phrase-example">
-                            <span lang="ja">{p.example_ja}</span>
-                            <span className="muted">{p.example_ko}</span>
-                          </span>
-                        ) : (
-                          '-'
+                    <Fragment key={p.id}>
+                      <tr className={p.words.length > 1 ? 'phrase-row--split' : undefined}>
+                        <td lang="ja" className="log-term">
+                          {p.japanese}
+                        </td>
+                        {!narrow && <td lang="ja">{p.reading}</td>}
+                        <td>{phraseSound(p)}</td>
+                        <td>{p.meaning}</td>
+                        {!narrow && (
+                          <td>
+                            {p.example_ja ? (
+                              <span className="phrase-example">
+                                <span lang="ja">{p.example_ja}</span>
+                                <span className="muted">{p.example_ko}</span>
+                              </span>
+                            ) : (
+                              '-'
+                            )}
+                          </td>
                         )}
-                      </td>
-                      <td>
-                        <SpeakButton text={p.japanese} />
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="icon-btn icon-btn--delete"
-                          aria-label={`${p.japanese} 삭제`}
-                          title="삭제"
-                          onClick={() => void remove(p)}
-                        >
-                          <CloseIcon />
-                        </button>
-                      </td>
-                    </tr>
+                        <td className="cell-button">
+                          <SpeakButton text={p.japanese} />
+                        </td>
+                        <td className="cell-button">
+                          <button
+                            type="button"
+                            className="icon-btn icon-btn--delete"
+                            aria-label={`${p.japanese} 삭제`}
+                            title="삭제"
+                            onClick={() => void remove(p)}
+                          >
+                            <CloseIcon />
+                          </button>
+                        </td>
+                      </tr>
+                      {p.words.length > 1 && (
+                        <tr className="phrase-words-row">
+                          <td colSpan={narrow ? 5 : 7}>
+                            <WordBreakdown words={p.words} />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

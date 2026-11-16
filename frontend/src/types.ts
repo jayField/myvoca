@@ -40,6 +40,15 @@ export interface DeckItem extends Item {
   recovered: boolean;
 }
 
+/** One word of a phrase's breakdown, e.g. 考えている · かんがえている · 생각하고 있다. */
+export interface PhraseWord {
+  japanese: string;
+  reading: string;
+  meaning: string;
+  /** Joined to the word before when the phrase is spaced Korean-style, as particles are (君を 思っている). */
+  attach?: boolean;
+}
+
 /** What /api/translate returns for one typed expression. */
 export interface Translation {
   japanese: string;
@@ -49,6 +58,8 @@ export interface Translation {
   note: string;
   example_ja: string;
   example_ko: string;
+  /** The expression split into words in order; empty for phrases saved before the breakdown existed. */
+  words: PhraseWord[];
 }
 
 /** A 회화 노트 entry, stored per account in Supabase. */

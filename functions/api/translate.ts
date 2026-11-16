@@ -24,7 +24,8 @@ Return:
 - meaning: short, natural Korean translation of this exact expression with its own words (食べたい → 먹고 싶다). Never a pattern with ~ or placeholders like ~하고 싶다
 - note: one short Korean sentence on nuance or politeness, or on how the input was corrected; empty if nothing to add
 - example_ja: one natural, everyday example sentence in Japanese (Japanese script only, never Hangul) using the expression
-- example_ko: the Korean translation of example_ja (Hangul)`;
+- example_ko: the Korean translation of example_ja (Hangul)
+- words: the expression split into its words in order, so a learner can see how it is built. Keep a verb with its endings together (考えている, 食べたい) and give each particle its own entry. Each has japanese (as written in the expression), reading (hiragana), meaning (short Korean gloss; for a particle, its role such as 을/를, 의, 에서) and attach: true when Korean-style spacing would write it joined to the word before (particles, も, です after a noun), so 君を思っている reads 君を 思っている. Joined, the japanese parts must spell the expression exactly. A one-word expression has a single entry.`;
 
 const SCHEMA = {
   type: 'OBJECT',
@@ -35,12 +36,39 @@ const SCHEMA = {
     note: { type: 'STRING' },
     example_ja: { type: 'STRING' },
     example_ko: { type: 'STRING' },
+    words: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: { japanese: { type: 'STRING' }, reading: { type: 'STRING' }, meaning: { type: 'STRING' }, attach: { type: 'BOOLEAN' } },
+        required: ['japanese', 'reading', 'meaning', 'attach'],
+      },
+    },
   },
-  required: ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko'],
+  required: ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko', 'words'],
 };
 
 const FIELDS = ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko'] as const;
-type Translation = Record<(typeof FIELDS)[number], string>;
+interface Word {
+  japanese: string;
+  reading: string;
+  meaning: string;
+  /** Written joined to the word before when spaced Korean-style (particles). */
+  attach: boolean;
+}
+type Translation = Record<(typeof FIELDS)[number], string> & { words: Word[] };
+
+const MAX_WORDS = 30;
+
+/** Keeps only well-formed word entries; the breakdown is a study aid, so a bad one is dropped rather than failing. */
+function cleanWords(value: unknown): Word[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((w): w is Word => !!w && typeof w.japanese === 'string' && typeof w.reading === 'string' && typeof w.meaning === 'string')
+    .map((w) => ({ japanese: w.japanese.trim(), reading: w.reading.trim(), meaning: w.meaning.trim(), attach: w.attach === true }))
+    .filter((w) => w.japanese)
+    .slice(0, MAX_WORDS);
+}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
@@ -83,21 +111,31 @@ async function geminiReason(res: Response): Promise<string> {
 
 async function translate(env: Env, input: string): Promise<Translation> {
   const model = env.GEMINI_MODEL || DEFAULT_MODEL;
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: 'POST',
-    headers: { 'x-goog-api-key': env.GEMINI_API_KEY!, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM }] },
-      contents: [{ role: 'user', parts: [{ text: input }] }],
-      generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA },
-    }),
-  });
+  const call = () =>
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': env.GEMINI_API_KEY!, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM }] },
+        contents: [{ role: 'user', parts: [{ text: input }] }],
+        generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA },
+      }),
+    });
+  let res = await call();
+  // 503 means Gemini is briefly overloaded; one quiet retry usually gets through.
+  if (res.status === 503) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    res = await call();
+  }
   if (res.status === 429) throw new QuotaError(await res.text());
   if (!res.ok) throw new GeminiError(res.status, await geminiReason(res));
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
   const parsed = JSON.parse(text) as Record<string, unknown>;
-  const out = Object.fromEntries(FIELDS.map((f) => [f, typeof parsed[f] === 'string' ? (parsed[f] as string).trim() : ''])) as Translation;
+  const out = {
+    ...Object.fromEntries(FIELDS.map((f) => [f, typeof parsed[f] === 'string' ? (parsed[f] as string).trim() : ''])),
+    words: cleanWords(parsed.words),
+  } as Translation;
   if (!out.japanese || !out.reading || !out.meaning) throw new Error(`gemini returned an incomplete result: ${text}`);
   return out;
 }

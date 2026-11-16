@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
 import { CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
+import { WordBreakdown } from '../components/WordBreakdown';
 import { localDate } from '../lib/dates';
-import { toHangul } from '../lib/kana';
-import { deletePhrase, listPhrases, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
+import { deletePhrase, listPhrases, phraseSound, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
 
 const MAX_INPUT = 100;
 
@@ -131,17 +131,24 @@ export default function TalkNotes() {
             <span>읽기</span>
             <input lang="ja" className="text-input text-input--block" value={draft.result.reading} onChange={(e) => edit('reading', e.target.value)} />
           </label>
-          <p className="muted small talk-sound">발음: {toHangul(draft.result.reading)}</p>
+          <p className="muted small talk-sound">발음: {phraseSound(draft.result)}</p>
           <label className="talk-field">
             <span>뜻</span>
             <input className="text-input text-input--block" value={draft.result.meaning} onChange={(e) => edit('meaning', e.target.value)} />
           </label>
+          {draft.result.words.length > 1 && (
+            <div className="talk-block">
+              <span className="talk-label">단어별로 보기</span>
+              <WordBreakdown words={draft.result.words} />
+            </div>
+          )}
           {draft.result.note && <p className="hint">{draft.result.note}</p>}
           {draft.result.example_ja && (
-            <p className="talk-example">
+            <div className="talk-example">
+              <span className="talk-label">예시</span>
               <span lang="ja">{draft.result.example_ja}</span>
               <span className="muted">{draft.result.example_ko}</span>
-            </p>
+            </div>
           )}
           <p className="hint">번역이 틀릴 수 있어요. 이상하면 고치거나 다시 번역해 보세요.</p>
           <div className="button-row">
@@ -180,13 +187,15 @@ export default function TalkNotes() {
                   <span lang="ja" className="talk-term">
                     {p.japanese}
                   </span>
-                  <span className="item-text">
+                  <span className="item-text talk-text">
                     {p.reading !== p.japanese && <span lang="ja">{p.reading}</span>}
-                    <span className="muted">{toHangul(p.reading)}</span>
+                    <span className="muted">{phraseSound(p)}</span>
                     <span>{p.meaning}</span>
                   </span>
+                  <WordBreakdown words={p.words} />
                   {p.example_ja && (
                     <span className="talk-example small">
+                      <span className="talk-label">예시</span>
                       <span lang="ja">{p.example_ja}</span>
                       <span className="muted">{p.example_ko}</span>
                     </span>

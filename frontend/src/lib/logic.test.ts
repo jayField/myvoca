@@ -3,6 +3,7 @@ import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
 import { toHangul } from './kana';
+import { phraseSound } from './phrases';
 import { seededRng } from './random';
 import {
   applyReview,
@@ -210,6 +211,18 @@ describe('computeStats', () => {
     expect(stats.heatmap).toHaveLength(140);
     expect(stats.heatmap.at(-1)).toEqual({ date: TODAY, count: 2 });
     expect(computeStats([], days.slice(0, 2), TODAY).streak).toBe(2);
+  });
+});
+
+describe('phraseSound', () => {
+  it('spaces a phrase Korean-style from its word breakdown, joining particles to the word before', () => {
+    const words = [
+      { japanese: '君', reading: 'きみ', meaning: '너' },
+      { japanese: 'を', reading: 'を', meaning: '을/를', attach: true },
+      { japanese: '思っている', reading: 'おもっている', meaning: '생각하고 있다' },
+    ];
+    expect(phraseSound({ reading: 'きみをおもっている', words })).toBe('키미오 오못테이루');
+    expect(phraseSound({ reading: 'おやすみ', words: [] })).toBe('오야스미');
   });
 });
 
