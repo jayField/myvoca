@@ -11,6 +11,7 @@ import { showsReading, Term } from '../components/Term';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ORDER_LABEL } from '../labels';
 import { toRomaji } from '../lib/kana';
+import { listPhrases, TALK_DECK } from '../lib/phrases';
 
 interface HomeData {
   plan: TodayPlan;
@@ -33,6 +34,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
+  // Phrases live on the account; loaded on their own so being offline never blocks the rest of home.
+  const [phraseCount, setPhraseCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    listPhrases()
+      .then((list) => setPhraseCount(list.length))
+      .catch(() => setPhraseCount(null));
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -115,10 +124,15 @@ export default function Home() {
                   <span className="deck-title">{deck.title}</span>
                   <span className="muted small">
                     {deck.total}개 중 {deck.learned}개 학습
-                    {deck.due > 0 && ` · 복습 ${deck.due}`}
                   </span>
                 </Link>
               ))}
+              <Link to="/talk" className="card deck-card deck-card--talk">
+                <span className="deck-title">
+                  {TALK_DECK.title} {phraseCount !== null && <span className="accent-text">{phraseCount}</span>}
+                </span>
+                <span className="muted small">대화에서 배운 표현 모음</span>
+              </Link>
               <Link to={`/decks/${CONFUSING_DECK_ID}`} className="card deck-card deck-card--danger">
                 <span className="deck-title">
                   헷갈리는 단어 <span className="danger-text">{data.confusing}</span>
