@@ -366,3 +366,33 @@ describe('numbers quiz', () => {
     for (const q of quiz.questions) expect(q.choices.every((c) => c.deck_id === 'numbers')).toBe(true);
   });
 });
+
+describe('pronunciation grammar', () => {
+  it('stretches long vowels instead of saying them twice', () => {
+    expect(toHangul('べんきょう')).toBe('벤쿄-');
+    expect(toHangul('せんせい')).toBe('센세-');
+    expect(toHangul('ありがとう')).toBe('아리가토-');
+    expect(toHangul('おいしい')).toBe('오이시-');
+    expect(toHangul('おかあさん')).toBe('오카-산');
+    expect(toHangul('こんにちは')).toBe('콘니치와');
+  });
+  it('keeps vowels that are said in full', () => {
+    expect(toHangul('おもう')).toBe('오모우');
+    expect(toHangul('たべている')).toBe('타베테이루');
+    expect(toHangul('ごはんたべたい')).toBe('고한타베타이');
+  });
+  it('says the particles は and へ as 와 and 에', () => {
+    const words = [
+      { japanese: '私', reading: 'わたし' },
+      { japanese: 'は', reading: 'は', attach: true },
+      { japanese: '日本語', reading: 'にほんご' },
+      { japanese: 'の', reading: 'の', attach: true },
+      { japanese: '勉強', reading: 'べんきょう' },
+      { japanese: 'を', reading: 'を', attach: true },
+      { japanese: '熱心に', reading: 'ねっしんに' },
+      { japanese: 'しています', reading: 'しています' },
+    ];
+    expect(phraseSound({ reading: '', words })).toBe('와타시와 니혼고노 벤쿄-오 넷신니 시테이마스');
+    expect(phraseSound({ reading: '', words: [{ japanese: '学校', reading: 'がっこう' }, { japanese: 'へ', reading: 'へ', attach: true }] })).toBe('갓코-에');
+  });
+});

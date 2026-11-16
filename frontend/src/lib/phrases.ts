@@ -1,6 +1,6 @@
 // 회화 노트: expressions picked up in conversation, translated by /api/translate and saved per account.
 // Unlike the bundled decks these live only in Supabase, so they need a signed-in account.
-import type { Item, Phrase, Translation } from '../types';
+import type { Item, Phrase, PhraseWord, Translation } from '../types';
 import { localDate } from './dates';
 import { toHangul } from './kana';
 import { supabase } from './supabase';
@@ -23,7 +23,14 @@ export function phraseSound(p: Pick<Translation, 'reading' | 'words'> & { sound?
 /** The pronunciation worked out from the reading, ignoring any the learner typed. */
 export function autoSound(p: Pick<Translation, 'reading' | 'words'>): string {
   if (p.words.length < 2) return toHangul(p.reading);
-  return p.words.map((w, i) => (i > 0 && !w.attach ? ' ' : '') + toHangul(w.reading)).join('');
+  return p.words.map((w, i) => (i > 0 && !w.attach ? ' ' : '') + wordSound(w)).join('');
+}
+
+/** The particles は and へ are written with those kana but said わ and え. */
+const PARTICLE_SOUNDS: Record<string, string> = { は: '와', へ: '에' };
+
+function wordSound(w: PhraseWord): string {
+  return (w.attach && PARTICLE_SOUNDS[w.reading]) || toHangul(w.reading);
 }
 
 /** A phrase as a quiz item, so the existing quiz screens can ask it like a word. */

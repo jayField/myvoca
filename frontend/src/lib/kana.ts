@@ -51,12 +51,42 @@ function withFinal(text: string, final: number): string | null {
   return text.slice(0, -1) + String.fromCharCode(SYLLABLE_START + last + final);
 }
 
+type Vowel = 'a' | 'i' | 'u' | 'e' | 'o';
+
+/** The vowel a Hangul syllable ends in when it has no final consonant (카 → a, 쿄 → o); null otherwise. */
+function openVowel(text: string): Vowel | null {
+  const code = text.charCodeAt(text.length - 1) - SYLLABLE_START;
+  if (!(code >= 0 && code < 11172) || code % 28 !== 0) return null;
+  const medial = Math.floor(code / 28) % 21;
+  if ([0, 2, 9].includes(medial)) return 'a';
+  if ([20, 16].includes(medial)) return 'i';
+  if ([13, 17, 18].includes(medial)) return 'u';
+  if ([5, 7, 15].includes(medial)) return 'e';
+  if ([8, 12, 10].includes(medial)) return 'o';
+  return null;
+}
+
+/** Vowels that, after a syllable ending in the given vowel, lengthen it instead of being said again. */
+const LENGTHENS: Record<Vowel, string> = { a: 'あ', i: 'い', u: 'う', e: 'いえ', o: 'うお' };
+
+/**
+ * Vowels said in full though they would otherwise lengthen the one before: the う of 思う and the い of ている
+ * (and でいる, ていた, …). Each match's last kana is the said vowel.
+ */
+const SAID_VOWELS = /おもう|[てで]い/g;
+
 /**
  * How a kana reading sounds, in Hangul, from the kana chart's 한글 발음: ん becomes a ㄴ final and っ a ㅅ final
- * on the syllable before (こんにちは → 콘니치하, きって → 킷테), and ー is written as a dash (コーヒー → 코-히-).
+ * on the syllable before (きって → 킷테), and long vowels, ー or spelled out, are written as a dash (コーヒー → 코-히-,
+ * べんきょう → 벤쿄-). The は of こんにちは is said わ.
  */
 export function toHangul(kana: string): string {
-  const hira = kana.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  const hira = kana
+    .replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60))
+    // The greetings end in the particle は, said わ.
+    .replace(/(こんにち|こんばん)は/g, '$1わ');
+  const said = new Set<number>();
+  for (const m of hira.matchAll(SAID_VOWELS)) said.add(m.index! + m[0].length - 1);
   let out = '';
   for (let i = 0; i < hira.length; i++) {
     const two = hira.slice(i, i + 2);
@@ -67,6 +97,12 @@ export function toHangul(kana: string): string {
       continue;
     }
     const ch = hira[i];
+    // A long vowel is said by stretching the one before (べんきょう → 벤쿄-, せんせい → 센세-).
+    const vowel = openVowel(out);
+    if (vowel && LENGTHENS[vowel].includes(ch) && !said.has(i)) {
+      out += '-';
+      continue;
+    }
     if (ch === 'ん') out = withFinal(out, FINAL_N) ?? out + '응';
     else if (ch === 'っ') out = withFinal(out, FINAL_S) ?? out;
     else if (ch === 'ー') out += '-';
