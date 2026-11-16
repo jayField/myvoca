@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { inScript, KANA_SECTIONS, type KanaScript } from '../lib/kana';
+import { inScript, KANA_SECTIONS, type KanaCell, type KanaScript } from '../lib/kana';
 import { speak } from '../speech';
 
 const SCRIPT_KEY = 'tango-note.kana.script';
@@ -10,6 +10,12 @@ function initialScript(): KanaScript {
   } catch {
     return 'hiragana';
   }
+}
+
+/** あ행, か행, …; ん's row has no heading, as on printed charts. */
+function rowLabel(row: KanaCell[], script: KanaScript): string {
+  const first = row.find((cell) => cell)![0];
+  return first === 'ん' ? '' : `${inScript(first[0], script)}행`;
 }
 
 export default function Kana() {
@@ -29,7 +35,7 @@ export default function Kana() {
       <header className="page-header">
         <div>
           <h1>가나표</h1>
-          <p className="muted small">글자를 누르면 발음을 들려줘요.</p>
+          <p className="muted small">로마자 표기와 한글 발음을 함께 보여줘요. 글자를 누르면 발음을 들려줘요.</p>
         </div>
         <div className="segmented" role="radiogroup" aria-label="문자 종류">
           {(['hiragana', 'katakana'] as const).map((s) => (
@@ -52,27 +58,47 @@ export default function Kana() {
           <h2 id={`kana-${section.id}`} className="section-title">
             {section.title}
           </h2>
-          <div className="kana-grid" style={{ gridTemplateColumns: `repeat(${section.columns.length}, minmax(0, 1fr))` }}>
-            {section.rows.flatMap((row, r) =>
-              row.map((cell, c) => {
-                if (!cell) return <span key={`${r}-${c}`} className="kana-cell kana-cell--empty" aria-hidden="true" />;
-                const text = inScript(cell[0], script);
-                return (
-                  <button
-                    key={`${r}-${c}`}
-                    type="button"
-                    className="kana-cell"
-                    aria-label={`${text}, ${cell[1]} 발음 듣기`}
-                    onClick={() => speak(text)}
-                  >
-                    <span lang="ja" className="kana-char">
-                      {text}
-                    </span>
-                    <span className="kana-romaji">{cell[1]}</span>
-                  </button>
-                );
-              }),
-            )}
+          <div className="kana-scroll">
+            <table className="kana-table">
+              <thead>
+                <tr>
+                  <th scope="col">행 / 단</th>
+                  {section.columns.map((col) => (
+                    <th key={col} scope="col">
+                      <span lang="ja">{inScript(col, script)}</span>단
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {section.rows.map((row, r) => (
+                  <tr key={r}>
+                    <th scope="row">{rowLabel(row, script)}</th>
+                    {row.map((cell, c) => {
+                      if (!cell) return <td key={c} />;
+                      const text = inScript(cell[0], script);
+                      return (
+                        <td key={c}>
+                          <button
+                            type="button"
+                            className="kana-cell"
+                            aria-label={`${text}, ${cell[1]} 발음 듣기`}
+                            onClick={() => speak(text)}
+                          >
+                            <span lang="ja" className="kana-char">
+                              {text}
+                            </span>
+                            <span className="kana-romaji">
+                              {cell[1]} {cell[2]}
+                            </span>
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
       ))}

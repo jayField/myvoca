@@ -1351,49 +1351,105 @@ a.device-box:hover {
   max-width: 48rem;
 }
 
-.kana-grid {
-  display: grid;
-  gap: clamp(0.375rem, 0.8vw, 0.625rem);
+.kana-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.kana-table {
+  width: 100%;
+  min-width: 19rem;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: var(--surface);
+}
+
+.kana-table th,
+.kana-table td {
+  padding: 0;
+  border: 1px solid var(--border-soft);
+  text-align: center;
+}
+
+/* The outer edge is the wrapper's rounded border. */
+.kana-table tr > :first-child {
+  border-left: none;
+}
+
+.kana-table tr > :last-child {
+  border-right: none;
+}
+
+.kana-table thead tr:first-child > * {
+  border-top: none;
+}
+
+.kana-table tbody tr:last-child > * {
+  border-bottom: none;
+}
+
+.kana-table th {
+  padding: 0.75rem 0.25rem;
+  background: var(--surface-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.kana-table thead th:first-child {
+  width: 4.5rem;
+}
+
+@media (max-width: 760px) {
+  .kana-table thead th:first-child {
+    width: 3rem;
+  }
+
+  .kana-table th {
+    font-size: 0.75rem;
+  }
+
+  .kana-romaji {
+    font-size: 0.75rem;
+  }
 }
 
 .kana-cell {
-  transition: transform 0.08s ease;
-  min-height: clamp(4.25rem, 7vw, 5.75rem);
+  width: 100%;
+  min-height: clamp(4.25rem, 7vw, 5.25rem);
   padding: 0.5rem 0.25rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
+  border: none;
+  background: transparent;
+  color: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+  cursor: pointer;
+  transition: background 0.08s ease;
 }
 
-button.kana-cell:hover {
-  border-color: var(--accent);
+.kana-cell:hover {
+  background: var(--surface-accent);
 }
 
-button.kana-cell:active {
-  transform: scale(0.95);
+.kana-cell:active {
   background: var(--surface-2);
 }
 
-.kana-cell--empty {
-  border-style: dashed;
-  border-color: var(--border-soft);
-  background: transparent;
-}
-
 .kana-char {
-  font-size: clamp(1.625rem, 1.6vw + 1rem, 2.375rem);
+  font-size: clamp(1.5rem, 1.6vw + 0.9rem, 2.25rem);
   font-weight: 700;
   line-height: 1.1;
 }
 
 .kana-romaji {
   font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .day-title {

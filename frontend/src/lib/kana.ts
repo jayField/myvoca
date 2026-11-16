@@ -1,19 +1,20 @@
 import chart from '../data/kana-chart.json';
 
-export type KanaCell = [kana: string, romaji: string] | null;
+export type KanaCell = [kana: string, romaji: string, hangul: string] | null;
 export type KanaScript = 'hiragana' | 'katakana';
 
 export interface KanaSection {
   id: keyof typeof chart;
   title: string;
+  /** The vowel kana heading each column (あ단, い단, …). */
   columns: string[];
   rows: KanaCell[][];
 }
 
 export const KANA_SECTIONS: KanaSection[] = [
-  { id: 'basic', title: '기본 (청음)', columns: ['a', 'i', 'u', 'e', 'o'], rows: chart.basic as KanaCell[][] },
-  { id: 'dakuon', title: '탁음 · 반탁음', columns: ['a', 'i', 'u', 'e', 'o'], rows: chart.dakuon as KanaCell[][] },
-  { id: 'yoon', title: '요음', columns: ['ya', 'yu', 'yo'], rows: chart.yoon as KanaCell[][] },
+  { id: 'basic', title: '기본 (청음)', columns: ['あ', 'い', 'う', 'え', 'お'], rows: chart.basic as KanaCell[][] },
+  { id: 'dakuon', title: '탁음 · 반탁음', columns: ['あ', 'い', 'う', 'え', 'お'], rows: chart.dakuon as KanaCell[][] },
+  { id: 'yoon', title: '요음', columns: ['や', 'ゆ', 'よ'], rows: chart.yoon as KanaCell[][] },
 ];
 
 /** Hiragana and katakana sit exactly 0x60 apart in Unicode, small kana included. */
