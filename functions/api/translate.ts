@@ -16,9 +16,14 @@ const MAX_INPUT = 100;
 
 const SYSTEM = `You help a Korean learner of Japanese save expressions they picked up chatting with Japanese speakers.
 The input is usually Japanese written in Hangul by how it sounds (e.g. 아리가또 → ありがとう, 고항 타베타이 → ご飯食べたい), often misspelled: long vowels, small っ and voicing are frequently wrong or missing. It may also be a Korean sentence to say in Japanese, or Japanese text.
-Read Hangul as Japanese sounds first; treat it as Korean only when it clearly is Korean. Work out the natural Japanese expression the learner meant and correct it.
+First decide what the input is (input_kind):
+- "korean": real Korean words and Korean grammar endings (친해지다, 진짜, 고마워, -ㅂ니다, -어요, -고 싶어, -았다). Translate its meaning faithfully into natural Japanese: 진짜 친해집니다 → 本当に仲良くなります. Never swap it for a stock phrase that only sounds alike (친해집니다 is not お世話になります).
+- "japanese_sound": Japanese written in Hangul by sound, which is not meaningful Korean (오하요, 아리가또, 고항 타베타이, 키미오 오못테이루). Work out the Japanese the learner heard and correct its spelling.
+- "japanese": Japanese script.
+When unsure between the first two, ask whether a Korean speaker would read it as ordinary Korean; if so it is "korean".
 The input is always a whole expression the learner heard, never a grammar pattern to explain: 타베타이 is 食べたい "먹고 싶다", not the ~たい pattern. When a sound could be either a full word or a grammar ending (미타이: 見たい "보고 싶다" or みたい "~같다"), choose the full word.
 Return:
+- input_kind: "korean", "japanese_sound" or "japanese", decided as above before anything else
 - japanese: the expression as normally written (kanji where natural, otherwise kana)
 - reading: the whole expression in hiragana (katakana loanwords stay katakana)
 - meaning: short, natural Korean translation of this exact expression with its own words (食べたい → 먹고 싶다). Never a pattern with ~ or placeholders like ~하고 싶다
@@ -27,6 +32,7 @@ Return:
 const SCHEMA = {
   type: 'OBJECT',
   properties: {
+    input_kind: { type: 'STRING', enum: ['korean', 'japanese_sound', 'japanese'] },
     japanese: { type: 'STRING' },
     reading: { type: 'STRING' },
     meaning: { type: 'STRING' },
@@ -39,7 +45,9 @@ const SCHEMA = {
       },
     },
   },
-  required: ['japanese', 'reading', 'meaning', 'words'],
+  required: ['input_kind', 'japanese', 'reading', 'meaning', 'words'],
+  // Decide what the input is before translating it, so Korean is not misread as Japanese sounds.
+  propertyOrdering: ['input_kind', 'japanese', 'reading', 'meaning', 'words'],
 };
 
 const FIELDS = ['japanese', 'reading', 'meaning'] as const;
