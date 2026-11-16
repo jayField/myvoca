@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
-import { BackIcon } from '../components/Icons';
+import { BackIcon, CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { dayLabel, localDate } from '../lib/dates';
 import { toRomaji } from '../lib/kana';
@@ -111,8 +111,14 @@ export default function PhraseDeck() {
                         <SpeakButton text={p.japanese} />
                       </td>
                       <td>
-                        <button type="button" className="btn btn--ghost btn--sm" onClick={() => void remove(p)}>
-                          삭제
+                        <button
+                          type="button"
+                          className="icon-btn icon-btn--delete"
+                          aria-label={`${p.japanese} 삭제`}
+                          title="삭제"
+                          onClick={() => void remove(p)}
+                        >
+                          <CloseIcon />
                         </button>
                       </td>
                     </tr>

@@ -1714,11 +1714,27 @@ a.device-box:hover {
 }
 
 .phrase-table th:nth-child(7) {
-  width: 5.25rem;
+  width: 3.5rem;
 }
 
-.phrase-table .btn--sm {
-  white-space: nowrap;
+/* The listen and ✕ buttons sit in narrow columns; keep them whole. */
+.phrase-table td:nth-child(6),
+.phrase-table td:nth-child(7) {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.phrase-table .icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.icon-btn--delete {
+  color: var(--muted);
+}
+
+.icon-btn--delete:hover {
+  color: var(--danger);
 }
 
 /* Phones: drop the reading and example columns (발음 still says how it sounds) so the rest fits without scrolling. */
@@ -1757,7 +1773,7 @@ a.device-box:hover {
   }
 
   .phrase-table th:nth-child(7) {
-    width: 3.5rem;
+    width: 2.75rem;
   }
 
   .phrase-table .log-term {

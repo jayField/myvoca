@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
+import { CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { toRomaji } from '../lib/kana';
 import { deletePhrase, listPhrases, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
@@ -179,8 +180,14 @@ export default function TalkNotes() {
                   )}
                 </div>
                 <SpeakButton text={p.japanese} />
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => void remove(p)}>
-                  삭제
+                <button
+                  type="button"
+                  className="icon-btn icon-btn--delete"
+                  aria-label={`${p.japanese} 삭제`}
+                  title="삭제"
+                  onClick={() => void remove(p)}
+                >
+                  <CloseIcon />
                 </button>
               </li>
             ))}
