@@ -7,7 +7,7 @@ import { PhraseEditor } from '../components/PhraseEditor';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
 import { dayLabel } from '../lib/dates';
-import { deletePhrase, exampleSound, groupByDay, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
+import { deletePhrase, groupByDay, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
 
 const PHONE = '(max-width: 760px)';
 
@@ -116,7 +116,7 @@ export default function PhraseDeck() {
                       <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
                     </li>
                   ) : (
-                    <PhraseCard key={p.id} phrase={p} onEdit={() => setEditing(p.id)} onDelete={() => void remove(p)} />
+                    <PhraseCard key={p.id} phrase={p} showExample={false} onEdit={() => setEditing(p.id)} onDelete={() => void remove(p)} />
                   ),
                 )}
               </ul>
@@ -137,7 +137,6 @@ export default function PhraseDeck() {
                     <th scope="col" className="col-meaning">
                       뜻
                     </th>
-                    <th scope="col">예시</th>
                     <th scope="col" className="col-button" aria-label="듣기" />
                     <th scope="col" className="col-actions" aria-label="수정·삭제" />
                   </tr>
@@ -146,7 +145,7 @@ export default function PhraseDeck() {
                   {group.map((p) =>
                     editing === p.id ? (
                       <tr key={p.id} className="phrase-edit-row">
-                        <td colSpan={7}>
+                        <td colSpan={6}>
                           <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
                         </td>
                       </tr>
@@ -162,17 +161,6 @@ export default function PhraseDeck() {
                           {p.meaning}
                           {p.note && <span className="phrase-note">{p.note}</span>}
                         </td>
-                          <td>
-                            {p.example_ja ? (
-                              <span className="phrase-example">
-                                <span lang="ja">{p.example_ja}</span>
-                                {exampleSound(p) && <span className="talk-example-sound">{exampleSound(p)}</span>}
-                                <span className="muted">{p.example_ko}</span>
-                              </span>
-                            ) : (
-                              '-'
-                            )}
-                          </td>
                         <td className="cell-button">
                           <SpeakButton text={p.japanese} />
                         </td>
@@ -201,7 +189,7 @@ export default function PhraseDeck() {
                       </tr>
                       {p.words.length > 1 && (
                         <tr className="phrase-words-row">
-                          <td colSpan={7}>
+                          <td colSpan={6}>
                             <WordBreakdown words={p.words} />
                           </td>
                         </tr>

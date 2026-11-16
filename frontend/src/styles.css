@@ -1749,20 +1749,16 @@ a.device-box:hover {
 
 /* 회화 노트 table: phrases and examples run long, so it is wider than 복습표 and its text wraps. */
 .phrase-table {
-  min-width: 48rem;
+  min-width: 40rem;
 }
 
 .phrase-table .col-term {
-  width: 18%;
+  width: 22%;
 }
 
 .phrase-table .col-reading,
 .phrase-table .col-sound {
-  width: 15%;
-}
-
-.phrase-table .col-meaning {
-  width: 14%;
+  width: 19%;
 }
 
 .phrase-table .col-button {

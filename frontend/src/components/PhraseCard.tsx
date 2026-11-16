@@ -8,7 +8,17 @@ import { WordBreakdown } from './WordBreakdown';
  * One saved phrase as a card: the phrase and its buttons on top, everything else full width below, so a
  * phone's narrow screen is not split into columns.
  */
-export function PhraseCard({ phrase: p, onEdit, onDelete }: { phrase: Phrase; onEdit?: () => void; onDelete: () => void }) {
+export function PhraseCard({
+  phrase: p,
+  showExample = true,
+  onEdit,
+  onDelete,
+}: {
+  phrase: Phrase;
+  showExample?: boolean;
+  onEdit?: () => void;
+  onDelete: () => void;
+}) {
   return (
     <li className="item-row phrase-card">
       <div className="phrase-card-head">
@@ -34,7 +44,7 @@ export function PhraseCard({ phrase: p, onEdit, onDelete }: { phrase: Phrase; on
       <span className="phrase-card-meaning">{p.meaning}</span>
       {p.note && <span className="phrase-note">{p.note}</span>}
       <WordBreakdown words={p.words} />
-      {p.example_ja && (
+      {showExample && p.example_ja && (
         <span className="talk-example small">
           <span className="talk-label">예시</span>
           <span lang="ja">{p.example_ja}</span>
