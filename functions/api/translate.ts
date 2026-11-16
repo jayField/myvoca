@@ -81,9 +81,9 @@ async function translate(env: Env, input: string): Promise<Translation> {
 }
 
 export async function onRequestPost({ request, env }: { request: Request; env: Env }): Promise<Response> {
-  if (!env.GEMINI_API_KEY || !env.VITE_SUPABASE_URL || !env.VITE_SUPABASE_ANON_KEY) {
-    return fail(500, '번역 설정이 아직 안 됐어요. 관리자에게 알려 주세요.');
-  }
+  // Name what is missing (never the values) so a setup slip is easy to spot in the app.
+  const missing = (['GEMINI_API_KEY', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'] as const).filter((name) => !env[name]);
+  if (missing.length) return fail(500, `번역 설정이 아직 안 됐어요. 관리자에게 알려 주세요. (빠진 설정: ${missing.join(', ')})`);
   const token = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
   if (!token) return fail(401, '로그인이 필요해요.');
 
