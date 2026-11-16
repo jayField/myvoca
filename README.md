@@ -56,7 +56,7 @@ GitHub 저장소를 Cloudflare Pages(`tango-note`)에 연결해 main에 push하�
 - **가나표** (`/kana`): `src/data/kana-chart.json`의 청음·탁음/반탁음·요음 표. 히라가나/가타카나 전환, 칸을 누르면 발음. 히라가나·가타카나 단어장은 기본 46자 뒤에 이 표의 탁음·반탁음, 요음을 이어 붙인다(순서대로 학습하면 기본 → 탁음 → 요음).
 - **피드백** (`/feedback`): 로그인한 사람끼리 보는 의견 게시판. Supabase `feedback` 표(작성자 이름은 트리거가 계정에서 채움), 본인 글만 삭제.
 - **백업**: 기록 화면에서 JSON 파일로 내보내기/가져오기.
-- **발음**: 단어와 회화 노트 모두 브라우저 내장 TTS로 읽는다(Google 日本語, Kyoko 등 여자 목소리 우선, `frontend/src/speech.ts`). 예전에 만든 VOICEVOX 녹음(`frontend/public/audio/`, `scripts/generate-audio.mjs`)은 지금은 쓰지 않는다.
+- **발음**: 단어와 회화 노트 모두 브라우저 내장 TTS로 읽는다(Google 日本語, Kyoko 등 여자 목소리 우선, `frontend/src/speech.ts`).
 
 ## backend/ (현재 미사용)
 
