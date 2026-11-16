@@ -165,7 +165,7 @@ export default function TalkNotes() {
               전체 보기
             </Link>
           </div>
-          <ul className="item-list">
+          <ul className="phrase-blocks">
             {today.map((p) => (
               <PhraseCard key={p.id} phrase={p} onDelete={() => void remove(p)} />
             ))}

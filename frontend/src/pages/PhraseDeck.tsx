@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
 import { DragHandle } from '../components/DragHandle';
-import { BackIcon, CloseIcon, DownloadIcon, EditIcon } from '../components/Icons';
+import { BackIcon, DownloadIcon } from '../components/Icons';
 import { PhraseCard } from '../components/PhraseCard';
 import { PhraseEditor } from '../components/PhraseEditor';
-import { SpeakButton } from '../components/SpeakButton';
-import { deletePhrase, listPhrases, phraseSound, placeAt, savePositions, TALK_DECK } from '../lib/phrases';
+import { deletePhrase, listPhrases, placeAt, savePositions, TALK_DECK } from '../lib/phrases';
 
 const PHONE = '(max-width: 760px)';
 /** How close to the window's top or bottom edge a drag scrolls the page, and how far per move. */
 const SCROLL_EDGE = 72;
 const SCROLL_STEP = 14;
+/** How blocks slide out of the way, and how a dropped block settles into its place. */
+const SLIDE = 'transform 180ms cubic-bezier(0.2, 0, 0, 1)';
 
 /** Whether the screen is phone-sized, following rotation and window resizes. */
 function useNarrow(): boolean {
@@ -32,11 +33,10 @@ function moved(list: Phrase[], id: string, index: number): Phrase[] {
   return [...rest.slice(0, index), item, ...rest.slice(index)];
 }
 
-/** 회화 노트 as a deck: everything saved so far, in the learner's own order. Adding happens on /talk. */
+/** 회화 노트 as a deck: everything saved so far, as blocks in the learner's own order. Adding happens on /talk. */
 export default function PhraseDeck() {
   const [phrases, setPhrasesState] = useState<Phrase[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Phones get one card per phrase; a table split into columns is too cramped there.
   const narrow = useNarrow();
   const [editing, setEditing] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -44,12 +44,22 @@ export default function PhraseDeck() {
 
   // Pointer handlers read these directly, so a move right after pressing never sees a stale render.
   const listRef = useRef<Phrase[] | null>(null);
-  const rows = useRef(new Map<string, HTMLElement>());
-  const drag = useRef<{ id: string; before: Phrase[] } | null>(null);
+  const listEl = useRef<HTMLUListElement>(null);
+  const blocks = useRef(new Map<string, HTMLElement>());
+  /** The block being dragged: where it was grabbed (from its top) and where the pointer is now. */
+  const drag = useRef<{ id: string; before: Phrase[]; grab: number; y: number } | null>(null);
+  /** Where each block sat before the last reorder, so it can slide from there to its new place. */
+  const slideFrom = useRef<Map<string, number> | null>(null);
 
   function setPhrases(next: Phrase[] | null) {
     listRef.current = next;
     setPhrasesState(next);
+  }
+
+  /** Reorder with the other blocks sliding into their new places rather than jumping. */
+  function reorder(next: Phrase[]) {
+    slideFrom.current = new Map([...blocks.current].map(([id, el]) => [id, el.offsetTop]));
+    setPhrases(next);
   }
 
   useEffect(() => {
@@ -58,10 +68,39 @@ export default function PhraseDeck() {
       .catch((e: Error) => setError(e.message));
   }, []);
 
-  const rowRef = (id: string) => (el: HTMLElement | null) => {
-    if (el) rows.current.set(id, el);
-    else rows.current.delete(id);
+  const blockRef = (id: string) => (el: HTMLElement | null) => {
+    if (el) blocks.current.set(id, el);
+    else blocks.current.delete(id);
   };
+
+  /** Keeps the dragged block under the pointer wherever the list has put it. */
+  function follow() {
+    const d = drag.current;
+    const el = d && blocks.current.get(d.id);
+    const list = listEl.current;
+    if (!d || !el || !list) return;
+    const natural = list.getBoundingClientRect().top + el.offsetTop;
+    el.style.transform = `translateY(${d.y - d.grab - natural}px)`;
+  }
+
+  useLayoutEffect(() => {
+    const from = slideFrom.current;
+    slideFrom.current = null;
+    if (from) {
+      for (const [id, el] of blocks.current) {
+        const old = from.get(id);
+        if (old === undefined || id === drag.current?.id) continue;
+        const delta = old - el.offsetTop;
+        if (!delta) continue;
+        el.style.transition = 'none';
+        el.style.transform = `translateY(${delta}px)`;
+        void el.offsetHeight; // apply the jump back before sliding forward
+        el.style.transition = SLIDE;
+        el.style.transform = '';
+      }
+    }
+    follow();
+  }, [phrases]);
 
   /** Store the new place of `id`; on failure put the list back as it was. */
   async function commit(id: string, before: Phrase[]) {
@@ -74,49 +113,65 @@ export default function PhraseDeck() {
     try {
       await savePositions(updates);
     } catch (e) {
-      setPhrases(before);
+      reorder(before);
       setError((e as Error).message);
     }
   }
 
+  function dragStart(id: string, clientY: number) {
+    const el = blocks.current.get(id);
+    const list = listEl.current;
+    if (!el || !list || !listRef.current) return;
+    el.style.transition = 'none';
+    drag.current = { id, before: listRef.current, grab: clientY - (list.getBoundingClientRect().top + el.offsetTop), y: clientY };
+    setDragging(id);
+    setError(null);
+  }
+
   function dragTo(clientY: number) {
-    const id = drag.current?.id;
+    const d = drag.current;
     const list = listRef.current;
-    if (!id || !list) return;
+    const el = d && blocks.current.get(d.id);
+    const box = listEl.current?.getBoundingClientRect();
+    if (!d || !list || !el || !box) return;
+    d.y = clientY;
     if (clientY < SCROLL_EDGE) window.scrollBy(0, -SCROLL_STEP);
     else if (clientY > window.innerHeight - SCROLL_EDGE) window.scrollBy(0, SCROLL_STEP);
-    // The dragged row goes after every other row whose middle is above the pointer.
+    // The dragged block goes after every other block whose middle is above its own middle.
+    const middle = clientY - d.grab + el.offsetHeight / 2;
     const index = list.filter((p) => {
-      if (p.id === id) return false;
-      const box = rows.current.get(p.id)?.getBoundingClientRect();
-      return box ? box.top + box.height / 2 < clientY : false;
+      const other = p.id !== d.id && blocks.current.get(p.id);
+      return other ? box.top + other.offsetTop + other.offsetHeight / 2 < middle : false;
     }).length;
-    if (list[index]?.id !== id) setPhrases(moved(list, id, index));
+    if (list[index]?.id !== d.id) reorder(moved(list, d.id, index));
+    else follow();
   }
 
   function dragEnd() {
-    const current = drag.current;
+    const d = drag.current;
     drag.current = null;
     setDragging(null);
-    if (current) void commit(current.id, current.before);
+    if (!d) return;
+    const el = blocks.current.get(d.id);
+    if (el) {
+      el.style.transition = SLIDE;
+      el.style.transform = '';
+    }
+    void commit(d.id, d.before);
   }
 
   function step(id: string, delta: -1 | 1) {
     const list = listRef.current!;
     const index = list.findIndex((p) => p.id === id) + delta;
     if (index < 0 || index >= list.length) return;
-    setPhrases(moved(list, id, index));
+    reorder(moved(list, id, index));
     void commit(id, list);
   }
 
   const handle = (p: Phrase) => (
     <DragHandle
       label={p.japanese}
-      onStart={() => {
-        drag.current = { id: p.id, before: listRef.current! };
-        setDragging(p.id);
-        setError(null);
-      }}
+      onStart={(y) => dragStart(p.id, y)}
       onMove={dragTo}
       onEnd={dragEnd}
       onStep={(delta) => step(p.id, delta)}
@@ -127,7 +182,7 @@ export default function PhraseDeck() {
     if (!window.confirm(`'${p.japanese}'를 회화 노트에서 지울까요?`)) return;
     try {
       await deletePhrase(p.id);
-      setPhrases(listRef.current?.filter((x) => x.id !== p.id) ?? null);
+      reorder(listRef.current?.filter((x) => x.id !== p.id) ?? []);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -186,101 +241,29 @@ export default function PhraseDeck() {
           아직 저장한 표현이 없어요. <Link to="/talk">표현 추가</Link>에서 번역해서 저장해 보세요.
         </p>
       )}
-      {phrases && phrases.length > 1 && <p className="muted small">⠿ 손잡이를 끌어서 순서를 바꿀 수 있어요.</p>}
+      {phrases && phrases.length > 1 && <p className="muted small">⠿ 손잡이를 잡고 끌면 블록 순서를 바꿀 수 있어요.</p>}
 
-      {phrases &&
-        phrases.length > 0 &&
-        (narrow ? (
-          <ul className={`item-list${dragging ? ' is-reordering' : ''}`}>
-            {phrases.map((p) =>
-              editing === p.id ? (
-                <li key={p.id} ref={rowRef(p.id)} className="item-row phrase-card phrase-card--editing">
-                  <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
-                </li>
-              ) : (
-                <PhraseCard
-                  key={p.id}
-                  phrase={p}
-                  handle={handle(p)}
-                  dragging={dragging === p.id}
-                  cardRef={rowRef(p.id)}
-                  onEdit={() => setEditing(p.id)}
-                  onDelete={() => void remove(p)}
-                />
-              ),
-            )}
-          </ul>
-        ) : (
-          <div className="log-scroll">
-            <table className={`log-table phrase-table${dragging ? ' is-reordering' : ''}`}>
-              <thead>
-                <tr>
-                  <th scope="col" className="col-handle" aria-label="순서" />
-                  <th scope="col" className="col-term">
-                    표현
-                  </th>
-                  <th scope="col" className="col-reading">
-                    읽기
-                  </th>
-                  <th scope="col" className="col-sound">
-                    발음
-                  </th>
-                  <th scope="col" className="col-meaning">
-                    뜻
-                  </th>
-                  <th scope="col" className="col-button" aria-label="듣기" />
-                  <th scope="col" className="col-actions" aria-label="수정·삭제" />
-                </tr>
-              </thead>
-              <tbody>
-                {phrases.map((p) =>
-                  editing === p.id ? (
-                    <tr key={p.id} ref={rowRef(p.id)} className="phrase-edit-row">
-                      <td colSpan={7}>
-                        <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
-                      </td>
-                    </tr>
-                  ) : (
-                    <tr key={p.id} ref={rowRef(p.id)} className={dragging === p.id ? 'is-dragging' : undefined}>
-                      <td className="cell-button">{handle(p)}</td>
-                      <td lang="ja" className="log-term">
-                        {p.japanese}
-                      </td>
-                      <td lang="ja">{p.reading}</td>
-                      <td>{phraseSound(p)}</td>
-                      <td>{p.meaning}</td>
-                      <td className="cell-button">
-                        <SpeakButton text={p.japanese} />
-                      </td>
-                      <td className="cell-button">
-                        <span className="phrase-actions">
-                          <button
-                            type="button"
-                            className="icon-btn"
-                            aria-label={`${p.japanese} 수정`}
-                            title="수정"
-                            onClick={() => setEditing(p.id)}
-                          >
-                            <EditIcon />
-                          </button>
-                          <button
-                            type="button"
-                            className="icon-btn icon-btn--delete"
-                            aria-label={`${p.japanese} 삭제`}
-                            title="삭제"
-                            onClick={() => void remove(p)}
-                          >
-                            <CloseIcon />
-                          </button>
-                        </span>
-                      </td>
-                    </tr>
-                  ),
-                )}
-              </tbody>
-            </table>
-          </div>
-        ))}
+      {phrases && phrases.length > 0 && (
+        <ul ref={listEl} className={`phrase-blocks${dragging ? ' is-reordering' : ''}`}>
+          {phrases.map((p) =>
+            editing === p.id ? (
+              <li key={p.id} ref={blockRef(p.id)} className="phrase-block phrase-block--editing">
+                <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
+              </li>
+            ) : (
+              <PhraseCard
+                key={p.id}
+                phrase={p}
+                handle={handle(p)}
+                dragging={dragging === p.id}
+                cardRef={blockRef(p.id)}
+                onEdit={() => setEditing(p.id)}
+                onDelete={() => void remove(p)}
+              />
+            ),
+          )}
+        </ul>
+      )}
     </div>
   );
 }

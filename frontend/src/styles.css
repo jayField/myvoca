@@ -1666,57 +1666,6 @@ a.device-box:hover {
   font-weight: 700;
 }
 
-.talk-text {
-  gap: 0.375rem 1.125rem;
-}
-
-.talk-row {
-  align-items: flex-start;
-  padding: 1.125rem 1rem 1.125rem 1.25rem;
-}
-
-.talk-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.talk-term {
-  font-size: 1.375rem;
-  font-weight: 700;
-}
-
-/* 회화 노트 table: phrases and examples run long, so it is wider than 복습표 and its text wraps. */
-.phrase-table {
-  min-width: 40rem;
-}
-
-.phrase-table .col-term {
-  width: 22%;
-}
-
-.phrase-table .col-reading,
-.phrase-table .col-sound {
-  width: 19%;
-}
-
-.phrase-table .col-button {
-  width: 3.5rem;
-}
-
-/* The listen and ✕ buttons sit in narrow columns; keep them whole. */
-.phrase-table .cell-button {
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-}
-
-.phrase-table .icon-btn {
-  width: 2.25rem;
-  height: 2.25rem;
-}
-
 .icon-btn--delete {
   color: var(--muted);
 }
@@ -1726,60 +1675,6 @@ a.device-box:hover {
 }
 
 /* Phones: the page leaves out the reading and example columns (발음 still says how it sounds) so the rest fits. */
-@media (max-width: 760px) {
-  .phrase-table {
-    min-width: 0;
-    font-size: 0.875rem;
-  }
-
-  .phrase-table th,
-  .phrase-table td {
-    padding: 0.5rem 0.375rem;
-  }
-
-  .phrase-table .col-term {
-    width: 30%;
-  }
-
-  .phrase-table .col-sound {
-    width: 26%;
-  }
-
-  .phrase-table .col-meaning {
-    width: auto;
-  }
-
-  .phrase-table .col-button {
-    width: 2.625rem;
-  }
-
-  .phrase-table .log-term {
-    font-size: 1rem;
-  }
-}
-
-.phrase-table td {
-  overflow-wrap: anywhere;
-}
-
-/* 회화 노트: edit and delete share one cell, side by side (stacked on phones, where the column is narrow). */
-/* th.col-actions outranks .log-table th:last-child, which would squeeze both buttons into one button's width. */
-.phrase-table th.col-actions {
-  width: 5.75rem;
-}
-
-.phrase-table td:last-child {
-  padding-right: 0.5rem;
-}
-
-.phrase-actions {
-  display: flex;
-  justify-content: center;
-}
-
-.phrase-edit-row td {
-  background: var(--surface-accent);
-}
 
 .phrase-editor {
   display: flex;
@@ -1795,53 +1690,10 @@ a.device-box:hover {
 }
 
 @media (max-width: 760px) {
-  .phrase-table th.col-actions {
-    width: 2.75rem;
-  }
-
-  .phrase-actions {
-    flex-direction: column;
-    align-items: center;
-  }
 
   .phrase-editor-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-/* A saved phrase as a card (the translate page, and 회화 노트 on phones): phrase and buttons on top, the rest full width. */
-.phrase-card {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.5rem;
-  padding: 1rem 0.75rem 1.125rem 1.125rem;
-}
-
-.phrase-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.phrase-card-head .talk-term {
-  min-width: 0;
-  padding-top: 0.25rem;
-  line-height: 1.4;
-}
-
-.phrase-card-actions {
-  display: flex;
-  flex-shrink: 0;
-}
-
-.phrase-card-meaning {
-  font-weight: 600;
-}
-
-.phrase-card--editing {
-  padding: 0.75rem 1rem;
-  background: var(--surface-accent);
 }
 
 @media (max-width: 760px) {
@@ -1857,14 +1709,6 @@ a.device-box:hover {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
-
-  .phrase-card {
-    padding: 0.875rem 0.5rem 1rem 1rem;
-  }
-
-  .phrase-card .talk-term {
-    font-size: 1.25rem;
-  }
 }
 
 /* Phones: the 20 weeks of 학습 잔디 shrink to fit the card instead of scrolling off its edge. */
@@ -1875,16 +1719,6 @@ a.device-box:hover {
     grid-template-rows: repeat(7, 0.75rem);
     grid-auto-columns: minmax(0, 1fr);
   }
-}
-
-/* The editing card fills its list's rounded corner instead of poking out of it. */
-.phrase-card--editing:last-child {
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-}
-
-.phrase-card--editing:first-child {
-  border-top-left-radius: var(--radius-md);
-  border-top-right-radius: var(--radius-md);
 }
 
 .phrase-editor-hint {
@@ -1981,11 +1815,7 @@ a.device-box:hover {
   }
 }
 
-/* 회화 노트 order: a grip on each row; the row being dragged lifts, and text is not selected while dragging. */
-.phrase-table th.col-handle {
-  width: 2.75rem;
-}
-
+/* The grip a block is dragged by; while dragging, nothing on the page gets text-selected. */
 .drag-handle {
   color: var(--muted);
   cursor: grab;
@@ -1999,25 +1829,98 @@ a.device-box:hover {
   -webkit-user-select: none;
 }
 
-.phrase-table tr.is-dragging td,
-.phrase-card.is-dragging {
+/* 회화 노트 as blocks: each phrase its own card. Dragging lifts a block; the others slide out of its way. */
+.phrase-blocks {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.phrase-block {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 0.75rem 0.875rem 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition: box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.phrase-block.is-dragging {
+  z-index: 2;
+  border-color: var(--accent);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+.phrase-block-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.375rem 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.phrase-block-term {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.phrase-block-reading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: 0.875rem;
+}
+
+.phrase-block-meaning {
+  font-weight: 600;
+}
+
+.phrase-block-actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.phrase-block--editing {
+  display: block;
+  padding: 0.75rem 1rem;
   background: var(--surface-accent);
 }
 
-.phrase-card.is-dragging {
-  box-shadow: inset 3px 0 0 var(--accent);
-}
-
-.phrase-card-head .talk-term {
-  flex: 1;
-}
-
-.phrase-card .drag-handle {
-  margin-left: -0.5rem;
-}
-
+/* Phones: the phrase, its reading and its meaning stack; the buttons stay on the first line. */
 @media (max-width: 760px) {
-  .phrase-card-head {
-    align-items: center;
+  .phrase-block {
+    align-items: flex-start;
+    padding: 0.75rem 0.5rem 0.875rem 0.25rem;
   }
+
+  .phrase-block-main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+    padding-top: 0.25rem;
+  }
+
+  .phrase-block-term {
+    font-size: 1.125rem;
+  }
+
+  .phrase-block-reading {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0 0.75rem;
+  }
+}
+
+/* Blocks without a grip (the translate page's list) need their own left margin. */
+.phrase-block > .phrase-block-main:first-child {
+  padding-left: 0.75rem;
 }

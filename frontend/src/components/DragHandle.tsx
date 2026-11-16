@@ -2,7 +2,7 @@ import type { KeyboardEvent, PointerEvent } from 'react';
 import { GripIcon } from './Icons';
 
 /**
- * The grip for moving one row: drag it with a mouse or finger, or focus it and press ↑/↓.
+ * The grip for moving one block: drag it with a mouse or finger, or focus it and press ↑/↓.
  * The list does the moving; this only reports where the pointer went.
  */
 export function DragHandle({
@@ -13,7 +13,7 @@ export function DragHandle({
   onStep,
 }: {
   label: string;
-  onStart: () => void;
+  onStart: (clientY: number) => void;
   onMove: (clientY: number) => void;
   onEnd: () => void;
   onStep: (delta: -1 | 1) => void;
@@ -22,7 +22,7 @@ export function DragHandle({
     if (e.button !== 0) return;
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
-    onStart();
+    onStart(e.clientY);
   }
 
   function key(e: KeyboardEvent<HTMLButtonElement>) {
