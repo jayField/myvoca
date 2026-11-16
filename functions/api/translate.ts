@@ -59,6 +59,25 @@ async function isSignedIn(env: Env, token: string): Promise<boolean> {
 /** Gemini's own quota (the free tier's daily cap) ran out. */
 class QuotaError extends Error {}
 
+/** Gemini refused the call; `reason` is its own short message (never contains the key), shown to help fix setup. */
+class GeminiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly reason: string,
+  ) {
+    super(`gemini ${status}: ${reason}`);
+  }
+}
+
+async function geminiReason(res: Response): Promise<string> {
+  const text = await res.text();
+  try {
+    return String((JSON.parse(text) as { error?: { message?: string } }).error?.message ?? text).slice(0, 200);
+  } catch {
+    return text.slice(0, 200);
+  }
+}
+
 async function translate(env: Env, input: string): Promise<Translation> {
   const model = env.GEMINI_MODEL || DEFAULT_MODEL;
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -71,7 +90,7 @@ async function translate(env: Env, input: string): Promise<Translation> {
     }),
   });
   if (res.status === 429) throw new QuotaError(await res.text());
-  if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new GeminiError(res.status, await geminiReason(res));
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
   const parsed = JSON.parse(text) as Record<string, unknown>;
@@ -109,6 +128,7 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   } catch (e) {
     console.error(e);
     if (e instanceof QuotaError) return fail(429, '번역 서비스의 무료 사용량을 다 썼어요. 잠시 뒤나 내일 다시 해 주세요.');
+    if (e instanceof GeminiError) return fail(502, `번역하지 못했어요. 잠시 뒤 다시 시도해 주세요. (Gemini ${e.status}: ${e.reason})`);
     return fail(502, '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
   }
 }
