@@ -16,6 +16,7 @@ import {
   studyLog,
   wordOfDay,
 } from './lib/logic';
+import { NUMBER_DECK, numberItems } from './lib/numbers';
 import { listPhrases, phraseItem, TALK_DECK } from './lib/phrases';
 import * as storage from './lib/storage';
 import { deleteRemoteStudyData, exclusive } from './lib/sync';
@@ -25,6 +26,7 @@ export type * from './types';
 
 export const CONFUSING_DECK_ID = CONFUSING_DECK.id;
 export const TALK_DECK_ID = TALK_DECK.id;
+export const NUMBER_DECK_ID = NUMBER_DECK.id;
 export const LOAD_ERROR = '학습 기록을 불러오지 못했어요. 브라우저 저장소가 막혀 있지 않은지 확인해 주세요.';
 
 const GRADE_SET = new Set<Grade>(['again', 'hard', 'good']);
@@ -146,6 +148,7 @@ export const api = {
 
   async quiz(deckId: string, count = 10) {
     if (deckId === TALK_DECK.id) return buildPhraseQuiz((await listPhrases()).map(phraseItem), count);
+    if (deckId === NUMBER_DECK.id) return buildPhraseQuiz(numberItems(), count);
     const { progress } = await snapshot();
     return buildQuiz(deckId, count, progress);
   },

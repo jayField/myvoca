@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, LOAD_ERROR, TALK_DECK_ID, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, NUMBER_DECK_ID, TALK_DECK_ID, type Deck, type Grade, type Item, type Quiz as QuizData } from '../api';
 import { BackIcon, SpeakerIcon } from '../components/Icons';
 import { PracticeCards } from '../components/PracticeCards';
+import { READING_SEPARATOR } from '../lib/numbers';
 import { QuestionCountPicker } from '../components/QuestionCountPicker';
 import { showsReading, Term } from '../components/Term';
 import { GRADES } from '../labels';
@@ -54,6 +55,8 @@ function normalize(text: string): string {
 function isCorrectReading(item: Item, input: string): boolean {
   const answer = normalize(input);
   const reading = normalize(item.reading);
+  // A number with two everyday readings (よん・し) takes either.
+  if (reading.split(READING_SEPARATOR).includes(answer)) return true;
   return answer === reading || (item.kind === 'kana' && (ROMAJI_ALIASES[reading] ?? []).includes(answer));
 }
 
@@ -176,6 +179,7 @@ export default function Quiz() {
                 ...decks.map((d) => ({ id: d.id, title: d.title })),
                 { id: CONFUSING_DECK_ID, title: '헷갈리는 단어' },
                 { id: TALK_DECK_ID, title: '회화 노트' },
+                { id: NUMBER_DECK_ID, title: '숫자' },
               ].map((d) => (
                 <label key={d.id} className="chip">
                   <input type="radio" name="deck" checked={deckId === d.id} onChange={() => setDeckId(d.id)} />

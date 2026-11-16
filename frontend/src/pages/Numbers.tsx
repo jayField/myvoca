@@ -1,22 +1,7 @@
+import { Link } from 'react-router-dom';
 import { toHangul } from '../lib/kana';
+import { NUMBER_DECK, NUMBERS } from '../lib/numbers';
 import { speak } from '../speech';
-
-/**
- * 1 to 10 in both readings. 음독 (Chinese-derived) is for counting and most numbers; 훈독 (native) is the
- * ~つ series for counting things. Where two readings are in everyday use, the more common one comes first.
- */
-const NUMBERS: { n: number; kanji: string; on: string[]; kun: string }[] = [
-  { n: 1, kanji: '一', on: ['いち'], kun: 'ひとつ' },
-  { n: 2, kanji: '二', on: ['に'], kun: 'ふたつ' },
-  { n: 3, kanji: '三', on: ['さん'], kun: 'みっつ' },
-  { n: 4, kanji: '四', on: ['よん', 'し'], kun: 'よっつ' },
-  { n: 5, kanji: '五', on: ['ご'], kun: 'いつつ' },
-  { n: 6, kanji: '六', on: ['ろく'], kun: 'むっつ' },
-  { n: 7, kanji: '七', on: ['なな', 'しち'], kun: 'ななつ' },
-  { n: 8, kanji: '八', on: ['はち'], kun: 'やっつ' },
-  { n: 9, kanji: '九', on: ['きゅう', 'く'], kun: 'ここのつ' },
-  { n: 10, kanji: '十', on: ['じゅう'], kun: 'とお' },
-];
 
 function Reading({ kana }: { kana: string }) {
   return (
@@ -37,6 +22,9 @@ export default function Numbers() {
           <h1>숫자</h1>
           <p className="muted small">1부터 10까지 음독과 훈독이에요. 읽는 법을 누르면 발음을 들려줘요.</p>
         </div>
+        <Link to={`/quiz?deck=${NUMBER_DECK.id}`} className="btn btn--ghost">
+          퀴즈로 풀기
+        </Link>
       </header>
 
       <section className="kana-section stack-sm" aria-label="1부터 10까지">

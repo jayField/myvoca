@@ -353,3 +353,16 @@ describe('typed pronunciations', () => {
     expect(phraseSound({ reading: 'ねこ', words: [], sound: '' })).toBe('네코');
   });
 });
+
+describe('numbers quiz', () => {
+  it('asks each number in both readings, with choices from the numbers', async () => {
+    const { numberItems } = await import('./numbers');
+    const items = numberItems();
+    expect(items).toHaveLength(20);
+    expect(items.find((i) => i.term === '四')).toMatchObject({ reading: 'よん・し', meaning: '4' });
+    expect(items.find((i) => i.term === '四つ')).toMatchObject({ reading: 'よっつ', meaning: '4개' });
+    const quiz = buildPhraseQuiz(items, 10, seededRng('numbers'));
+    expect(quiz.questions).toHaveLength(10);
+    for (const q of quiz.questions) expect(q.choices.every((c) => c.deck_id === 'numbers')).toBe(true);
+  });
+});

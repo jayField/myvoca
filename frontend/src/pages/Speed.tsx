@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, LOAD_ERROR, TALK_DECK_ID, type Deck, type Item, type QuizQuestion } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, NUMBER_DECK_ID, TALK_DECK_ID, type Deck, type Item, type QuizQuestion } from '../api';
 import { BackIcon } from '../components/Icons';
 import { clampQuestionCount, QuestionCountPicker } from '../components/QuestionCountPicker';
 import { showsReading, Term } from '../components/Term';
@@ -178,6 +178,7 @@ export default function Speed() {
                 ...decks.map((d) => ({ id: d.id, title: d.title })),
                 { id: CONFUSING_DECK_ID, title: '헷갈리는 단어' },
                 { id: TALK_DECK_ID, title: '회화 노트' },
+                { id: NUMBER_DECK_ID, title: '숫자' },
               ].map((d) => (
                 <label key={d.id} className="chip">
                   <input type="radio" name="deck" checked={deckId === d.id} onChange={() => setDeckId(d.id)} />
