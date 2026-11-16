@@ -17,10 +17,11 @@ const MAX_INPUT = 100;
 const SYSTEM = `You help a Korean learner of Japanese save expressions they picked up chatting with Japanese speakers.
 The input is usually Japanese written in Hangul by how it sounds (e.g. 아리가또 → ありがとう, 고항 타베타이 → ご飯食べたい), often misspelled: long vowels, small っ and voicing are frequently wrong or missing. It may also be a Korean sentence to say in Japanese, or Japanese text.
 Read Hangul as Japanese sounds first; treat it as Korean only when it clearly is Korean. Work out the natural Japanese expression the learner meant and correct it.
+The input is always a whole expression the learner heard, never a grammar pattern to explain: 타베타이 is 食べたい "먹고 싶다", not the ~たい pattern. When a sound could be either a full word or a grammar ending (미타이: 見たい "보고 싶다" or みたい "~같다"), choose the full word and mention the other reading in note.
 Return:
 - japanese: the expression as normally written (kanji where natural, otherwise kana)
 - reading: the whole expression in hiragana (katakana loanwords stay katakana)
-- meaning: short, natural Korean meaning
+- meaning: short, natural Korean translation of this exact expression with its own words (食べたい → 먹고 싶다). Never a pattern with ~ or placeholders like ~하고 싶다
 - note: one short Korean sentence on nuance or politeness, or on how the input was corrected; empty if nothing to add
 - example_ja: one natural, everyday example sentence in Japanese (Japanese script only, never Hangul) using the expression
 - example_ko: the Korean translation of example_ja (Hangul)`;
@@ -56,16 +57,18 @@ async function isSignedIn(env: Env, token: string): Promise<boolean> {
   return true;
 }
 
-/** Gemini's own quota (the free tier's daily cap) ran out. */
+/** Gemini's own free-tier quota ran out: per minute (15 requests at the time of writing) or per day. */
 class QuotaError extends Error {}
 
 /** Gemini refused the call; `reason` is its own short message (never contains the key), shown to help fix setup. */
 class GeminiError extends Error {
-  constructor(
-    readonly status: number,
-    readonly reason: string,
-  ) {
+  status: number;
+  reason: string;
+
+  constructor(status: number, reason: string) {
     super(`gemini ${status}: ${reason}`);
+    this.status = status;
+    this.reason = reason;
   }
 }
 
@@ -127,7 +130,11 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
     return json({ result: await translate(env, input) });
   } catch (e) {
     console.error(e);
-    if (e instanceof QuotaError) return fail(429, '번역 서비스의 무료 사용량을 다 썼어요. 잠시 뒤나 내일 다시 해 주세요.');
+    if (e instanceof QuotaError) {
+      return /PerMinute|per minute/i.test(e.message)
+        ? fail(429, '번역 요청이 잠깐 몰렸어요. 1분쯤 뒤에 다시 해 주세요.')
+        : fail(429, '오늘 번역 무료 사용량을 다 썼어요. 내일 다시 해 주세요.');
+    }
     if (e instanceof GeminiError) return fail(502, `번역하지 못했어요. 잠시 뒤 다시 시도해 주세요. (Gemini ${e.status}: ${e.reason})`);
     return fail(502, '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
   }
