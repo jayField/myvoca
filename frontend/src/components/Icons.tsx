@@ -138,3 +138,9 @@ export const DownloadIcon = () => (
     <path d="M5 19h14" />
   </Icon>
 );
+
+export const NumberIcon = () => (
+  <Icon>
+    <path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16" />
+  </Icon>
+);
