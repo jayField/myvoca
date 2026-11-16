@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
-import { CloseIcon } from '../components/Icons';
+import { PhraseCard } from '../components/PhraseCard';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
 import { localDate } from '../lib/dates';
@@ -184,37 +184,7 @@ export default function TalkNotes() {
           </div>
           <ul className="item-list">
             {today.map((p) => (
-              <li key={p.id} className="item-row talk-row">
-                <div className="talk-main">
-                  <span lang="ja" className="talk-term">
-                    {p.japanese}
-                  </span>
-                  <span className="item-text talk-text">
-                    {p.reading !== p.japanese && <span lang="ja">{p.reading}</span>}
-                    <span className="muted">{phraseSound(p)}</span>
-                    <span>{p.meaning}</span>
-                  </span>
-                  <WordBreakdown words={p.words} />
-                  {p.example_ja && (
-                    <span className="talk-example small">
-                      <span className="talk-label">예시</span>
-                      <span lang="ja">{p.example_ja}</span>
-                      {p.example_reading && <span className="talk-example-sound">{toHangul(p.example_reading)}</span>}
-                      <span className="muted">{p.example_ko}</span>
-                    </span>
-                  )}
-                </div>
-                <SpeakButton text={p.japanese} />
-                <button
-                  type="button"
-                  className="icon-btn icon-btn--delete"
-                  aria-label={`${p.japanese} 삭제`}
-                  title="삭제"
-                  onClick={() => void remove(p)}
-                >
-                  <CloseIcon />
-                </button>
-              </li>
+              <PhraseCard key={p.id} phrase={p} onDelete={() => void remove(p)} />
             ))}
           </ul>
         </section>

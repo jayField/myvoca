@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
 import { BackIcon, CloseIcon, DownloadIcon, EditIcon } from '../components/Icons';
+import { PhraseCard } from '../components/PhraseCard';
 import { PhraseEditor } from '../components/PhraseEditor';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
@@ -27,9 +28,8 @@ function useNarrow(): boolean {
 export default function PhraseDeck() {
   const [phrases, setPhrases] = useState<Phrase[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Phones skip the reading and example columns; leaving them out (not hiding them) keeps the breakdown row's span right.
+  // Phones get one card per phrase; a table split into columns is too cramped there.
   const narrow = useNarrow();
-  const columns = narrow ? 5 : 7;
   const [editing, setEditing] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -87,11 +87,11 @@ export default function PhraseDeck() {
             표현 추가
           </Link>
           <Link to={`/quiz?deck=${TALK_DECK.id}`} className="btn btn--ghost">
-            이 범위로 퀴즈
+            {narrow ? '퀴즈' : '이 범위로 퀴즈'}
           </Link>
           <button type="button" className="btn btn--ghost" onClick={() => void exportPdf()} disabled={!phrases?.length || exporting}>
             <DownloadIcon />
-            {exporting ? 'PDF 만드는 중…' : 'PDF 다운로드'}
+            {exporting ? (narrow ? '만드는 중…' : 'PDF 만드는 중…') : narrow ? 'PDF' : 'PDF 다운로드'}
           </button>
         </div>
       </header>
@@ -109,6 +109,19 @@ export default function PhraseDeck() {
             <h2 id={`phrase-${day}`} className="section-title day-title">
               {dayLabel(day)} <span className="muted small">· {group.length}개</span>
             </h2>
+            {narrow ? (
+              <ul className="item-list">
+                {group.map((p) =>
+                  editing === p.id ? (
+                    <li key={p.id} className="item-row phrase-card phrase-card--editing">
+                      <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
+                    </li>
+                  ) : (
+                    <PhraseCard key={p.id} phrase={p} onEdit={() => setEditing(p.id)} onDelete={() => void remove(p)} />
+                  ),
+                )}
+              </ul>
+            ) : (
             <div className="log-scroll">
               <table className="log-table phrase-table">
                 <thead>
@@ -116,18 +129,16 @@ export default function PhraseDeck() {
                     <th scope="col" className="col-term">
                       표현
                     </th>
-                    {!narrow && (
-                      <th scope="col" className="col-reading">
-                        읽기
-                      </th>
-                    )}
+                    <th scope="col" className="col-reading">
+                      읽기
+                    </th>
                     <th scope="col" className="col-sound">
                       발음
                     </th>
                     <th scope="col" className="col-meaning">
                       뜻
                     </th>
-                    {!narrow && <th scope="col">예시</th>}
+                    <th scope="col">예시</th>
                     <th scope="col" className="col-button" aria-label="듣기" />
                     <th scope="col" className="col-actions" aria-label="수정·삭제" />
                   </tr>
@@ -136,7 +147,7 @@ export default function PhraseDeck() {
                   {group.map((p) =>
                     editing === p.id ? (
                       <tr key={p.id} className="phrase-edit-row">
-                        <td colSpan={columns}>
+                        <td colSpan={7}>
                           <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
                         </td>
                       </tr>
@@ -146,13 +157,12 @@ export default function PhraseDeck() {
                         <td lang="ja" className="log-term">
                           {p.japanese}
                         </td>
-                        {!narrow && <td lang="ja">{p.reading}</td>}
+                        <td lang="ja">{p.reading}</td>
                         <td>{phraseSound(p)}</td>
                         <td>
                           {p.meaning}
                           {p.note && <span className="phrase-note">{p.note}</span>}
                         </td>
-                        {!narrow && (
                           <td>
                             {p.example_ja ? (
                               <span className="phrase-example">
@@ -164,7 +174,6 @@ export default function PhraseDeck() {
                               '-'
                             )}
                           </td>
-                        )}
                         <td className="cell-button">
                           <SpeakButton text={p.japanese} />
                         </td>
@@ -193,7 +202,7 @@ export default function PhraseDeck() {
                       </tr>
                       {p.words.length > 1 && (
                         <tr className="phrase-words-row">
-                          <td colSpan={columns}>
+                          <td colSpan={7}>
                             <WordBreakdown words={p.words} />
                           </td>
                         </tr>
@@ -204,6 +213,7 @@ export default function PhraseDeck() {
                 </tbody>
               </table>
             </div>
+            )}
           </section>
         ))}
     </div>
