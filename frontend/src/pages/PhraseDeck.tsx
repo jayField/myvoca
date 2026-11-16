@@ -75,24 +75,51 @@ export default function PhraseDeck() {
             <h2 id={`phrase-${day}`} className="section-title day-title">
               {dayLabel(day)} <span className="muted small">· {group.length}개</span>
             </h2>
-            <ul className="item-list">
-              {group.map((p) => (
-                <li key={p.id} className="item-row">
-                  <span lang="ja" className="item-term talk-deck-term">
-                    {p.japanese}
-                  </span>
-                  <span className="item-text">
-                    {p.reading !== p.japanese && <span lang="ja">{p.reading}</span>}
-                    <span className="muted">{toRomaji(p.reading)}</span>
-                    <span>{p.meaning}</span>
-                  </span>
-                  <SpeakButton text={p.japanese} />
-                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => void remove(p)}>
-                    삭제
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="log-scroll">
+              <table className="log-table phrase-table">
+                <thead>
+                  <tr>
+                    <th scope="col">표현</th>
+                    <th scope="col">읽기</th>
+                    <th scope="col">발음</th>
+                    <th scope="col">뜻</th>
+                    <th scope="col">예문</th>
+                    <th scope="col" aria-label="듣기" />
+                    <th scope="col" aria-label="삭제" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.map((p) => (
+                    <tr key={p.id}>
+                      <td lang="ja" className="log-term">
+                        {p.japanese}
+                      </td>
+                      <td lang="ja">{p.reading}</td>
+                      <td>{toRomaji(p.reading)}</td>
+                      <td>{p.meaning}</td>
+                      <td>
+                        {p.example_ja ? (
+                          <span className="phrase-example">
+                            <span lang="ja">{p.example_ja}</span>
+                            <span className="muted">{p.example_ko}</span>
+                          </span>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td>
+                        <SpeakButton text={p.japanese} />
+                      </td>
+                      <td>
+                        <button type="button" className="btn btn--ghost btn--sm" onClick={() => void remove(p)}>
+                          삭제
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         ))}
     </div>
