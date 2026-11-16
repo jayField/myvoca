@@ -5,6 +5,7 @@ import { CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
 import { localDate } from '../lib/dates';
+import { toHangul } from '../lib/kana';
 import { deletePhrase, listPhrases, phraseSound, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
 
 const MAX_INPUT = 100;
@@ -147,6 +148,7 @@ export default function TalkNotes() {
             <div className="talk-example">
               <span className="talk-label">예시</span>
               <span lang="ja">{draft.result.example_ja}</span>
+              {draft.result.example_reading && <span className="talk-example-sound">{toHangul(draft.result.example_reading)}</span>}
               <span className="muted">{draft.result.example_ko}</span>
             </div>
           )}
@@ -197,6 +199,7 @@ export default function TalkNotes() {
                     <span className="talk-example small">
                       <span className="talk-label">예시</span>
                       <span lang="ja">{p.example_ja}</span>
+                      {p.example_reading && <span className="talk-example-sound">{toHangul(p.example_reading)}</span>}
                       <span className="muted">{p.example_ko}</span>
                     </span>
                   )}

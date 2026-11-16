@@ -39,25 +39,27 @@ function client() {
   return supabase;
 }
 
-/** Rows saved before the word breakdown existed (or before its column was added) have no words. */
-const withWords = (row: Omit<Phrase, 'words'> & { words?: Phrase['words'] | null }): Phrase => ({ ...row, words: row.words ?? [] });
+type StoredPhrase = Omit<Phrase, 'words' | 'example_reading'> & Partial<Pick<Phrase, 'words' | 'example_reading'>>;
+
+/** Rows saved before the breakdown and example reading existed (or before their columns were added) lack them. */
+const complete = (row: StoredPhrase): Phrase => ({ ...row, words: row.words ?? [], example_reading: row.example_reading ?? '' });
 
 export async function listPhrases(): Promise<Phrase[]> {
   const { data, error } = await client().from('phrases').select('*').order('created_at', { ascending: false });
   if (error) throw new Error(NETWORK);
-  return data.map(withWords);
+  return data.map(complete);
 }
 
 export async function savePhrase(input: string, t: Translation): Promise<Phrase> {
   const phrases = client().from('phrases');
   let res = await phrases.insert({ input, ...t }).select('*').single();
-  // PGRST204: the project has not run the schema update that adds `words` yet; save the rest.
+  // PGRST204: the project has not run the schema update that adds `words` and `example_reading` yet; save the rest.
   if (res.error?.code === 'PGRST204') {
-    const { words: _words, ...rest } = t;
+    const { words: _words, example_reading: _reading, ...rest } = t;
     res = await phrases.insert({ input, ...rest }).select('*').single();
   }
   if (res.error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
-  return withWords(res.data);
+  return complete(res.data);
 }
 
 export async function deletePhrase(id: string): Promise<void> {

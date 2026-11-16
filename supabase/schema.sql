@@ -124,12 +124,14 @@ create table if not exists public.phrases (
   note text not null default '' check (char_length(note) <= 500),
   example_ja text not null default '' check (char_length(example_ja) <= 500),
   example_ko text not null default '' check (char_length(example_ko) <= 500),
+  example_reading text not null default '' check (char_length(example_reading) <= 1000),
   words jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );
 
--- Word-by-word breakdown, added after the first release; safe to run again.
+-- Word-by-word breakdown and the example's reading, added after the first release; safe to run again.
 alter table public.phrases add column if not exists words jsonb not null default '[]'::jsonb;
+alter table public.phrases add column if not exists example_reading text not null default '' check (char_length(example_reading) <= 1000);
 
 alter table public.phrases enable row level security;
 

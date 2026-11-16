@@ -1677,6 +1677,11 @@ a.device-box:hover {
   line-height: 1.6;
 }
 
+.talk-example-sound {
+  font-size: 0.875em;
+  color: var(--accent-soft);
+}
+
 .talk-label {
   font-size: 0.75rem;
   font-weight: 700;

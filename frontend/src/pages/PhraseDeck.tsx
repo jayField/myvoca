@@ -5,6 +5,7 @@ import { BackIcon, CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
 import { dayLabel, localDate } from '../lib/dates';
+import { toHangul } from '../lib/kana';
 import { deletePhrase, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
 
 /** Saved phrases by the day they were saved, newest day first (the list already arrives newest first). */
@@ -129,6 +130,7 @@ export default function PhraseDeck() {
                             {p.example_ja ? (
                               <span className="phrase-example">
                                 <span lang="ja">{p.example_ja}</span>
+                                {p.example_reading && <span className="talk-example-sound">{toHangul(p.example_reading)}</span>}
                                 <span className="muted">{p.example_ko}</span>
                               </span>
                             ) : (

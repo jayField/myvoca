@@ -58,6 +58,8 @@ export interface Translation {
   note: string;
   example_ja: string;
   example_ko: string;
+  /** example_ja in kana, spaced Korean-style; empty when unknown (older phrases, or the model's reading was unreliable). */
+  example_reading: string;
   /** The expression split into words in order; empty for phrases saved before the breakdown existed. */
   words: PhraseWord[];
 }
