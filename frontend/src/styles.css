@@ -1738,7 +1738,7 @@ a.device-box:hover {
 
 /* 숫자: 1–10 with 음독 and 훈독, built on the kana chart's table. */
 .number-table thead th:first-child {
-  width: 5.5rem;
+  width: 6rem;
 }
 
 .number-table tbody th {
@@ -1792,18 +1792,34 @@ a.device-box:hover {
   color: var(--muted);
 }
 
-.number-notes {
-  margin: 0.5rem 0 0;
-  padding-left: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
+.number-tables {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* The notes differ in length; a fixed height keeps the three tables' rows level. */
+.number-note {
+  min-height: 3.25em;
+  margin: 0;
   line-height: 1.6;
+}
+
+@media (max-width: 1000px) {
+  .number-tables {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 30rem;
+  }
+
+  .number-note {
+    min-height: 0;
+  }
 }
 
 @media (max-width: 760px) {
   .number-table thead th:first-child {
-    width: 3.25rem;
+    width: 5rem;
   }
 
   .number-reading {
