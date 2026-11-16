@@ -41,10 +41,10 @@ export interface DeckItem extends Item {
 }
 
 /** One word of a phrase's breakdown, e.g. 考えている · かんがえている · 생각하고 있다. */
+/** One word of a saved phrase; only used to space its Hangul pronunciation Korean-style. */
 export interface PhraseWord {
   japanese: string;
   reading: string;
-  meaning: string;
   /** Joined to the word before when the phrase is spaced Korean-style, as particles are (君を 思っている). */
   attach?: boolean;
 }
@@ -52,15 +52,10 @@ export interface PhraseWord {
 /** What /api/translate returns for one typed expression. */
 export interface Translation {
   japanese: string;
-  /** Hiragana (katakana for loanwords); quizzes and romaji read this. */
+  /** Hiragana (katakana for loanwords); quizzes read this. */
   reading: string;
   meaning: string;
-  note: string;
-  example_ja: string;
-  example_ko: string;
-  /** example_ja in kana, spaced Korean-style; empty when unknown (older phrases, or the model's reading was unreliable). */
-  example_reading: string;
-  /** The expression split into words in order; empty for phrases saved before the breakdown existed. */
+  /** The expression split into words in order; empty for phrases saved before this existed. */
   words: PhraseWord[];
 }
 
@@ -71,8 +66,6 @@ export interface Phrase extends Translation {
   input: string;
   /** Hangul pronunciation the learner typed in place of the automatic one; empty means automatic. */
   sound: string;
-  /** The same for the example sentence. */
-  example_sound: string;
   created_at: string;
 }
 

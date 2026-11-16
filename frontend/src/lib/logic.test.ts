@@ -348,10 +348,8 @@ describe('pageBreaks', () => {
 
 describe('typed pronunciations', () => {
   it('wins over the automatic one, and empty means automatic', async () => {
-    const { phraseSound, exampleSound } = await import('./phrases');
+    const { phraseSound } = await import('./phrases');
     expect(phraseSound({ reading: 'ねこ', words: [], sound: '냐옹' })).toBe('냐옹');
     expect(phraseSound({ reading: 'ねこ', words: [], sound: '' })).toBe('네코');
-    expect(exampleSound({ example_reading: 'ねこ だ', example_sound: '' })).toBe('네코 다');
-    expect(exampleSound({ example_reading: 'ねこ だ', example_sound: '네꼬 다' })).toBe('네꼬 다');
   });
 });

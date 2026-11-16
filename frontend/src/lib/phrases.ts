@@ -9,7 +9,6 @@ export const TALK_DECK = { id: 'talk', title: '회화 노트', description: '대
 
 const SIGN_IN = '회화 노트는 로그인해야 쓸 수 있어요.';
 const NETWORK = '인터넷 연결을 확인하고 다시 시도해 주세요.';
-const MISSING_SOUND = '나머지는 저장했지만 발음은 저장하지 못했어요. Supabase에서 발음 칸을 추가하는 SQL을 먼저 실행해 주세요.';
 
 
 /**
@@ -27,11 +26,6 @@ export function autoSound(p: Pick<Translation, 'reading' | 'words'>): string {
   return p.words.map((w, i) => (i > 0 && !w.attach ? ' ' : '') + toHangul(w.reading)).join('');
 }
 
-/** How the example sentence sounds: the learner's own version if they typed one, else from its reading. */
-export function exampleSound(p: Pick<Phrase, 'example_reading' | 'example_sound'>): string {
-  return p.example_sound || toHangul(p.example_reading);
-}
-
 /** A phrase as a quiz item, so the existing quiz screens can ask it like a word. */
 export function phraseItem(p: Phrase): Item {
   return {
@@ -42,8 +36,8 @@ export function phraseItem(p: Phrase): Item {
     display: p.japanese,
     reading: p.reading,
     meaning: p.meaning,
-    example_ja: p.example_ja || null,
-    example_ko: p.example_ko || null,
+    example_ja: null,
+    example_ko: null,
   };
 }
 
@@ -52,53 +46,28 @@ function client() {
   return supabase;
 }
 
-type Later = 'words' | 'example_reading' | 'sound' | 'example_sound';
-type StoredPhrase = Omit<Phrase, Later> & Partial<Pick<Phrase, Later>>;
-
-/** Rows saved before these columns existed (or before the schema update adding them was run) lack them. */
-const complete = (row: StoredPhrase): Phrase => ({
-  ...row,
-  words: row.words ?? [],
-  example_reading: row.example_reading ?? '',
-  sound: row.sound ?? '',
-  example_sound: row.example_sound ?? '',
-});
+/** Only what the app shows; older rows also hold examples and notes that are no longer used. */
+const COLUMNS = 'id,input,japanese,reading,meaning,sound,words,created_at';
 
 export async function listPhrases(): Promise<Phrase[]> {
-  const { data, error } = await client().from('phrases').select('*').order('created_at', { ascending: false });
+  const { data, error } = await client().from('phrases').select(COLUMNS).order('created_at', { ascending: false });
   if (error) throw new Error(NETWORK);
-  return data.map(complete);
+  return data as Phrase[];
 }
 
 export async function savePhrase(input: string, t: Translation): Promise<Phrase> {
-  const phrases = client().from('phrases');
-  let res = await phrases.insert({ input, ...t }).select('*').single();
-  // PGRST204: the project has not run the schema update that adds `words` and `example_reading` yet; save the rest.
-  if (res.error?.code === 'PGRST204') {
-    const { words: _words, example_reading: _reading, ...rest } = t;
-    res = await phrases.insert({ input, ...rest }).select('*').single();
-  }
-  if (res.error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
-  return complete(res.data);
+  const { data, error } = await client().from('phrases').insert({ input, ...t }).select(COLUMNS).single();
+  if (error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
+  return data as Phrase;
 }
 
-export type PhraseEdit = Pick<
-  Phrase,
-  'japanese' | 'reading' | 'sound' | 'meaning' | 'note' | 'example_ja' | 'example_reading' | 'example_sound' | 'example_ko' | 'words'
->;
+export type PhraseEdit = Pick<Phrase, 'japanese' | 'reading' | 'sound' | 'meaning' | 'words'>;
 
 /** Save edits to a phrase; returns the stored row. */
 export async function updatePhrase(id: string, edit: PhraseEdit): Promise<Phrase> {
-  const phrases = client().from('phrases');
-  let res = await phrases.update(edit).eq('id', id).select('*').single();
-  // PGRST204: the columns for typed pronunciations (or older additions) do not exist yet.
-  if (res.error?.code === 'PGRST204') {
-    const { sound: _s, example_sound: _es, ...rest } = edit;
-    res = await phrases.update(rest).eq('id', id).select('*').single();
-    if (!res.error && (edit.sound || edit.example_sound)) throw new Error(MISSING_SOUND);
-  }
-  if (res.error) throw new Error(`고치지 못했어요. ${NETWORK}`);
-  return complete(res.data);
+  const { data, error } = await client().from('phrases').update(edit).eq('id', id).select(COLUMNS).single();
+  if (error) throw new Error(`고치지 못했어요. ${NETWORK}`);
+  return data as Phrase;
 }
 
 export async function deletePhrase(id: string): Promise<void> {

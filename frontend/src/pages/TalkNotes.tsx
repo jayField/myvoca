@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
 import { PhraseCard } from '../components/PhraseCard';
 import { SpeakButton } from '../components/SpeakButton';
-import { WordBreakdown } from '../components/WordBreakdown';
 import { localDate } from '../lib/dates';
-import { toHangul } from '../lib/kana';
 import { deletePhrase, listPhrases, phraseSound, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
 
 const MAX_INPUT = 100;
@@ -137,21 +135,6 @@ export default function TalkNotes() {
             <span>뜻</span>
             <input className="text-input text-input--block" value={draft.result.meaning} onChange={(e) => edit('meaning', e.target.value)} />
           </label>
-          {draft.result.words.length > 1 && (
-            <div className="talk-block">
-              <span className="talk-label">단어별로 보기</span>
-              <WordBreakdown words={draft.result.words} />
-            </div>
-          )}
-          {draft.result.note && <p className="hint">{draft.result.note}</p>}
-          {draft.result.example_ja && (
-            <div className="talk-example">
-              <span className="talk-label">예시</span>
-              <span lang="ja">{draft.result.example_ja}</span>
-              {draft.result.example_reading && <span className="talk-example-sound">{toHangul(draft.result.example_reading)}</span>}
-              <span className="muted">{draft.result.example_ko}</span>
-            </div>
-          )}
           <p className="hint">번역이 틀릴 수 있어요. 이상하면 고치거나 다시 번역해 보세요.</p>
           <div className="button-row">
             <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy !== null}>

@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: POST /api/translate
 // Turns what a learner typed (usually Japanese written in Hangul, e.g. 고항 타베타이) into the
-// Japanese they meant, with reading, Korean meaning and an example, via the Gemini API.
+// Japanese they meant, with its reading and Korean meaning, via the Gemini API.
 // The Gemini key lives only here (Pages secret GEMINI_API_KEY); the browser never sees it,
 // and only signed-in accounts may use it.
 
@@ -17,16 +17,12 @@ const MAX_INPUT = 100;
 const SYSTEM = `You help a Korean learner of Japanese save expressions they picked up chatting with Japanese speakers.
 The input is usually Japanese written in Hangul by how it sounds (e.g. 아리가또 → ありがとう, 고항 타베타이 → ご飯食べたい), often misspelled: long vowels, small っ and voicing are frequently wrong or missing. It may also be a Korean sentence to say in Japanese, or Japanese text.
 Read Hangul as Japanese sounds first; treat it as Korean only when it clearly is Korean. Work out the natural Japanese expression the learner meant and correct it.
-The input is always a whole expression the learner heard, never a grammar pattern to explain: 타베타이 is 食べたい "먹고 싶다", not the ~たい pattern. When a sound could be either a full word or a grammar ending (미타이: 見たい "보고 싶다" or みたい "~같다"), choose the full word and mention the other reading in note.
+The input is always a whole expression the learner heard, never a grammar pattern to explain: 타베타이 is 食べたい "먹고 싶다", not the ~たい pattern. When a sound could be either a full word or a grammar ending (미타이: 見たい "보고 싶다" or みたい "~같다"), choose the full word.
 Return:
 - japanese: the expression as normally written (kanji where natural, otherwise kana)
 - reading: the whole expression in hiragana (katakana loanwords stay katakana)
 - meaning: short, natural Korean translation of this exact expression with its own words (食べたい → 먹고 싶다). Never a pattern with ~ or placeholders like ~하고 싶다
-- note: one short Korean sentence on nuance or politeness, or on how the input was corrected; empty if nothing to add
-- example_ja: one natural, everyday example sentence in Japanese (Japanese script only, never Hangul) using the expression
-- example_ko: the Korean translation of example_ja (Hangul)
-- example_reading: the reading of example_ja, word for word: every word of example_ja appears in order, nothing left out or added; kanji become hiragana, kana stay as they are, punctuation is kept, and a space goes wherever Korean-style spacing would put one (particles joined to the word before). いつも君を思っているよ。 → いつも きみを おもっているよ。
-- words: the expression split into its words in order, so a learner can see how it is built. Keep a verb with its endings together (考えている, 食べたい) and give each particle its own entry. Each has japanese (as written in the expression), reading (hiragana), meaning (short Korean gloss; for a particle, its role such as 을/를, 의, 에서) and attach: true when Korean-style spacing would write it joined to the word before (particles, も, です after a noun), so 君を思っている reads 君を 思っている. Joined, the japanese parts must spell the expression exactly. A one-word expression has a single entry.`;
+- words: the expression split into its words in order, used to space its pronunciation. Keep a verb with its endings together (考えている, 食べたい) and give each particle its own entry. Each has japanese (as written in the expression), reading (hiragana) and attach: true when Korean-style spacing would write it joined to the word before (particles, も, です after a noun), so 君を思っている reads 君を 思っている. Joined, the japanese parts must spell the expression exactly. A one-word expression has a single entry.`;
 
 const SCHEMA = {
   type: 'OBJECT',
@@ -34,27 +30,22 @@ const SCHEMA = {
     japanese: { type: 'STRING' },
     reading: { type: 'STRING' },
     meaning: { type: 'STRING' },
-    note: { type: 'STRING' },
-    example_ja: { type: 'STRING' },
-    example_ko: { type: 'STRING' },
-    example_reading: { type: 'STRING' },
     words: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
-        properties: { japanese: { type: 'STRING' }, reading: { type: 'STRING' }, meaning: { type: 'STRING' }, attach: { type: 'BOOLEAN' } },
-        required: ['japanese', 'reading', 'meaning', 'attach'],
+        properties: { japanese: { type: 'STRING' }, reading: { type: 'STRING' }, attach: { type: 'BOOLEAN' } },
+        required: ['japanese', 'reading', 'attach'],
       },
     },
   },
-  required: ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko', 'example_reading', 'words'],
+  required: ['japanese', 'reading', 'meaning', 'words'],
 };
 
-const FIELDS = ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko', 'example_reading'] as const;
+const FIELDS = ['japanese', 'reading', 'meaning'] as const;
 interface Word {
   japanese: string;
   reading: string;
-  meaning: string;
   /** Written joined to the word before when spaced Korean-style (particles). */
   attach: boolean;
 }
@@ -62,12 +53,12 @@ type Translation = Record<(typeof FIELDS)[number], string> & { words: Word[] };
 
 const MAX_WORDS = 30;
 
-/** Keeps only well-formed word entries; the breakdown is a study aid, so a bad one is dropped rather than failing. */
+/** Keeps only well-formed word entries; they only space the pronunciation, so a bad one is dropped rather than failing. */
 function cleanWords(value: unknown): Word[] {
   if (!Array.isArray(value)) return [];
   return value
-    .filter((w): w is Word => !!w && typeof w.japanese === 'string' && typeof w.reading === 'string' && typeof w.meaning === 'string')
-    .map((w) => ({ japanese: w.japanese.trim(), reading: w.reading.trim(), meaning: w.meaning.trim(), attach: w.attach === true }))
+    .filter((w): w is Word => !!w && typeof w.japanese === 'string' && typeof w.reading === 'string')
+    .map((w) => ({ japanese: w.japanese.trim(), reading: w.reading.trim(), attach: w.attach === true }))
     .filter((w) => w.japanese)
     .slice(0, MAX_WORDS);
 }
@@ -111,23 +102,6 @@ async function geminiReason(res: Response): Promise<string> {
   }
 }
 
-const toHiragana = (text: string) => text.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
-
-/**
- * Whether a reading covers its sentence: every kana run of the sentence must appear in the reading, in order.
- * Catches the model dropping a word (いつも君を思っているよ read as いつもの おもっているよ).
- */
-function readingCovers(sentence: string, reading: string): boolean {
-  const flat = toHiragana(reading).replace(/[\s、。，．！？!?,.・「」『』…]/g, '');
-  let from = 0;
-  for (const run of toHiragana(sentence).match(/[ぁ-ゖー]+/g) ?? []) {
-    const at = flat.indexOf(run, from);
-    if (at < 0) return false;
-    from = at + run.length;
-  }
-  return true;
-}
-
 async function translate(env: Env, input: string): Promise<Translation> {
   const model = env.GEMINI_MODEL || DEFAULT_MODEL;
   const call = () =>
@@ -156,8 +130,6 @@ async function translate(env: Env, input: string): Promise<Translation> {
     words: cleanWords(parsed.words),
   } as Translation;
   if (!out.japanese || !out.reading || !out.meaning) throw new Error(`gemini returned an incomplete result: ${text}`);
-  // A wrong pronunciation teaches the wrong thing; better to show none.
-  if (out.example_reading && !readingCovers(out.example_ja, out.example_reading)) out.example_reading = '';
   return out;
 }
 

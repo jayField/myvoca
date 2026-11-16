@@ -603,8 +603,6 @@ a {
   margin-bottom: 1rem;
 }
 
-
-
 .heatmap-scroll {
   overflow-x: auto;
 }
@@ -1668,65 +1666,8 @@ a.device-box:hover {
   font-weight: 700;
 }
 
-
-.talk-example,
-.talk-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  line-height: 1.6;
-}
-
-.talk-example-sound {
-  font-size: 0.875em;
-  color: var(--accent-soft);
-}
-
-.talk-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--accent-soft);
-}
-
 .talk-text {
   gap: 0.375rem 1.125rem;
-}
-
-/* A phrase split into words: each word over its sound and meaning. */
-.word-breakdown {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.word-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: 3.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  text-align: center;
-}
-
-.word-chip-ja {
-  font-size: 1.0625rem;
-  font-weight: 700;
-}
-
-.word-chip-sound {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.word-chip-meaning {
-  font-size: 0.8125rem;
 }
 
 .talk-row {
@@ -1821,24 +1762,6 @@ a.device-box:hover {
   overflow-wrap: anywhere;
 }
 
-.phrase-example {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-}
-
-/* A phrase row and its word breakdown below read as one entry. */
-.phrase-table .phrase-row--split td {
-  border-bottom: none;
-}
-
-.phrase-table .phrase-words-row td {
-  padding-top: 0;
-  padding-bottom: 0.875rem;
-}
-
 /* 회화 노트: edit and delete share one cell, side by side (stacked on phones, where the column is narrow). */
 /* th.col-actions outranks .log-table th:last-child, which would squeeze both buttons into one button's width. */
 .phrase-table th.col-actions {
@@ -1854,14 +1777,6 @@ a.device-box:hover {
   justify-content: center;
 }
 
-.phrase-note {
-  display: block;
-  margin-top: 0.375rem;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
 .phrase-edit-row td {
   background: var(--surface-accent);
 }
@@ -1875,21 +1790,8 @@ a.device-box:hover {
 
 .phrase-editor-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem 1rem;
-}
-
-.phrase-editor-wide {
-  grid-column: 1 / -1;
-}
-
-.text-area {
-  min-height: 0;
-  padding: 0.5rem 0.75rem;
-  line-height: 1.5;
-  resize: vertical;
-  font: inherit;
-  color: var(--text);
 }
 
 @media (max-width: 760px) {
@@ -1937,17 +1839,6 @@ a.device-box:hover {
   font-weight: 600;
 }
 
-.phrase-card .phrase-note {
-  margin-top: 0;
-}
-
-.phrase-card .talk-example {
-  margin-top: 0.25rem;
-  padding: 0.625rem 0.75rem;
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-}
-
 .phrase-card--editing {
   padding: 0.75rem 1rem;
   background: var(--surface-accent);
@@ -1973,19 +1864,6 @@ a.device-box:hover {
 
   .phrase-card .talk-term {
     font-size: 1.25rem;
-  }
-
-  .word-breakdown {
-    gap: 0.375rem;
-  }
-
-  .word-chip {
-    min-width: 2.75rem;
-    padding: 0.375rem 0.5rem;
-  }
-
-  .word-chip-ja {
-    font-size: 1rem;
   }
 }
 

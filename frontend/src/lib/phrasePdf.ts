@@ -2,8 +2,7 @@
 // already loaded) and cut into A4 pages between entries, never through one.
 import type { Phrase } from '../types';
 import { dayLabel, localDate } from './dates';
-import { toHangul } from './kana';
-import { exampleSound, groupByDay, phraseSound } from './phrases';
+import { groupByDay, phraseSound } from './phrases';
 
 const WIDTH = 720; // px of the drawn sheet; maps onto the A4 width inside the margins
 const PAGE_MM = { w: 210, h: 297, margin: 12 };
@@ -28,23 +27,6 @@ function entry(p: Phrase): HTMLElement {
   const reading = el('div', `font-size:13px;color:${MUTED};`);
   reading.append(el('span', '', p.reading, true), el('span', `color:${ACCENT};margin-left:10px;`, phraseSound(p)));
   box.append(reading, el('div', 'font-size:15px;font-weight:600;', p.meaning));
-  if (p.words.length > 1) {
-    const words = el('div', `font-size:12px;color:${MUTED};display:flex;flex-wrap:wrap;gap:4px 12px;`);
-    for (const w of p.words) {
-      const word = el('span', '');
-      word.append(el('span', `color:${INK};`, w.japanese, true), document.createTextNode(` ${toHangul(w.reading)} · ${w.meaning}`));
-      words.append(word);
-    }
-    box.append(words);
-  }
-  if (p.note) box.append(el('div', `font-size:12px;color:${MUTED};`, p.note));
-  if (p.example_ja) {
-    const ex = el('div', `margin-top:4px;padding:8px 10px;background:#f3f5fb;border-radius:6px;font-size:13px;display:flex;flex-direction:column;gap:3px;`);
-    ex.append(el('span', `font-size:11px;font-weight:600;color:${MUTED};`, '예시'), el('span', '', p.example_ja, true));
-    if (exampleSound(p)) ex.append(el('span', `color:${ACCENT};`, exampleSound(p)));
-    if (p.example_ko) ex.append(el('span', `color:${MUTED};`, p.example_ko));
-    box.append(ex);
-  }
   return box;
 }
 

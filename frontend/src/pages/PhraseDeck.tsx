@@ -1,11 +1,10 @@
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
 import { BackIcon, CloseIcon, DownloadIcon, EditIcon } from '../components/Icons';
 import { PhraseCard } from '../components/PhraseCard';
 import { PhraseEditor } from '../components/PhraseEditor';
 import { SpeakButton } from '../components/SpeakButton';
-import { WordBreakdown } from '../components/WordBreakdown';
 import { dayLabel } from '../lib/dates';
 import { deletePhrase, groupByDay, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
 
@@ -116,7 +115,7 @@ export default function PhraseDeck() {
                       <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
                     </li>
                   ) : (
-                    <PhraseCard key={p.id} phrase={p} showExample={false} onEdit={() => setEditing(p.id)} onDelete={() => void remove(p)} />
+                    <PhraseCard key={p.id} phrase={p} onEdit={() => setEditing(p.id)} onDelete={() => void remove(p)} />
                   ),
                 )}
               </ul>
@@ -150,17 +149,13 @@ export default function PhraseDeck() {
                         </td>
                       </tr>
                     ) : (
-                    <Fragment key={p.id}>
-                      <tr className={p.words.length > 1 ? 'phrase-row--split' : undefined}>
+                      <tr key={p.id}>
                         <td lang="ja" className="log-term">
                           {p.japanese}
                         </td>
                         <td lang="ja">{p.reading}</td>
                         <td>{phraseSound(p)}</td>
-                        <td>
-                          {p.meaning}
-                          {p.note && <span className="phrase-note">{p.note}</span>}
-                        </td>
+                        <td>{p.meaning}</td>
                         <td className="cell-button">
                           <SpeakButton text={p.japanese} />
                         </td>
@@ -187,14 +182,6 @@ export default function PhraseDeck() {
                           </span>
                         </td>
                       </tr>
-                      {p.words.length > 1 && (
-                        <tr className="phrase-words-row">
-                          <td colSpan={6}>
-                            <WordBreakdown words={p.words} />
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
                     ),
                   )}
                 </tbody>
