@@ -1749,7 +1749,7 @@ a.device-box:hover {
 
 /* 회화 노트 table: phrases and examples run long, so it is wider than 복습표 and its text wraps. */
 .phrase-table {
-  min-width: 52rem;
+  min-width: 48rem;
 }
 
 .phrase-table .col-term {
@@ -1841,4 +1841,67 @@ a.device-box:hover {
 .phrase-table .phrase-words-row td {
   padding-top: 0;
   padding-bottom: 0.875rem;
+}
+
+/* 회화 노트: edit and delete share one cell, side by side (stacked on phones, where the column is narrow). */
+.phrase-table .col-actions {
+  width: 5rem;
+}
+
+.phrase-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.phrase-note {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.phrase-edit-row td {
+  background: var(--surface-accent);
+}
+
+.phrase-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+.phrase-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.phrase-editor-wide {
+  grid-column: 1 / -1;
+}
+
+.text-area {
+  min-height: 0;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.5;
+  resize: vertical;
+  font: inherit;
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .phrase-table .col-actions {
+    width: 2.625rem;
+  }
+
+  .phrase-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .phrase-editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

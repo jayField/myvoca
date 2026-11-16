@@ -1,22 +1,13 @@
 import { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
-import { BackIcon, CloseIcon } from '../components/Icons';
+import { BackIcon, CloseIcon, DownloadIcon, EditIcon } from '../components/Icons';
+import { PhraseEditor } from '../components/PhraseEditor';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
-import { dayLabel, localDate } from '../lib/dates';
+import { dayLabel } from '../lib/dates';
 import { toHangul } from '../lib/kana';
-import { deletePhrase, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
-
-/** Saved phrases by the day they were saved, newest day first (the list already arrives newest first). */
-function groupByDay(phrases: Phrase[]): [string, Phrase[]][] {
-  const groups = new Map<string, Phrase[]>();
-  for (const p of phrases) {
-    const day = localDate(new Date(p.created_at));
-    groups.set(day, [...(groups.get(day) ?? []), p]);
-  }
-  return [...groups.entries()];
-}
+import { deletePhrase, groupByDay, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
 
 const PHONE = '(max-width: 760px)';
 
@@ -38,6 +29,9 @@ export default function PhraseDeck() {
   const [error, setError] = useState<string | null>(null);
   // Phones skip the reading and example columns; leaving them out (not hiding them) keeps the breakdown row's span right.
   const narrow = useNarrow();
+  const columns = narrow ? 5 : 7;
+  const [editing, setEditing] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     listPhrases()
@@ -52,6 +46,25 @@ export default function PhraseDeck() {
       setPhrases((list) => list?.filter((x) => x.id !== p.id) ?? null);
     } catch (e) {
       setError((e as Error).message);
+    }
+  }
+
+  function saved(p: Phrase) {
+    setPhrases((list) => list?.map((x) => (x.id === p.id ? p : x)) ?? null);
+    setEditing(null);
+  }
+
+  async function exportPdf() {
+    if (!phrases?.length) return;
+    setExporting(true);
+    setError(null);
+    try {
+      const { downloadPhrasesPdf } = await import('../lib/phrasePdf');
+      await downloadPhrasesPdf(phrases);
+    } catch {
+      setError('PDF를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -76,6 +89,10 @@ export default function PhraseDeck() {
           <Link to={`/quiz?deck=${TALK_DECK.id}`} className="btn btn--ghost">
             이 범위로 퀴즈
           </Link>
+          <button type="button" className="btn btn--ghost" onClick={() => void exportPdf()} disabled={!phrases?.length || exporting}>
+            <DownloadIcon />
+            {exporting ? 'PDF 만드는 중…' : 'PDF 다운로드'}
+          </button>
         </div>
       </header>
 
@@ -112,11 +129,18 @@ export default function PhraseDeck() {
                     </th>
                     {!narrow && <th scope="col">예시</th>}
                     <th scope="col" className="col-button" aria-label="듣기" />
-                    <th scope="col" className="col-button" aria-label="삭제" />
+                    <th scope="col" className="col-actions" aria-label="수정·삭제" />
                   </tr>
                 </thead>
                 <tbody>
-                  {group.map((p) => (
+                  {group.map((p) =>
+                    editing === p.id ? (
+                      <tr key={p.id} className="phrase-edit-row">
+                        <td colSpan={columns}>
+                          <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
+                        </td>
+                      </tr>
+                    ) : (
                     <Fragment key={p.id}>
                       <tr className={p.words.length > 1 ? 'phrase-row--split' : undefined}>
                         <td lang="ja" className="log-term">
@@ -124,7 +148,10 @@ export default function PhraseDeck() {
                         </td>
                         {!narrow && <td lang="ja">{p.reading}</td>}
                         <td>{phraseSound(p)}</td>
-                        <td>{p.meaning}</td>
+                        <td>
+                          {p.meaning}
+                          {p.note && <span className="phrase-note">{p.note}</span>}
+                        </td>
                         {!narrow && (
                           <td>
                             {p.example_ja ? (
@@ -142,6 +169,16 @@ export default function PhraseDeck() {
                           <SpeakButton text={p.japanese} />
                         </td>
                         <td className="cell-button">
+                          <span className="phrase-actions">
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            aria-label={`${p.japanese} 수정`}
+                            title="수정"
+                            onClick={() => setEditing(p.id)}
+                          >
+                            <EditIcon />
+                          </button>
                           <button
                             type="button"
                             className="icon-btn icon-btn--delete"
@@ -151,17 +188,19 @@ export default function PhraseDeck() {
                           >
                             <CloseIcon />
                           </button>
+                          </span>
                         </td>
                       </tr>
                       {p.words.length > 1 && (
                         <tr className="phrase-words-row">
-                          <td colSpan={narrow ? 5 : 7}>
+                          <td colSpan={columns}>
                             <WordBreakdown words={p.words} />
                           </td>
                         </tr>
                       )}
                     </Fragment>
-                  ))}
+                    ),
+                  )}
                 </tbody>
               </table>
             </div>

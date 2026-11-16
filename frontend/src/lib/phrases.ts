@@ -1,6 +1,7 @@
 // 회화 노트: expressions picked up in conversation, translated by /api/translate and saved per account.
 // Unlike the bundled decks these live only in Supabase, so they need a signed-in account.
 import type { Item, Phrase, Translation } from '../types';
+import { localDate } from './dates';
 import { toHangul } from './kana';
 import { supabase } from './supabase';
 
@@ -62,6 +63,21 @@ export async function savePhrase(input: string, t: Translation): Promise<Phrase>
   return complete(res.data);
 }
 
+export type PhraseEdit = Pick<Phrase, 'japanese' | 'reading' | 'meaning' | 'note' | 'example_ja' | 'example_reading' | 'example_ko' | 'words'>;
+
+/** Save edits to a phrase; returns the stored row. */
+export async function updatePhrase(id: string, edit: PhraseEdit): Promise<Phrase> {
+  const phrases = client().from('phrases');
+  let res = await phrases.update(edit).eq('id', id).select('*').single();
+  // PGRST204: as in savePhrase, the columns for the breakdown and example reading may not exist yet.
+  if (res.error?.code === 'PGRST204') {
+    const { words: _words, example_reading: _reading, ...rest } = edit;
+    res = await phrases.update(rest).eq('id', id).select('*').single();
+  }
+  if (res.error) throw new Error(`고치지 못했어요. ${NETWORK}`);
+  return complete(res.data);
+}
+
 export async function deletePhrase(id: string): Promise<void> {
   const { error } = await client().from('phrases').delete().eq('id', id);
   if (error) throw new Error(`지우지 못했어요. ${NETWORK}`);
@@ -84,4 +100,14 @@ export async function translatePhrase(input: string): Promise<Translation> {
   const body = (await res.json().catch(() => null)) as { result?: Translation; error?: string } | null;
   if (!res.ok || !body?.result) throw new Error(body?.error ?? '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
   return body.result;
+}
+
+/** Saved phrases by the day they were saved, newest day first (the list already arrives newest first). */
+export function groupByDay(phrases: Phrase[]): [string, Phrase[]][] {
+  const groups = new Map<string, Phrase[]>();
+  for (const p of phrases) {
+    const day = localDate(new Date(p.created_at));
+    groups.set(day, [...(groups.get(day) ?? []), p]);
+  }
+  return [...groups.entries()];
 }

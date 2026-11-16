@@ -124,3 +124,17 @@ export const DeviceIcon = () => (
     <path d="M11 17.5h2" />
   </Icon>
 );
+
+export const EditIcon = () => (
+  <Icon>
+    <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z" />
+    <path d="M13.5 6.5l4 4" />
+  </Icon>
+);
+
+export const DownloadIcon = () => (
+  <Icon>
+    <path d="M12 4v11M7 10l5 5 5-5" />
+    <path d="M5 19h14" />
+  </Icon>
+);

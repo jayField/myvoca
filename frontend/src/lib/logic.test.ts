@@ -336,3 +336,12 @@ describe('quiz size', () => {
     expect(studied.every((id) => ids.includes(id))).toBe(true);
   });
 });
+
+describe('pageBreaks', () => {
+  it('cuts between entries and only cuts through one taller than a page', async () => {
+    const { pageBreaks } = await import('./phrasePdf');
+    expect(pageBreaks([40, 90, 140, 190], 190, 100)).toEqual([0, 90, 190]);
+    expect(pageBreaks([30, 300], 300, 100)).toEqual([0, 30, 130, 230, 300]);
+    expect(pageBreaks([50], 50, 100)).toEqual([0, 50]);
+  });
+});
