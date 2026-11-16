@@ -1,13 +1,30 @@
+import type { ReactNode } from 'react';
 import type { Phrase } from '../api';
 import { phraseSound } from '../lib/phrases';
 import { CloseIcon, EditIcon } from './Icons';
 import { SpeakButton } from './SpeakButton';
 
 /** One saved phrase as a card: the phrase and its buttons on top, reading, pronunciation and meaning below. */
-export function PhraseCard({ phrase: p, onEdit, onDelete }: { phrase: Phrase; onEdit?: () => void; onDelete: () => void }) {
+export function PhraseCard({
+  phrase: p,
+  handle,
+  dragging = false,
+  cardRef,
+  onEdit,
+  onDelete,
+}: {
+  phrase: Phrase;
+  /** A grip for reordering, shown before the phrase. */
+  handle?: ReactNode;
+  dragging?: boolean;
+  cardRef?: (el: HTMLLIElement | null) => void;
+  onEdit?: () => void;
+  onDelete: () => void;
+}) {
   return (
-    <li className="item-row phrase-card">
+    <li ref={cardRef} className={`item-row phrase-card${dragging ? ' is-dragging' : ''}`}>
       <div className="phrase-card-head">
+        {handle}
         <span lang="ja" className="talk-term">
           {p.japanese}
         </span>

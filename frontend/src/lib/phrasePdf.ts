@@ -2,7 +2,7 @@
 // already loaded) and cut into A4 pages between entries, never through one.
 import type { Phrase } from '../types';
 import { dayLabel, localDate } from './dates';
-import { groupByDay, phraseSound } from './phrases';
+import { phraseSound } from './phrases';
 
 const WIDTH = 720; // px of the drawn sheet; maps onto the A4 width inside the margins
 const PAGE_MM = { w: 210, h: 297, margin: 12 };
@@ -42,10 +42,7 @@ function sheet(phrases: Phrase[]): HTMLElement {
     el('div', `font-size:13px;color:${MUTED};`, `${dayLabel(localDate())} 기준 · 표현 ${phrases.length}개`),
   );
   root.append(head);
-  for (const [day, group] of groupByDay(phrases)) {
-    root.append(el('div', `padding:18px 0 2px;font-size:15px;font-weight:700;color:${ACCENT};`, `${dayLabel(day)} · ${group.length}개`));
-    for (const p of group) root.append(entry(p));
-  }
+  for (const p of phrases) root.append(entry(p));
   return root;
 }
 

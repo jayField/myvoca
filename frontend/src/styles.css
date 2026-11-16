@@ -1980,3 +1980,44 @@ a.device-box:hover {
     font-size: 1.125rem;
   }
 }
+
+/* 회화 노트 order: a grip on each row; the row being dragged lifts, and text is not selected while dragging. */
+.phrase-table th.col-handle {
+  width: 2.75rem;
+}
+
+.drag-handle {
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.is-reordering,
+.is-reordering * {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.phrase-table tr.is-dragging td,
+.phrase-card.is-dragging {
+  background: var(--surface-accent);
+}
+
+.phrase-card.is-dragging {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.phrase-card-head .talk-term {
+  flex: 1;
+}
+
+.phrase-card .drag-handle {
+  margin-left: -0.5rem;
+}
+
+@media (max-width: 760px) {
+  .phrase-card-head {
+    align-items: center;
+  }
+}

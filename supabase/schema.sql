@@ -135,6 +135,9 @@ alter table public.phrases add column if not exists example_reading text not nul
 -- Hangul pronunciation typed by the learner over the automatic one ('' = automatic).
 alter table public.phrases add column if not exists sound text not null default '' check (char_length(sound) <= 300);
 alter table public.phrases add column if not exists example_sound text not null default '' check (char_length(example_sound) <= 1000);
+-- The learner's own order in 회화 노트 (lowest first). Existing rows start newest first.
+alter table public.phrases add column if not exists position double precision;
+update public.phrases set position = -extract(epoch from created_at) where position is null;
 
 alter table public.phrases enable row level security;
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Progress, Settings } from '../types';
+import type { Phrase, Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
 import { toHangul } from './kana';
@@ -372,7 +372,6 @@ describe('pronunciation grammar', () => {
     expect(toHangul('べんきょう')).toBe('벤쿄-');
     expect(toHangul('せんせい')).toBe('센세-');
     expect(toHangul('ありがとう')).toBe('아리가토-');
-    expect(toHangul('おいしい')).toBe('오이시-');
     expect(toHangul('おかあさん')).toBe('오카-산');
     expect(toHangul('こんにちは')).toBe('콘니치와');
   });
@@ -380,6 +379,9 @@ describe('pronunciation grammar', () => {
     expect(toHangul('おもう')).toBe('오모우');
     expect(toHangul('たべている')).toBe('타베테이루');
     expect(toHangul('ごはんたべたい')).toBe('고한타베타이');
+    expect(toHangul('またあした')).toBe('마타아시타');
+    expect(toHangul('がっこうにいきます')).toBe('갓코-니이키마스');
+    expect(toHangul('おいしい')).toBe('오이시이');
   });
   it('says the particles は and へ as 와 and 에', () => {
     const words = [
@@ -394,5 +396,23 @@ describe('pronunciation grammar', () => {
     ];
     expect(phraseSound({ reading: '', words })).toBe('와타시와 니혼고노 벤쿄-오 넷신니 시테이마스');
     expect(phraseSound({ reading: '', words: [{ japanese: '学校', reading: 'がっこう' }, { japanese: 'へ', reading: 'へ', attach: true }] })).toBe('갓코-에');
+  });
+});
+
+describe('placeAt', () => {
+  const at = (id: string, position: number | null) => ({ id, position }) as unknown as Phrase;
+  it('puts a moved phrase halfway between its new neighbours', async () => {
+    const { placeAt } = await import('./phrases');
+    expect(placeAt([at('a', 1), at('x', 9), at('b', 2)], 1)).toEqual([{ id: 'x', position: 1.5 }]);
+    expect(placeAt([at('x', 9), at('a', 1)], 0)).toEqual([{ id: 'x', position: 0 }]);
+    expect(placeAt([at('a', 1), at('x', -5)], 1)).toEqual([{ id: 'x', position: 2 }]);
+  });
+  it('renumbers everything when a neighbour has no position yet', async () => {
+    const { placeAt } = await import('./phrases');
+    expect(placeAt([at('a', null), at('x', 5), at('b', null)], 1)).toEqual([
+      { id: 'a', position: 0 },
+      { id: 'x', position: 1 },
+      { id: 'b', position: 2 },
+    ]);
   });
 });

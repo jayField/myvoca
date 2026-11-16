@@ -1,7 +1,6 @@
 // 회화 노트: expressions picked up in conversation, translated by /api/translate and saved per account.
 // Unlike the bundled decks these live only in Supabase, so they need a signed-in account.
 import type { Item, Phrase, PhraseWord, Translation } from '../types';
-import { localDate } from './dates';
 import { toHangul } from './kana';
 import { supabase } from './supabase';
 
@@ -54,27 +53,73 @@ function client() {
 }
 
 /** Only what the app shows; older rows also hold examples and notes that are no longer used. */
-const COLUMNS = 'id,input,japanese,reading,meaning,sound,words,created_at';
+const COLUMNS = 'id,input,japanese,reading,meaning,sound,position,words,created_at';
+const WITHOUT_POSITION = 'id,input,japanese,reading,meaning,sound,words,created_at';
+/** A query's outcome, loosely typed so the with- and without-position queries can share a variable. */
+type Result = { data: unknown; error: { code: string } | null };
+/** Postgres / PostgREST codes for a column that does not exist yet (the order column before its SQL is run). */
+const MISSING_COLUMN = new Set(['42703', 'PGRST204']);
+const NEEDS_SQL = '순서를 저장하려면 Supabase에서 순서 칸을 추가하는 SQL을 먼저 실행해 주세요.';
 
+const withPosition = (row: Omit<Phrase, 'position'> & { position?: number | null }): Phrase => ({ ...row, position: row.position ?? null });
+
+/** In the learner's order: by position, then (for rows never moved) newest first. */
 export async function listPhrases(): Promise<Phrase[]> {
-  const { data, error } = await client().from('phrases').select(COLUMNS).order('created_at', { ascending: false });
-  if (error) throw new Error(NETWORK);
-  return data as Phrase[];
+  const phrases = client().from('phrases');
+  let res: Result = await phrases
+    .select(COLUMNS)
+    .order('position', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
+  if (res.error && MISSING_COLUMN.has(res.error.code)) {
+    res = await phrases.select(WITHOUT_POSITION).order('created_at', { ascending: false });
+  }
+  if (res.error) throw new Error(NETWORK);
+  return (res.data as Omit<Phrase, 'position'>[]).map(withPosition);
 }
 
+/** New phrases go on top: below every position given so far (moves use small numbers, this a large negative). */
+const topPosition = () => -Date.now() / 1000;
+
 export async function savePhrase(input: string, t: Translation): Promise<Phrase> {
-  const { data, error } = await client().from('phrases').insert({ input, ...t }).select(COLUMNS).single();
-  if (error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
-  return data as Phrase;
+  const phrases = client().from('phrases');
+  let res: Result = await phrases.insert({ input, ...t, position: topPosition() }).select(COLUMNS).single();
+  if (res.error && MISSING_COLUMN.has(res.error.code)) {
+    res = await phrases.insert({ input, ...t }).select(WITHOUT_POSITION).single();
+  }
+  if (res.error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
+  return withPosition(res.data as Omit<Phrase, 'position'>);
+}
+
+/**
+ * The positions to store after the phrase at `index` was moved there: usually one, halfway between its new
+ * neighbours. When a neighbour has none yet, or the numbers have run too close, the whole list is renumbered.
+ */
+export function placeAt(list: Phrase[], index: number): { id: string; position: number }[] {
+  const prev = index > 0 ? list[index - 1].position : undefined;
+  const next = index < list.length - 1 ? list[index + 1].position : undefined;
+  if (prev !== null && next !== null) {
+    const position =
+      prev === undefined && next === undefined ? 0 : prev === undefined ? next! - 1 : next === undefined ? prev + 1 : (prev + next) / 2;
+    if (position !== prev && position !== next) return [{ id: list[index].id, position }];
+  }
+  return list.map((p, i) => ({ id: p.id, position: i })).filter((u, i) => list[i].position !== u.position);
+}
+
+export async function savePositions(updates: { id: string; position: number }[]): Promise<void> {
+  const results = await Promise.all(updates.map((u) => client().from('phrases').update({ position: u.position }).eq('id', u.id)));
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw new Error(MISSING_COLUMN.has(failed.error.code) ? NEEDS_SQL : `순서를 저장하지 못했어요. ${NETWORK}`);
 }
 
 export type PhraseEdit = Pick<Phrase, 'japanese' | 'reading' | 'sound' | 'meaning' | 'words'>;
 
 /** Save edits to a phrase; returns the stored row. */
 export async function updatePhrase(id: string, edit: PhraseEdit): Promise<Phrase> {
-  const { data, error } = await client().from('phrases').update(edit).eq('id', id).select(COLUMNS).single();
-  if (error) throw new Error(`고치지 못했어요. ${NETWORK}`);
-  return data as Phrase;
+  const phrases = client().from('phrases');
+  let res: Result = await phrases.update(edit).eq('id', id).select(COLUMNS).single();
+  if (res.error && MISSING_COLUMN.has(res.error.code)) res = await phrases.update(edit).eq('id', id).select(WITHOUT_POSITION).single();
+  if (res.error) throw new Error(`고치지 못했어요. ${NETWORK}`);
+  return withPosition(res.data as Omit<Phrase, 'position'>);
 }
 
 export async function deletePhrase(id: string): Promise<void> {
@@ -99,14 +144,4 @@ export async function translatePhrase(input: string): Promise<Translation> {
   const body = (await res.json().catch(() => null)) as { result?: Translation; error?: string } | null;
   if (!res.ok || !body?.result) throw new Error(body?.error ?? '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
   return body.result;
-}
-
-/** Saved phrases by the day they were saved, newest day first (the list already arrives newest first). */
-export function groupByDay(phrases: Phrase[]): [string, Phrase[]][] {
-  const groups = new Map<string, Phrase[]>();
-  for (const p of phrases) {
-    const day = localDate(new Date(p.created_at));
-    groups.set(day, [...(groups.get(day) ?? []), p]);
-  }
-  return [...groups.entries()];
 }

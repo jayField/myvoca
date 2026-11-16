@@ -66,6 +66,8 @@ export interface Phrase extends Translation {
   input: string;
   /** Hangul pronunciation the learner typed in place of the automatic one; empty means automatic. */
   sound: string;
+  /** Where the learner put it in 회화 노트, lowest first; null until the order column exists. */
+  position: number | null;
   created_at: string;
 }
 

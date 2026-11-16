@@ -66,8 +66,11 @@ function openVowel(text: string): Vowel | null {
   return null;
 }
 
-/** Vowels that, after a syllable ending in the given vowel, lengthen it instead of being said again. */
-const LENGTHENS: Record<Vowel, string> = { a: 'あ', i: 'い', u: 'う', e: 'いえ', o: 'うお' };
+/**
+ * Vowels that, after a syllable ending in the given vowel, lengthen it instead of being said again. ああ and いい
+ * are left out: across two words they are said in full (また|あした, に|いく), and a reading may not mark words.
+ */
+const LENGTHENS: Record<Vowel, string> = { a: '', i: '', u: 'う', e: 'いえ', o: 'うお' };
 
 /**
  * Vowels said in full though they would otherwise lengthen the one before: the う of 思う and the い of ている
@@ -84,7 +87,9 @@ export function toHangul(kana: string): string {
   const hira = kana
     .replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60))
     // The greetings end in the particle は, said わ.
-    .replace(/(こんにち|こんばん)は/g, '$1わ');
+    .replace(/(こんにち|こんばん)は/g, '$1わ')
+    // The long あ of 母さん and 婆さん, which the rule above leaves out.
+    .replace(/([かば])あ(さん|ちゃん)/g, '$1ー$2');
   const said = new Set<number>();
   for (const m of hira.matchAll(SAID_VOWELS)) said.add(m.index! + m[0].length - 1);
   let out = '';

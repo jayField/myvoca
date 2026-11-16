@@ -144,3 +144,14 @@ export const NumberIcon = () => (
     <path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16" />
   </Icon>
 );
+
+export const GripIcon = () => (
+  <Icon>
+    <circle cx="9" cy="6" r="1.2" fill="currentColor" />
+    <circle cx="15" cy="6" r="1.2" fill="currentColor" />
+    <circle cx="9" cy="12" r="1.2" fill="currentColor" />
+    <circle cx="15" cy="12" r="1.2" fill="currentColor" />
+    <circle cx="9" cy="18" r="1.2" fill="currentColor" />
+    <circle cx="15" cy="18" r="1.2" fill="currentColor" />
+  </Icon>
+);
