@@ -1844,8 +1844,13 @@ a.device-box:hover {
 }
 
 /* 회화 노트: edit and delete share one cell, side by side (stacked on phones, where the column is narrow). */
-.phrase-table .col-actions {
-  width: 5rem;
+/* th.col-actions outranks .log-table th:last-child, which would squeeze both buttons into one button's width. */
+.phrase-table th.col-actions {
+  width: 5.75rem;
+}
+
+.phrase-table td:last-child {
+  padding-right: 0.5rem;
 }
 
 .phrase-actions {
@@ -1892,8 +1897,8 @@ a.device-box:hover {
 }
 
 @media (max-width: 760px) {
-  .phrase-table .col-actions {
-    width: 2.625rem;
+  .phrase-table th.col-actions {
+    width: 2.75rem;
   }
 
   .phrase-actions {
