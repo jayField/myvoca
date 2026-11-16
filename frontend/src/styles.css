@@ -1815,21 +1815,7 @@ a.device-box:hover {
   }
 }
 
-/* The grip a block is dragged by; while dragging, nothing on the page gets text-selected. */
-.drag-handle {
-  color: var(--muted);
-  cursor: grab;
-  touch-action: none;
-}
-
-.is-reordering,
-.is-reordering * {
-  cursor: grabbing;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* 회화 노트 as blocks: each phrase its own card. Dragging lifts a block; the others slide out of its way. */
+/* A saved phrase as a block (the translate page, and 회화 노트 on phones). */
 .phrase-blocks {
   position: relative;
   margin: 0;
@@ -1845,17 +1831,10 @@ a.device-box:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 0.75rem 0.875rem 0.375rem;
+  padding: 0.875rem 0.75rem 0.875rem 1.125rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
-  transition: box-shadow 150ms ease, border-color 150ms ease;
-}
-
-.phrase-block.is-dragging {
-  z-index: 2;
-  border-color: var(--accent);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
 }
 
 .phrase-block-main {
@@ -1900,7 +1879,7 @@ a.device-box:hover {
 @media (max-width: 760px) {
   .phrase-block {
     align-items: flex-start;
-    padding: 0.75rem 0.5rem 0.875rem 0.25rem;
+    padding: 0.75rem 0.5rem 0.875rem 1rem;
   }
 
   .phrase-block-main {
@@ -1920,7 +1899,117 @@ a.device-box:hover {
   }
 }
 
-/* Blocks without a grip (the translate page's list) need their own left margin. */
-.phrase-block > .phrase-block-main:first-child {
-  padding-left: 0.75rem;
+/* 회화 노트 table (wide screens). */
+.phrase-table {
+  min-width: 40rem;
+}
+
+.phrase-table .col-term {
+  width: 22%;
+}
+
+.phrase-table .col-reading,
+.phrase-table .col-sound {
+  width: 19%;
+}
+
+.phrase-table .col-button {
+  width: 3.5rem;
+}
+
+/* th.col-actions outranks .log-table th:last-child, which would squeeze both buttons into one button's width. */
+.phrase-table th.col-actions {
+  width: 5.75rem;
+}
+
+.phrase-table td {
+  overflow-wrap: anywhere;
+}
+
+/* The listen, edit and ✕ buttons sit in narrow columns; keep them whole. */
+.phrase-table .cell-button {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.phrase-table td:last-child {
+  padding-right: 0.5rem;
+}
+
+.phrase-table .icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.phrase-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.phrase-edit-row td {
+  background: var(--surface-accent);
+}
+
+/* 순서 바꾸기: plain, well-spaced blocks picked up anywhere. The held one lifts; the others slide out of its way. */
+.reorder-blocks {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.reorder-block {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem 1rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.reorder-block:hover,
+.reorder-block:focus-visible {
+  border-color: var(--border-accent);
+}
+
+.reorder-block.is-dragging {
+  z-index: 2;
+  border-color: var(--accent);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  cursor: grabbing;
+}
+
+.is-reordering,
+.is-reordering * {
+  cursor: grabbing;
+}
+
+.reorder-grip {
+  display: flex;
+  color: var(--muted);
+}
+
+.reorder-term {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.reorder-meaning {
+  flex-shrink: 0;
+  max-width: 45%;
+  color: var(--muted);
+  text-align: right;
 }

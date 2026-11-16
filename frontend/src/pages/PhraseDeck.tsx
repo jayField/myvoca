@@ -1,11 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
-import { DragHandle } from '../components/DragHandle';
-import { BackIcon, DownloadIcon } from '../components/Icons';
+import { BackIcon, CloseIcon, DownloadIcon, EditIcon, GripIcon } from '../components/Icons';
 import { PhraseCard } from '../components/PhraseCard';
 import { PhraseEditor } from '../components/PhraseEditor';
-import { deletePhrase, listPhrases, placeAt, savePositions, TALK_DECK } from '../lib/phrases';
+import { SpeakButton } from '../components/SpeakButton';
+import { deletePhrase, listPhrases, phraseSound, placeAt, savePositions, TALK_DECK } from '../lib/phrases';
 
 const PHONE = '(max-width: 760px)';
 /** How close to the window's top or bottom edge a drag scrolls the page, and how far per move. */
@@ -13,6 +13,8 @@ const SCROLL_EDGE = 72;
 const SCROLL_STEP = 14;
 /** How blocks slide out of the way, and how a dropped block settles into its place. */
 const SLIDE = 'transform 180ms cubic-bezier(0.2, 0, 0, 1)';
+/** The picked-up block grows a little, so it reads as lifted. */
+const LIFT = 'scale(1.02)';
 
 /** Whether the screen is phone-sized, following rotation and window resizes. */
 function useNarrow(): boolean {
@@ -33,13 +35,17 @@ function moved(list: Phrase[], id: string, index: number): Phrase[] {
   return [...rest.slice(0, index), item, ...rest.slice(index)];
 }
 
-/** 회화 노트 as a deck: everything saved so far, as blocks in the learner's own order. Adding happens on /talk. */
+/**
+ * 회화 노트 as a deck: a table (cards on phones) of everything saved so far. 순서 바꾸기 swaps it for plain
+ * blocks that can be picked up anywhere and dragged into place. Adding happens on /talk.
+ */
 export default function PhraseDeck() {
   const [phrases, setPhrasesState] = useState<Phrase[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const narrow = useNarrow();
   const [editing, setEditing] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [reordering, setReordering] = useState(false);
   const [dragging, setDragging] = useState<string | null>(null);
 
   // Pointer handlers read these directly, so a move right after pressing never sees a stale render.
@@ -80,7 +86,7 @@ export default function PhraseDeck() {
     const list = listEl.current;
     if (!d || !el || !list) return;
     const natural = list.getBoundingClientRect().top + el.offsetTop;
-    el.style.transform = `translateY(${d.y - d.grab - natural}px)`;
+    el.style.transform = `translateY(${d.y - d.grab - natural}px) ${LIFT}`;
   }
 
   useLayoutEffect(() => {
@@ -118,14 +124,17 @@ export default function PhraseDeck() {
     }
   }
 
-  function dragStart(id: string, clientY: number) {
+  function pickUp(e: PointerEvent<HTMLLIElement>, id: string) {
     const el = blocks.current.get(id);
     const list = listEl.current;
-    if (!el || !list || !listRef.current) return;
+    if (e.button !== 0 || !el || !list || !listRef.current) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
     el.style.transition = 'none';
-    drag.current = { id, before: listRef.current, grab: clientY - (list.getBoundingClientRect().top + el.offsetTop), y: clientY };
+    drag.current = { id, before: listRef.current, grab: e.clientY - (list.getBoundingClientRect().top + el.offsetTop), y: e.clientY };
     setDragging(id);
     setError(null);
+    follow();
   }
 
   function dragTo(clientY: number) {
@@ -147,7 +156,7 @@ export default function PhraseDeck() {
     else follow();
   }
 
-  function dragEnd() {
+  function drop() {
     const d = drag.current;
     drag.current = null;
     setDragging(null);
@@ -160,29 +169,27 @@ export default function PhraseDeck() {
     void commit(d.id, d.before);
   }
 
-  function step(id: string, delta: -1 | 1) {
+  function step(e: KeyboardEvent<HTMLLIElement>, id: string) {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
     const list = listRef.current!;
-    const index = list.findIndex((p) => p.id === id) + delta;
+    const index = list.findIndex((p) => p.id === id) + (e.key === 'ArrowUp' ? -1 : 1);
     if (index < 0 || index >= list.length) return;
     reorder(moved(list, id, index));
     void commit(id, list);
   }
 
-  const handle = (p: Phrase) => (
-    <DragHandle
-      label={p.japanese}
-      onStart={(y) => dragStart(p.id, y)}
-      onMove={dragTo}
-      onEnd={dragEnd}
-      onStep={(delta) => step(p.id, delta)}
-    />
-  );
+  function toggleReordering() {
+    blocks.current.clear();
+    setEditing(null);
+    setReordering(!reordering);
+  }
 
   async function remove(p: Phrase) {
     if (!window.confirm(`'${p.japanese}'를 회화 노트에서 지울까요?`)) return;
     try {
       await deletePhrase(p.id);
-      reorder(listRef.current?.filter((x) => x.id !== p.id) ?? []);
+      setPhrases(listRef.current?.filter((x) => x.id !== p.id) ?? null);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -207,6 +214,8 @@ export default function PhraseDeck() {
     }
   }
 
+  const editor = (p: Phrase) => <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />;
+
   return (
     <div className="page">
       <header className="page-header">
@@ -221,18 +230,29 @@ export default function PhraseDeck() {
             {phrases && ` · ${phrases.length}개`}
           </p>
         </div>
-        <div className="button-row">
-          <Link to="/talk" className="btn btn--primary">
-            표현 추가
-          </Link>
-          <Link to={`/quiz?deck=${TALK_DECK.id}`} className="btn btn--ghost">
-            {narrow ? '퀴즈' : '이 범위로 퀴즈'}
-          </Link>
-          <button type="button" className="btn btn--ghost" onClick={() => void exportPdf()} disabled={!phrases?.length || exporting}>
-            <DownloadIcon />
-            {exporting ? (narrow ? '만드는 중…' : 'PDF 만드는 중…') : narrow ? 'PDF' : 'PDF 다운로드'}
-          </button>
-        </div>
+        {reordering ? (
+          <div className="button-row">
+            <button type="button" className="btn btn--primary" onClick={toggleReordering}>
+              완료
+            </button>
+          </div>
+        ) : (
+          <div className="button-row">
+            <Link to="/talk" className="btn btn--primary">
+              {narrow ? '추가' : '표현 추가'}
+            </Link>
+            <button type="button" className="btn btn--ghost" onClick={toggleReordering} disabled={!phrases || phrases.length < 2}>
+              {narrow ? '순서' : '순서 바꾸기'}
+            </button>
+            <Link to={`/quiz?deck=${TALK_DECK.id}`} className="btn btn--ghost">
+              {narrow ? '퀴즈' : '이 범위로 퀴즈'}
+            </Link>
+            <button type="button" className="btn btn--ghost" onClick={() => void exportPdf()} disabled={!phrases?.length || exporting}>
+              {!narrow && <DownloadIcon />}
+              {exporting ? '만드는 중…' : narrow ? 'PDF' : 'PDF 다운로드'}
+            </button>
+          </div>
+        )}
       </header>
 
       {error && <p className="banner-error">{error}</p>}
@@ -241,28 +261,109 @@ export default function PhraseDeck() {
           아직 저장한 표현이 없어요. <Link to="/talk">표현 추가</Link>에서 번역해서 저장해 보세요.
         </p>
       )}
-      {phrases && phrases.length > 1 && <p className="muted small">⠿ 손잡이를 잡고 끌면 블록 순서를 바꿀 수 있어요.</p>}
 
-      {phrases && phrases.length > 0 && (
-        <ul ref={listEl} className={`phrase-blocks${dragging ? ' is-reordering' : ''}`}>
+      {phrases && phrases.length > 0 && reordering && (
+        <>
+          <p className="muted small">블록을 잡고 위아래로 끌어 옮겨요. 다 옮겼으면 완료를 눌러 주세요.</p>
+          <ul ref={listEl} className={`reorder-blocks${dragging ? ' is-reordering' : ''}`}>
+            {phrases.map((p) => (
+              <li
+                key={p.id}
+                ref={blockRef(p.id)}
+                className={`reorder-block${dragging === p.id ? ' is-dragging' : ''}`}
+                tabIndex={0}
+                aria-label={`${p.japanese} ${p.meaning}. 위아래 화살표로 옮겨요`}
+                onPointerDown={(e) => pickUp(e, p.id)}
+                onPointerMove={(e) => e.currentTarget.hasPointerCapture(e.pointerId) && dragTo(e.clientY)}
+                onPointerUp={drop}
+                onPointerCancel={drop}
+                onKeyDown={(e) => step(e, p.id)}
+              >
+                <span className="reorder-grip" aria-hidden="true">
+                  <GripIcon />
+                </span>
+                <span lang="ja" className="reorder-term">
+                  {p.japanese}
+                </span>
+                <span className="reorder-meaning">{p.meaning}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {phrases && phrases.length > 0 && !reordering && narrow && (
+        <ul className="phrase-blocks">
           {phrases.map((p) =>
             editing === p.id ? (
-              <li key={p.id} ref={blockRef(p.id)} className="phrase-block phrase-block--editing">
-                <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />
+              <li key={p.id} className="phrase-block phrase-block--editing">
+                {editor(p)}
               </li>
             ) : (
-              <PhraseCard
-                key={p.id}
-                phrase={p}
-                handle={handle(p)}
-                dragging={dragging === p.id}
-                cardRef={blockRef(p.id)}
-                onEdit={() => setEditing(p.id)}
-                onDelete={() => void remove(p)}
-              />
+              <PhraseCard key={p.id} phrase={p} onEdit={() => setEditing(p.id)} onDelete={() => void remove(p)} />
             ),
           )}
         </ul>
+      )}
+
+      {phrases && phrases.length > 0 && !reordering && !narrow && (
+        <div className="log-scroll">
+          <table className="log-table phrase-table">
+            <thead>
+              <tr>
+                <th scope="col" className="col-term">
+                  표현
+                </th>
+                <th scope="col" className="col-reading">
+                  읽기
+                </th>
+                <th scope="col" className="col-sound">
+                  발음
+                </th>
+                <th scope="col">뜻</th>
+                <th scope="col" className="col-button" aria-label="듣기" />
+                <th scope="col" className="col-actions" aria-label="수정·삭제" />
+              </tr>
+            </thead>
+            <tbody>
+              {phrases.map((p) =>
+                editing === p.id ? (
+                  <tr key={p.id} className="phrase-edit-row">
+                    <td colSpan={6}>{editor(p)}</td>
+                  </tr>
+                ) : (
+                  <tr key={p.id}>
+                    <td lang="ja" className="log-term">
+                      {p.japanese}
+                    </td>
+                    <td lang="ja">{p.reading}</td>
+                    <td>{phraseSound(p)}</td>
+                    <td>{p.meaning}</td>
+                    <td className="cell-button">
+                      <SpeakButton text={p.japanese} />
+                    </td>
+                    <td className="cell-button">
+                      <span className="phrase-actions">
+                        <button type="button" className="icon-btn" aria-label={`${p.japanese} 수정`} title="수정" onClick={() => setEditing(p.id)}>
+                          <EditIcon />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-btn icon-btn--delete"
+                          aria-label={`${p.japanese} 삭제`}
+                          title="삭제"
+                          onClick={() => void remove(p)}
+                        >
+                          <CloseIcon />
+                        </button>
+                      </span>
+                    </td>
+                  </tr>
+                ),
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

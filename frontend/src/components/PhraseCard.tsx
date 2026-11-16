@@ -1,32 +1,23 @@
-import type { ReactNode } from 'react';
 import type { Phrase } from '../api';
 import { phraseSound } from '../lib/phrases';
 import { CloseIcon, EditIcon } from './Icons';
 import { SpeakButton } from './SpeakButton';
 
 /**
- * One saved phrase as a block: grip, then the phrase, its reading and pronunciation, and its meaning, then its
+ * One saved phrase as a block: the phrase, its reading and pronunciation, and its meaning, then its
  * buttons. Side by side on wide screens, stacked on phones.
  */
 export function PhraseCard({
   phrase: p,
-  handle,
-  dragging = false,
-  cardRef,
   onEdit,
   onDelete,
 }: {
   phrase: Phrase;
-  /** A grip for reordering, shown first. */
-  handle?: ReactNode;
-  dragging?: boolean;
-  cardRef?: (el: HTMLLIElement | null) => void;
   onEdit?: () => void;
   onDelete: () => void;
 }) {
   return (
-    <li ref={cardRef} className={`phrase-block${dragging ? ' is-dragging' : ''}`}>
-      {handle}
+    <li className="phrase-block">
       <div className="phrase-block-main">
         <span lang="ja" className="phrase-block-term">
           {p.japanese}
