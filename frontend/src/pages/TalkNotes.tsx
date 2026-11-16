@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
 import { CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
-import { pronunciation } from '../lib/kana';
+import { toHangul } from '../lib/kana';
 import { deletePhrase, listPhrases, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
 
 const MAX_INPUT = 100;
@@ -127,7 +127,7 @@ export default function TalkNotes() {
             <span>읽기</span>
             <input lang="ja" className="text-input text-input--block" value={draft.result.reading} onChange={(e) => edit('reading', e.target.value)} />
           </label>
-          <p className="muted small talk-romaji">발음: {pronunciation(draft.result.reading)}</p>
+          <p className="muted small talk-sound">발음: {toHangul(draft.result.reading)}</p>
           <label className="talk-field">
             <span>뜻</span>
             <input className="text-input text-input--block" value={draft.result.meaning} onChange={(e) => edit('meaning', e.target.value)} />
@@ -169,7 +169,7 @@ export default function TalkNotes() {
                   </span>
                   <span className="item-text">
                     {p.reading !== p.japanese && <span lang="ja">{p.reading}</span>}
-                    <span className="muted">{pronunciation(p.reading)}</span>
+                    <span className="muted">{toHangul(p.reading)}</span>
                     <span>{p.meaning}</span>
                   </span>
                   {p.example_ja && (

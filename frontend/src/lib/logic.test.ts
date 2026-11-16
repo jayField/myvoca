@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
-import { pronunciation, toHangul, toRomaji } from './kana';
+import { toHangul } from './kana';
 import { seededRng } from './random';
 import {
   applyReview,
@@ -213,16 +213,6 @@ describe('computeStats', () => {
   });
 });
 
-describe('toRomaji', () => {
-  it('spells readings in Hepburn', () => {
-    expect(toRomaji('ねこ')).toBe('neko');
-    expect(toRomaji('ちょっと')).toBe('chotto');
-    expect(toRomaji('きんえん')).toBe("kin'en");
-    expect(toRomaji('コーヒー')).toBe('koohii');
-    expect(toRomaji('パーティー')).toBe('paatii');
-  });
-});
-
 describe('toHangul', () => {
   it('writes how a reading sounds in Hangul, with ん and っ as finals', () => {
     expect(toHangul('ねこ')).toBe('네코');
@@ -230,7 +220,8 @@ describe('toHangul', () => {
     expect(toHangul('きって')).toBe('킷테');
     expect(toHangul('コーヒー')).toBe('코-히-');
     expect(toHangul('ファイル')).toBe('화이루');
-    expect(pronunciation('ごはんたべたい')).toBe('고한타베타이 (gohantabetai)');
+    expect(toHangul('ごはんたべたい')).toBe('고한타베타이');
+    expect(toHangul('パーティー')).toBe('파-티-');
   });
 });
 

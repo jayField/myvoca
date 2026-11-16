@@ -4,7 +4,7 @@ import type { Phrase } from '../api';
 import { BackIcon, CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { dayLabel, localDate } from '../lib/dates';
-import { pronunciation } from '../lib/kana';
+import { toHangul } from '../lib/kana';
 import { deletePhrase, listPhrases, TALK_DECK } from '../lib/phrases';
 
 /** Saved phrases by the day they were saved, newest day first (the list already arrives newest first). */
@@ -95,7 +95,7 @@ export default function PhraseDeck() {
                         {p.japanese}
                       </td>
                       <td lang="ja">{p.reading}</td>
-                      <td>{pronunciation(p.reading)}</td>
+                      <td>{toHangul(p.reading)}</td>
                       <td>{p.meaning}</td>
                       <td>
                         {p.example_ja ? (

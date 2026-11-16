@@ -915,7 +915,7 @@ a {
   color: var(--accent-soft);
 }
 
-.flashcard-romaji {
+.flashcard-sound {
   font-size: 0.95rem;
   letter-spacing: 0.02em;
   color: var(--muted);
@@ -1662,7 +1662,7 @@ a.device-box:hover {
   font-weight: 700;
 }
 
-.talk-romaji {
+.talk-sound {
   margin-top: -0.25rem;
 }
 

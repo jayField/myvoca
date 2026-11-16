@@ -26,52 +26,19 @@ export function inScript(kana: string, script: KanaScript): string {
   return script === 'katakana' ? toKatakana(kana) : kana;
 }
 
-// Small-vowel combinations that only katakana loanwords use (ファ, ティ, …), which the chart leaves out:
-// [kana, romaji, 한글].
-const LOANWORD_SOUNDS: [string, string, string][] = [
-  ['ふぁ', 'fa', '화'], ['ふぃ', 'fi', '휘'], ['ふぇ', 'fe', '훼'], ['ふぉ', 'fo', '훠'],
-  ['てぃ', 'ti', '티'], ['でぃ', 'di', '디'], ['とぅ', 'tu', '투'], ['どぅ', 'du', '두'],
-  ['うぃ', 'wi', '위'], ['うぇ', 'we', '웨'], ['うぉ', 'wo', '워'],
-  ['しぇ', 'she', '셰'], ['じぇ', 'je', '제'], ['ちぇ', 'che', '체'],
-  ['ゔぁ', 'va', '바'], ['ゔぃ', 'vi', '비'], ['ゔ', 'vu', '부'], ['ゔぇ', 've', '베'], ['ゔぉ', 'vo', '보'],
+// Small-vowel combinations that only katakana loanwords use (ファ, ティ, …), which the chart leaves out.
+const LOANWORD_SOUNDS: [string, string][] = [
+  ['ふぁ', '화'], ['ふぃ', '휘'], ['ふぇ', '훼'], ['ふぉ', '훠'],
+  ['てぃ', '티'], ['でぃ', '디'], ['とぅ', '투'], ['どぅ', '두'],
+  ['うぃ', '위'], ['うぇ', '웨'], ['うぉ', '워'],
+  ['しぇ', '셰'], ['じぇ', '제'], ['ちぇ', '체'],
+  ['ゔぁ', '바'], ['ゔぃ', '비'], ['ゔ', '부'], ['ゔぇ', '베'], ['ゔぉ', '보'],
 ];
 
-const CHART_CELLS = KANA_SECTIONS.flatMap((s) => s.rows.flat()).filter((cell) => cell !== null);
-const ROMAJI = new Map([...CHART_CELLS, ...LOANWORD_SOUNDS].map(([kana, romaji]) => [kana, romaji]));
-const HANGUL = new Map([...CHART_CELLS, ...LOANWORD_SOUNDS].map(([kana, , hangul]) => [kana, hangul]));
-
-/**
- * Hepburn romaji for a kana reading, built from the kana chart: っ doubles the next consonant,
- * ー repeats the vowel before it, and ん before a vowel or y gets an apostrophe (きんえん → kin'en).
- */
-export function toRomaji(kana: string): string {
-  const hira = kana.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
-  let out = '';
-  let double = false;
-  for (let i = 0; i < hira.length; i++) {
-    const pair = ROMAJI.get(hira.slice(i, i + 2));
-    const ch = hira[i];
-    let r = pair ?? ROMAJI.get(ch);
-    if (pair) i++;
-    if (ch === 'っ') {
-      double = true;
-      continue;
-    }
-    if (ch === 'ー') {
-      out += out.at(-1) ?? '';
-      continue;
-    }
-    if (r === undefined) r = ch;
-    if (double) {
-      out += r.startsWith('ch') ? 't' : r[0];
-      double = false;
-    }
-    if (out.endsWith('n') && /^[aiueoy]/.test(r) && hira[i - (pair ? 2 : 1)] === 'ん') out += "'";
-    out += r;
-  }
-  return out;
-}
-
+const HANGUL = new Map([
+  ...KANA_SECTIONS.flatMap((s) => s.rows.flat()).flatMap((cell) => (cell ? [[cell[0], cell[2]] as [string, string]] : [])),
+  ...LOANWORD_SOUNDS,
+]);
 
 const SYLLABLE_START = 0xac00;
 const FINAL_N = 4; // ㄴ
@@ -106,9 +73,4 @@ export function toHangul(kana: string): string {
     else out += HANGUL.get(ch) ?? ch;
   }
   return out;
-}
-
-/** The sound of a reading as shown to learners: Hangul first, romaji in brackets, e.g. 고한타베타이 (gohantabetai). */
-export function pronunciation(kana: string): string {
-  return `${toHangul(kana)} (${toRomaji(kana)})`;
 }

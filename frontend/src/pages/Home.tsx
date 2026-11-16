@@ -10,7 +10,7 @@ import { SpeakButton } from '../components/SpeakButton';
 import { showsReading, Term } from '../components/Term';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { ORDER_LABEL } from '../labels';
-import { pronunciation } from '../lib/kana';
+import { toHangul } from '../lib/kana';
 import { listPhrases, TALK_DECK } from '../lib/phrases';
 
 interface HomeData {
@@ -257,7 +257,7 @@ function WordOfDay({ word }: { word: Item }) {
               {word.reading}
             </div>
           )}
-          {word.kind === 'word' && <div className="muted small">{pronunciation(word.reading)}</div>}
+          {word.kind === 'word' && <div className="muted small">{toHangul(word.reading)}</div>}
           <div className="muted">{word.meaning}</div>
         </div>
       </div>
