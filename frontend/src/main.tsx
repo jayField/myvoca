@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './auth';
 import { RequireAuth } from './components/RequireAuth';
@@ -17,6 +17,7 @@ import Speed from './pages/Speed';
 import Log from './pages/Log';
 import Stats from './pages/Stats';
 import Study from './pages/Study';
+import PhraseDeck from './pages/PhraseDeck';
 import TalkNotes from './pages/TalkNotes';
 import './styles.css';
 
@@ -38,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="study" element={<Study />} />
             <Route path="decks" element={<Decks />} />
             <Route path="talk" element={<TalkNotes />} />
-            <Route path="decks/talk" element={<Navigate to="/talk" replace />} />
+            <Route path="decks/talk" element={<PhraseDeck />} />
             <Route path="decks/:deckId" element={<DeckDetail />} />
             <Route path="kana" element={<Kana />} />
             <Route path="quiz" element={<Quiz />} />

@@ -1690,3 +1690,11 @@ a.device-box:hover {
   font-size: 1.375rem;
   font-weight: 700;
 }
+
+/* Phrases run longer than single words, so they get a smaller face and room to wrap. */
+.talk-deck-term {
+  min-width: 0;
+  max-width: 50%;
+  font-size: 1.25rem;
+  overflow-wrap: anywhere;
+}

@@ -127,7 +127,7 @@ export default function Home() {
                   </span>
                 </Link>
               ))}
-              <Link to="/talk" className="card deck-card deck-card--talk">
+              <Link to={`/decks/${TALK_DECK.id}`} className="card deck-card deck-card--talk">
                 <span className="deck-title">
                   {TALK_DECK.title} {phraseCount !== null && <span className="accent-text">{phraseCount}</span>}
                 </span>

@@ -49,7 +49,7 @@ GitHub 저장소를 Cloudflare Pages(`tango-note`)에 연결해 main에 push하�
 - `src/data/` — 단어 데이터. 항목 ID는 `단어장:단어`라서 목록 순서를 바꾸거나 단어를 추가해도 기존 기록이 유지된다. JLPT N5(412)·N4(264)·N3(213)는 공개 목록을 옮기지 않고 자주 쓰는 단어를 직접 골라 한국어 뜻을 단 것이다. 공식 어휘 목록은 2010년 이후 공개되지 않아 레벨 구분은 일반적인 학습 자료 기준이다.
 - **표기**: 시험지처럼 그 레벨까지 배우는 한자로만 된 단어는 한자로, 범위 밖 한자가 섞인 단어는 가나로 보여주고 한자는 옆에 작게 단다(N5의 猫 → ねこ 猫, N3에서는 레벨이 높아 한자 그대로인 단어가 늘어남). `node scripts/apply-notation.mjs`가 `scripts/jlpt-kanji.json`(비공식 N5~N3 한자 목록)으로 각 단어의 `display`를 채우므로, 단어를 추가하면 다시 실행한다. ID·발음은 계속 `term`(한자)을 쓴다.
 - **오늘의 학습**: 복습 → 오늘의 새 항목 순서. 복습은 헷갈리는 단어(범위 무관)에서 하루 5개를 랜덤으로 뽑는다. 새 항목은 아직 시작하지 않은 항목에서만 뽑아 날마다 겹치지 않는다. 랜덤 모드는 날짜로 시드를 고정해 새로고침해도 같은 묶음이 나온다.
-- **회화 노트** (`/talk`, 메뉴에 있음): 대화에서 배운 표현을 한글 발음(예: 고항 타베타이)으로 적으면 `functions/api/translate.ts`(Cloudflare Pages Function)가 Gemini로 일본어·읽기·뜻·예문을 만들어 준다. 결과를 확인·수정한 뒤 계정별 `phrases` 표에 저장하고, 퀴즈 범위로 고를 수 있다. 번역은 로그인한 계정만 쓸 수 있고 횟수 제한은 없다(Gemini 무료 한도를 넘으면 그날은 안내 문구가 나온다).
+- **회화 노트** (메뉴 `/talk`에서 번역·저장, 단어장 `/decks/talk`에서 저장한 표현을 날짜별로 보기): 대화에서 배운 표현을 한글 발음(예: 고항 타베타이)으로 적으면 `functions/api/translate.ts`(Cloudflare Pages Function)가 Gemini로 일본어·읽기·뜻·예문을 만들어 준다. 결과를 확인·수정한 뒤 계정별 `phrases` 표에 저장하고, 퀴즈 범위로 고를 수 있다. 번역은 로그인한 계정만 쓸 수 있고 횟수 제한은 없다(Gemini 무료 한도를 넘으면 그날은 안내 문구가 나온다).
   - Cloudflare Pages → Settings → Variables and Secrets에 `GEMINI_API_KEY`(Secret) 추가. 선택: `GEMINI_MODEL`(기본 `gemini-3.5-flash-lite`). 함수는 기존 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`도 읽는다.
   - 키는 저장소에 넣지 않는다. 로컬에서 함수를 돌릴 때는 루트의 `.dev.vars`(gitignore됨)에 넣는다.
 - **복습표** (`/log`): 공부한 단어를 연도 → 월 → 날짜별 표로 접어서 보여준다(가장 최근 달만 펼쳐진 채 시작). 카드 기록(`first_seen`·`studied_on`)에서 만들므로 별도 저장소 없이 동기화되고, 단어마다 처음 본 날과 마지막 학습일에 나온다.
