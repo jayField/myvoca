@@ -1,5 +1,5 @@
 import type { Item } from '../api';
-import { toRomaji } from '../lib/kana';
+import { pronunciation } from '../lib/kana';
 import { SpeakButton } from './SpeakButton';
 import { showsReading, Term } from './Term';
 
@@ -33,7 +33,7 @@ export function Flashcard({ item, tag, flipped, onFlip }: Props) {
                 {item.reading}
               </span>
             )}
-            {item.kind === 'word' && <span className="flashcard-romaji">{toRomaji(item.reading)}</span>}
+            {item.kind === 'word' && <span className="flashcard-romaji">{pronunciation(item.reading)}</span>}
             {item.kind === 'word' && <span className="flashcard-meaning">{item.meaning}</span>}
             {item.example_ja && (
               <span className="flashcard-example">

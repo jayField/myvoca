@@ -5,7 +5,7 @@ import { SpeakButton } from '../components/SpeakButton';
 import { Term } from '../components/Term';
 import { GRADES } from '../labels';
 import { dayLabel } from '../lib/dates';
-import { toRomaji } from '../lib/kana';
+import { pronunciation } from '../lib/kana';
 
 const GRADE_LABEL = new Map(GRADES.map((g) => [g.grade, g.label]));
 const KIND_LABEL = { new: '새 단어', review: '복습' };
@@ -118,7 +118,7 @@ function DayTable({ day, entries }: LogDay) {
                   <Term item={item} className="log-term" />
                 </td>
                 <td lang="ja">{item.kind === 'word' ? item.reading : '-'}</td>
-                <td>{item.kind === 'word' ? toRomaji(item.reading) : item.reading}</td>
+                <td>{item.kind === 'word' ? pronunciation(item.reading) : item.reading}</td>
                 <td>{item.kind === 'word' ? item.meaning : '-'}</td>
                 <td>{KIND_LABEL[kind]}</td>
                 <td className={grade ? `log-grade log-grade--${grade}` : 'muted'}>{grade ? GRADE_LABEL.get(grade) : '-'}</td>
