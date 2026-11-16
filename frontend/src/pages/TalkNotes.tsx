@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
 import { CloseIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
+import { localDate } from '../lib/dates';
 import { toHangul } from '../lib/kana';
 import { deletePhrase, listPhrases, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
 
@@ -19,6 +20,9 @@ export default function TalkNotes() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState<'translate' | 'save' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Only today's saves are listed here; everything saved so far lives in 단어장 → 회화 노트.
+  const todayDate = localDate();
+  const today = phrases?.filter((p) => localDate(new Date(p.created_at)) === todayDate) ?? null;
 
   useEffect(() => {
     listPhrases()
@@ -89,7 +93,7 @@ export default function TalkNotes() {
         </div>
       </header>
 
-      <form className="card card--lg stack-sm" onSubmit={submit}>
+      <form className="card card--lg talk-card" onSubmit={submit}>
         <label className="form-field stack-sm">
           <span className="card-title">번역하기</span>
           <span className="hint">들은 일본어를 한글 발음 그대로 적어요. 한국어 문장이나 일본어로 적어도 돼요.</span>
@@ -111,7 +115,7 @@ export default function TalkNotes() {
       {error && <p className="banner-error">{error}</p>}
 
       {draft && (
-        <section className="card card--lg stack-sm talk-draft" aria-labelledby="talk-draft">
+        <section className="card card--lg talk-card talk-draft" aria-labelledby="talk-draft">
           <div className="card-head">
             <h2 id="talk-draft" className="card-title">
               번역 결과
@@ -154,14 +158,23 @@ export default function TalkNotes() {
         </section>
       )}
 
-      {phrases && phrases.length === 0 && <p className="muted">아직 저장한 표현이 없어요. 위에서 번역해서 저장해 보세요.</p>}
-      {phrases && phrases.length > 0 && (
+      {today && today.length === 0 && (
+        <p className="muted small">
+          오늘 저장한 표현이 아직 없어요. 지금까지 저장한 표현은 <Link to={`/decks/${TALK_DECK.id}`}>단어장 → 회화 노트</Link>에서 볼 수 있어요.
+        </p>
+      )}
+      {today && today.length > 0 && (
         <section className="stack-sm" aria-labelledby="talk-saved">
-          <h2 id="talk-saved" className="section-title day-title">
-            저장한 표현 <span className="muted small">· {phrases.length}개</span>
-          </h2>
+          <div className="card-head">
+            <h2 id="talk-saved" className="section-title day-title">
+              오늘 저장한 표현 <span className="muted small">· {today.length}개</span>
+            </h2>
+            <Link to={`/decks/${TALK_DECK.id}`} className="muted small">
+              전체 보기
+            </Link>
+          </div>
           <ul className="item-list">
-            {phrases.map((p) => (
+            {today.map((p) => (
               <li key={p.id} className="item-row talk-row">
                 <div className="talk-main">
                   <span lang="ja" className="talk-term">
