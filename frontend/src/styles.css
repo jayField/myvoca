@@ -1760,6 +1760,7 @@ a.device-box:hover {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 0 0.5rem;
 }
 
 .number-reading {
@@ -1802,16 +1803,21 @@ a.device-box:hover {
 
 @media (max-width: 760px) {
   .number-table thead th:first-child {
-    width: 4rem;
+    width: 3.25rem;
   }
 
   .number-reading {
-    min-width: 4rem;
-    padding: 0.5rem 0.25rem;
+    min-width: 0;
+    padding: 0.5rem 0.125rem;
   }
 
   .number-kana {
-    font-size: 1.125rem;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  .number-sound {
+    font-size: 0.75rem;
   }
 }
 

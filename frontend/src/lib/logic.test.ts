@@ -358,7 +358,8 @@ describe('numbers quiz', () => {
   it('asks each number in both readings, with choices from the numbers', async () => {
     const { numberItems } = await import('./numbers');
     const items = numberItems();
-    expect(items).toHaveLength(20);
+    expect(items).toHaveLength(30);
+    expect(items.find((i) => i.term === '七人')).toMatchObject({ reading: 'ななにん・しちにん', meaning: '7명' });
     expect(items.find((i) => i.term === '四')).toMatchObject({ reading: 'よん・し', meaning: '4' });
     expect(items.find((i) => i.term === '四つ')).toMatchObject({ reading: 'よっつ', meaning: '4개' });
     const quiz = buildPhraseQuiz(items, 10, seededRng('numbers'));

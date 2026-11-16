@@ -20,7 +20,7 @@ export default function Numbers() {
       <header className="page-header">
         <div>
           <h1>숫자</h1>
-          <p className="muted small">1부터 10까지 음독과 훈독이에요. 읽는 법을 누르면 발음을 들려줘요.</p>
+          <p className="muted small">1부터 10까지 음독, 훈독, 사람 세기예요. 읽는 법을 누르면 발음을 들려줘요.</p>
         </div>
         <Link to={`/quiz?deck=${NUMBER_DECK.id}`} className="btn btn--ghost">
           퀴즈로 풀기
@@ -35,6 +35,7 @@ export default function Numbers() {
                 <th scope="col">숫자</th>
                 <th scope="col">음독</th>
                 <th scope="col">훈독</th>
+                <th scope="col">사람 (~人)</th>
               </tr>
             </thead>
             <tbody>
@@ -56,6 +57,13 @@ export default function Numbers() {
                   <td>
                     <Reading kana={row.kun} />
                   </td>
+                  <td>
+                    <span className="number-readings">
+                      {row.people.map((kana) => (
+                        <Reading key={kana} kana={kana} />
+                      ))}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -67,6 +75,9 @@ export default function Numbers() {
           </li>
           <li>
             <strong>훈독</strong>(~つ)은 물건 개수를 셀 때 써요. 하나, 둘, 셋처럼요.
+          </li>
+          <li>
+            <strong>사람</strong>은 숫자 뒤에 ~人(にん)을 붙여 세요. 1명·2명만 ひとり·ふたり로 따로 읽고, 4명은 よにん이에요.
           </li>
           <li>4, 7, 9는 읽는 법이 둘이에요. 보통은 앞의 것(よん, なな, きゅう)을 써요.</li>
         </ul>
