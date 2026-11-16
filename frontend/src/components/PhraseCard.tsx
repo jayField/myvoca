@@ -1,6 +1,5 @@
 import type { Phrase } from '../api';
-import { toHangul } from '../lib/kana';
-import { phraseSound } from '../lib/phrases';
+import { exampleSound, phraseSound } from '../lib/phrases';
 import { CloseIcon, EditIcon } from './Icons';
 import { SpeakButton } from './SpeakButton';
 import { WordBreakdown } from './WordBreakdown';
@@ -39,7 +38,7 @@ export function PhraseCard({ phrase: p, onEdit, onDelete }: { phrase: Phrase; on
         <span className="talk-example small">
           <span className="talk-label">예시</span>
           <span lang="ja">{p.example_ja}</span>
-          {p.example_reading && <span className="talk-example-sound">{toHangul(p.example_reading)}</span>}
+          {exampleSound(p) && <span className="talk-example-sound">{exampleSound(p)}</span>}
           <span className="muted">{p.example_ko}</span>
         </span>
       )}

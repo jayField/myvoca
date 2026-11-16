@@ -9,15 +9,27 @@ export const TALK_DECK = { id: 'talk', title: '회화 노트', description: '대
 
 const SIGN_IN = '회화 노트는 로그인해야 쓸 수 있어요.';
 const NETWORK = '인터넷 연결을 확인하고 다시 시도해 주세요.';
+const MISSING_SOUND = '나머지는 저장했지만 발음은 저장하지 못했어요. Supabase에서 발음 칸을 추가하는 SQL을 먼저 실행해 주세요.';
 
 
 /**
  * How a phrase sounds in Hangul, spaced the way Korean is (君を思っている → 키미오 오못테이루) when its word
  * breakdown is known; otherwise the whole reading run together.
  */
-export function phraseSound(p: Pick<Translation, 'reading' | 'words'>): string {
+export function phraseSound(p: Pick<Translation, 'reading' | 'words'> & { sound?: string }): string {
+  if (p.sound) return p.sound;
+  return autoSound(p);
+}
+
+/** The pronunciation worked out from the reading, ignoring any the learner typed. */
+export function autoSound(p: Pick<Translation, 'reading' | 'words'>): string {
   if (p.words.length < 2) return toHangul(p.reading);
   return p.words.map((w, i) => (i > 0 && !w.attach ? ' ' : '') + toHangul(w.reading)).join('');
+}
+
+/** How the example sentence sounds: the learner's own version if they typed one, else from its reading. */
+export function exampleSound(p: Pick<Phrase, 'example_reading' | 'example_sound'>): string {
+  return p.example_sound || toHangul(p.example_reading);
 }
 
 /** A phrase as a quiz item, so the existing quiz screens can ask it like a word. */
@@ -40,10 +52,17 @@ function client() {
   return supabase;
 }
 
-type StoredPhrase = Omit<Phrase, 'words' | 'example_reading'> & Partial<Pick<Phrase, 'words' | 'example_reading'>>;
+type Later = 'words' | 'example_reading' | 'sound' | 'example_sound';
+type StoredPhrase = Omit<Phrase, Later> & Partial<Pick<Phrase, Later>>;
 
-/** Rows saved before the breakdown and example reading existed (or before their columns were added) lack them. */
-const complete = (row: StoredPhrase): Phrase => ({ ...row, words: row.words ?? [], example_reading: row.example_reading ?? '' });
+/** Rows saved before these columns existed (or before the schema update adding them was run) lack them. */
+const complete = (row: StoredPhrase): Phrase => ({
+  ...row,
+  words: row.words ?? [],
+  example_reading: row.example_reading ?? '',
+  sound: row.sound ?? '',
+  example_sound: row.example_sound ?? '',
+});
 
 export async function listPhrases(): Promise<Phrase[]> {
   const { data, error } = await client().from('phrases').select('*').order('created_at', { ascending: false });
@@ -63,16 +82,20 @@ export async function savePhrase(input: string, t: Translation): Promise<Phrase>
   return complete(res.data);
 }
 
-export type PhraseEdit = Pick<Phrase, 'japanese' | 'reading' | 'meaning' | 'note' | 'example_ja' | 'example_reading' | 'example_ko' | 'words'>;
+export type PhraseEdit = Pick<
+  Phrase,
+  'japanese' | 'reading' | 'sound' | 'meaning' | 'note' | 'example_ja' | 'example_reading' | 'example_sound' | 'example_ko' | 'words'
+>;
 
 /** Save edits to a phrase; returns the stored row. */
 export async function updatePhrase(id: string, edit: PhraseEdit): Promise<Phrase> {
   const phrases = client().from('phrases');
   let res = await phrases.update(edit).eq('id', id).select('*').single();
-  // PGRST204: as in savePhrase, the columns for the breakdown and example reading may not exist yet.
+  // PGRST204: the columns for typed pronunciations (or older additions) do not exist yet.
   if (res.error?.code === 'PGRST204') {
-    const { words: _words, example_reading: _reading, ...rest } = edit;
+    const { sound: _s, example_sound: _es, ...rest } = edit;
     res = await phrases.update(rest).eq('id', id).select('*').single();
+    if (!res.error && (edit.sound || edit.example_sound)) throw new Error(MISSING_SOUND);
   }
   if (res.error) throw new Error(`고치지 못했어요. ${NETWORK}`);
   return complete(res.data);

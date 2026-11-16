@@ -3,7 +3,7 @@
 import type { Phrase } from '../types';
 import { dayLabel, localDate } from './dates';
 import { toHangul } from './kana';
-import { groupByDay, phraseSound } from './phrases';
+import { exampleSound, groupByDay, phraseSound } from './phrases';
 
 const WIDTH = 720; // px of the drawn sheet; maps onto the A4 width inside the margins
 const PAGE_MM = { w: 210, h: 297, margin: 12 };
@@ -41,7 +41,7 @@ function entry(p: Phrase): HTMLElement {
   if (p.example_ja) {
     const ex = el('div', `margin-top:4px;padding:8px 10px;background:#f3f5fb;border-radius:6px;font-size:13px;display:flex;flex-direction:column;gap:3px;`);
     ex.append(el('span', `font-size:11px;font-weight:600;color:${MUTED};`, '예시'), el('span', '', p.example_ja, true));
-    if (p.example_reading) ex.append(el('span', `color:${ACCENT};`, toHangul(p.example_reading)));
+    if (exampleSound(p)) ex.append(el('span', `color:${ACCENT};`, exampleSound(p)));
     if (p.example_ko) ex.append(el('span', `color:${MUTED};`, p.example_ko));
     box.append(ex);
   }

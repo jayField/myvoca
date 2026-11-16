@@ -69,6 +69,10 @@ export interface Phrase extends Translation {
   id: string;
   /** What the learner typed, e.g. 고항 타베타이. */
   input: string;
+  /** Hangul pronunciation the learner typed in place of the automatic one; empty means automatic. */
+  sound: string;
+  /** The same for the example sentence. */
+  example_sound: string;
   created_at: string;
 }
 

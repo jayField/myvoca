@@ -7,8 +7,7 @@ import { PhraseEditor } from '../components/PhraseEditor';
 import { SpeakButton } from '../components/SpeakButton';
 import { WordBreakdown } from '../components/WordBreakdown';
 import { dayLabel } from '../lib/dates';
-import { toHangul } from '../lib/kana';
-import { deletePhrase, groupByDay, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
+import { deletePhrase, exampleSound, groupByDay, listPhrases, phraseSound, TALK_DECK } from '../lib/phrases';
 
 const PHONE = '(max-width: 760px)';
 
@@ -167,7 +166,7 @@ export default function PhraseDeck() {
                             {p.example_ja ? (
                               <span className="phrase-example">
                                 <span lang="ja">{p.example_ja}</span>
-                                {p.example_reading && <span className="talk-example-sound">{toHangul(p.example_reading)}</span>}
+                                {exampleSound(p) && <span className="talk-example-sound">{exampleSound(p)}</span>}
                                 <span className="muted">{p.example_ko}</span>
                               </span>
                             ) : (

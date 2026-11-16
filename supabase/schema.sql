@@ -132,6 +132,9 @@ create table if not exists public.phrases (
 -- Word-by-word breakdown and the example's reading, added after the first release; safe to run again.
 alter table public.phrases add column if not exists words jsonb not null default '[]'::jsonb;
 alter table public.phrases add column if not exists example_reading text not null default '' check (char_length(example_reading) <= 1000);
+-- Hangul pronunciation typed by the learner over the automatic one ('' = automatic).
+alter table public.phrases add column if not exists sound text not null default '' check (char_length(sound) <= 300);
+alter table public.phrases add column if not exists example_sound text not null default '' check (char_length(example_sound) <= 1000);
 
 alter table public.phrases enable row level security;
 
