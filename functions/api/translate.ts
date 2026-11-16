@@ -1,19 +1,17 @@
 // Cloudflare Pages Function: POST /api/translate
 // Turns what a learner typed (usually Japanese written in Hangul, e.g. 고항 타베타이) into the
 // Japanese they meant, with reading, Korean meaning and an example, via the Gemini API.
-// The Gemini key lives only here (Pages secret GEMINI_API_KEY); the browser never sees it.
-// Each call is counted against the signed-in account's daily limit in Supabase first.
+// The Gemini key lives only here (Pages secret GEMINI_API_KEY); the browser never sees it,
+// and only signed-in accounts may use it.
 
 interface Env {
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
-  TRANSLATE_DAILY_LIMIT?: string;
   VITE_SUPABASE_URL?: string;
   VITE_SUPABASE_ANON_KEY?: string;
 }
 
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
-const DEFAULT_DAILY_LIMIT = 30;
 const MAX_INPUT = 100;
 
 const SYSTEM = `You help a Korean learner of Japanese save expressions they picked up chatting with Japanese speakers.
@@ -48,17 +46,18 @@ const json = (body: unknown, status = 200) =>
 
 const fail = (status: number, error: string) => json({ error }, status);
 
-/** Count this call for the account behind the token; null when the token is not a signed-in user. */
-async function useTranslation(env: Env, token: string): Promise<number | null> {
-  const res = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/rpc/use_translation`, {
-    method: 'POST',
-    headers: { apikey: env.VITE_SUPABASE_ANON_KEY!, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: '{}',
+/** Whether the token belongs to a signed-in account of this app. */
+async function isSignedIn(env: Env, token: string): Promise<boolean> {
+  const res = await fetch(`${env.VITE_SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: env.VITE_SUPABASE_ANON_KEY!, Authorization: `Bearer ${token}` },
   });
-  if (res.status === 401 || res.status === 403) return null;
-  if (!res.ok) throw new Error(`use_translation ${res.status}: ${await res.text()}`);
-  return Number(await res.json());
+  if (res.status === 401 || res.status === 403) return false;
+  if (!res.ok) throw new Error(`auth ${res.status}: ${await res.text()}`);
+  return true;
 }
+
+/** Gemini's own quota (the free tier's daily cap) ran out. */
+class QuotaError extends Error {}
 
 async function translate(env: Env, input: string): Promise<Translation> {
   const model = env.GEMINI_MODEL || DEFAULT_MODEL;
@@ -71,6 +70,7 @@ async function translate(env: Env, input: string): Promise<Translation> {
       generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA },
     }),
   });
+  if (res.status === 429) throw new QuotaError(await res.text());
   if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`);
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
@@ -97,21 +97,18 @@ export async function onRequestPost({ request, env }: { request: Request; env: E
   if (!input) return fail(400, '번역할 표현을 입력해 주세요.');
   if (input.length > MAX_INPUT) return fail(400, `${MAX_INPUT}자 이내로 입력해 주세요.`);
 
-  const limit = Number(env.TRANSLATE_DAILY_LIMIT) || DEFAULT_DAILY_LIMIT;
-  let used: number | null;
   try {
-    used = await useTranslation(env, token);
+    if (!(await isSignedIn(env, token))) return fail(401, '로그인이 필요해요. 다시 로그인해 주세요.');
   } catch (e) {
     console.error(e);
-    return fail(500, '번역 횟수를 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+    return fail(502, '로그인을 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
   }
-  if (used === null) return fail(401, '로그인이 필요해요. 다시 로그인해 주세요.');
-  if (used > limit) return fail(429, `오늘 번역은 ${limit}번까지예요. 내일 다시 해 주세요.`);
 
   try {
-    return json({ result: await translate(env, input), used, limit });
+    return json({ result: await translate(env, input) });
   } catch (e) {
     console.error(e);
+    if (e instanceof QuotaError) return fail(429, '번역 서비스의 무료 사용량을 다 썼어요. 잠시 뒤나 내일 다시 해 주세요.');
     return fail(502, '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
   }
 }

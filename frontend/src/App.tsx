@@ -2,11 +2,13 @@ import type { ReactNode } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './auth';
 import { displayName } from './lib/username';
-import { BookIcon, ChartIcon, DeviceIcon, FeedbackIcon, HomeIcon, KanaIcon, QuizIcon, TableIcon } from './components/Icons';
+import { BookIcon, ChartIcon, DeviceIcon, FeedbackIcon, HomeIcon, KanaIcon, QuizIcon, TableIcon, TalkIcon } from './components/Icons';
 
-const NAV: { to: string; label: string; icon: ReactNode; end?: boolean }[] = [
+// `short` is the bottom tab bar's label on phones, where eight tabs leave little room.
+const NAV: { to: string; label: string; short?: string; icon: ReactNode; end?: boolean }[] = [
   { to: '/', label: '홈', icon: <HomeIcon />, end: true },
   { to: '/decks', label: '단어장', icon: <BookIcon /> },
+  { to: '/talk', label: '회화 노트', short: '회화', icon: <TalkIcon /> },
   { to: '/kana', label: '가나표', icon: <KanaIcon /> },
   { to: '/quiz', label: '퀴즈', icon: <QuizIcon /> },
   { to: '/log', label: '복습표', icon: <TableIcon /> },
@@ -66,7 +68,7 @@ export default function App() {
         {NAV.map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} className="tab-link">
             {n.icon}
-            <span>{n.label}</span>
+            <span>{n.short ?? n.label}</span>
           </NavLink>
         ))}
       </nav>

@@ -52,7 +52,7 @@ export default function Decks() {
           </Link>
         ))}
         {decks && (
-          <Link to={`/decks/${TALK_DECK.id}`} className="card deck-card deck-card--tall deck-card--talk">
+          <Link to="/talk" className="card deck-card deck-card--tall deck-card--talk">
             <div>
               <span className="deck-title">
                 {TALK_DECK.title} {phraseCount !== null && <span className="accent-text">{phraseCount}</span>}

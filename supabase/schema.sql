@@ -134,39 +134,3 @@ create policy "own phrases" on public.phrases
   for all to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
-
--- Translations per account per Korean day. No policies: only use_translation() below touches it,
--- so nobody can reset their own count.
-create table if not exists public.translate_usage (
-  user_id uuid not null references auth.users (id) on delete cascade,
-  day date not null,
-  count integer not null default 0,
-  primary key (user_id, day)
-);
-
-alter table public.translate_usage enable row level security;
-
--- Count one translation for the signed-in account and return today's total, so /api/translate
--- can refuse once the daily limit is passed.
-create or replace function public.use_translation()
-returns integer
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  total integer;
-begin
-  if auth.uid() is null then
-    raise exception 'not signed in';
-  end if;
-  insert into public.translate_usage (user_id, day, count)
-  values (auth.uid(), (now() at time zone 'Asia/Seoul')::date, 1)
-  on conflict (user_id, day) do update set count = public.translate_usage.count + 1
-  returning count into total;
-  return total;
-end;
-$$;
-
-revoke execute on function public.use_translation() from public, anon;
-grant execute on function public.use_translation() to authenticated;

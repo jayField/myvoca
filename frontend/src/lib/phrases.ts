@@ -9,12 +9,6 @@ const COLUMNS = 'id, input, japanese, reading, meaning, note, example_ja, exampl
 const SIGN_IN = '회화 노트는 로그인해야 쓸 수 있어요.';
 const NETWORK = '인터넷 연결을 확인하고 다시 시도해 주세요.';
 
-export interface TranslateResponse {
-  result: Translation;
-  /** Translations this account has used today, including this one. */
-  used: number;
-  limit: number;
-}
 
 /** A phrase as a quiz item, so the existing quiz screens can ask it like a word. */
 export function phraseItem(p: Phrase): Item {
@@ -53,8 +47,8 @@ export async function deletePhrase(id: string): Promise<void> {
   if (error) throw new Error(`지우지 못했어요. ${NETWORK}`);
 }
 
-/** Ask the server to translate; the Gemini key and the daily limit both live there. */
-export async function translatePhrase(input: string): Promise<TranslateResponse> {
+/** Ask the server to translate; the Gemini key lives there. */
+export async function translatePhrase(input: string): Promise<Translation> {
   const { data } = await client().auth.getSession();
   if (!data.session) throw new Error(SIGN_IN);
   let res: Response;
@@ -67,7 +61,7 @@ export async function translatePhrase(input: string): Promise<TranslateResponse>
   } catch {
     throw new Error(`번역하지 못했어요. ${NETWORK}`);
   }
-  const body = (await res.json().catch(() => null)) as (TranslateResponse & { error?: string }) | null;
+  const body = (await res.json().catch(() => null)) as { result?: Translation; error?: string } | null;
   if (!res.ok || !body?.result) throw new Error(body?.error ?? '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
-  return body;
+  return body.result;
 }

@@ -38,6 +38,13 @@ export const KanaIcon = () => (
   </Icon>
 );
 
+export const TalkIcon = () => (
+  <Icon>
+    <path d="M4 5h11a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H9l-3 2.5V13H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />
+    <path d="M16 9h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-1v2.5L16 17h-5a1 1 0 0 1-1-1v-1" />
+  </Icon>
+);
+
 export const FeedbackIcon = () => (
   <Icon>
     <path d="M5 5h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4 3v-3H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z" />

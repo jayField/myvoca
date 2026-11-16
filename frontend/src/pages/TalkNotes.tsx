@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase, Translation } from '../api';
-import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
 import { toRomaji } from '../lib/kana';
 import { deletePhrase, listPhrases, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
@@ -17,7 +16,6 @@ export default function TalkNotes() {
   const [phrases, setPhrases] = useState<Phrase[] | null>(null);
   const [input, setInput] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [usage, setUsage] = useState<{ used: number; limit: number } | null>(null);
   const [busy, setBusy] = useState<'translate' | 'save' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,9 +29,7 @@ export default function TalkNotes() {
     setBusy('translate');
     setError(null);
     try {
-      const res = await translatePhrase(text);
-      setDraft({ input: text, result: res.result });
-      setUsage({ used: res.used, limit: res.limit });
+      setDraft({ input: text, result: await translatePhrase(text) });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -82,10 +78,6 @@ export default function TalkNotes() {
     <div className="page page--narrow">
       <header className="page-header">
         <div>
-          <Link to="/decks" className="back-link">
-            <BackIcon />
-            단어장
-          </Link>
           <h1>{TALK_DECK.title}</h1>
           <p className="muted small">{TALK_DECK.description}</p>
         </div>
@@ -108,12 +100,7 @@ export default function TalkNotes() {
             onChange={(e) => setInput(e.target.value)}
           />
         </label>
-        <div className="button-row feedback-actions">
-          {usage && (
-            <span className="muted xsmall">
-              오늘 번역 {usage.used} / {usage.limit}
-            </span>
-          )}
+        <div className="button-row">
           <button type="submit" className="btn btn--primary" disabled={!input.trim() || busy !== null}>
             {busy === 'translate' ? '번역 중…' : '번역'}
           </button>
