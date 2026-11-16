@@ -40,6 +40,25 @@ export interface DeckItem extends Item {
   recovered: boolean;
 }
 
+/** What /api/translate returns for one typed expression. */
+export interface Translation {
+  japanese: string;
+  /** Hiragana (katakana for loanwords); quizzes and romaji read this. */
+  reading: string;
+  meaning: string;
+  note: string;
+  example_ja: string;
+  example_ko: string;
+}
+
+/** A 회화 노트 entry, stored per account in Supabase. */
+export interface Phrase extends Translation {
+  id: string;
+  /** What the learner typed, e.g. 고항 타베타이. */
+  input: string;
+  created_at: string;
+}
+
 /** One line of 복습표: a word on a day it was first met or studied. */
 export interface LogEntry {
   item: Item;

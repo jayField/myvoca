@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck, type Item, type QuizQuestion } from '../api';
+import { api, CONFUSING_DECK_ID, LOAD_ERROR, TALK_DECK_ID, type Deck, type Item, type QuizQuestion } from '../api';
 import { BackIcon } from '../components/Icons';
 import { clampQuestionCount, QuestionCountPicker } from '../components/QuestionCountPicker';
 import { showsReading, Term } from '../components/Term';
@@ -141,8 +141,9 @@ export default function Speed() {
       setReviewSaved(false);
       setBest(loadBest(recordKey));
       setError(null);
-    } catch {
-      setError(LOAD_ERROR);
+    } catch (e) {
+      // 회화 노트 is read from the account, so its errors say what went wrong (signed out, offline).
+      setError(deckId === TALK_DECK_ID && e instanceof Error ? e.message : LOAD_ERROR);
     }
   }
 
@@ -173,7 +174,11 @@ export default function Speed() {
           <fieldset className="field">
             <legend>범위</legend>
             <div className="choice-row">
-              {[...decks.map((d) => ({ id: d.id, title: d.title })), { id: CONFUSING_DECK_ID, title: '헷갈리는 단어' }].map((d) => (
+              {[
+                ...decks.map((d) => ({ id: d.id, title: d.title })),
+                { id: CONFUSING_DECK_ID, title: '헷갈리는 단어' },
+                { id: TALK_DECK_ID, title: '회화 노트' },
+              ].map((d) => (
                 <label key={d.id} className="chip">
                   <input type="radio" name="deck" checked={deckId === d.id} onChange={() => setDeckId(d.id)} />
                   <span>{d.title}</span>
@@ -200,7 +205,9 @@ export default function Speed() {
       <div className="page page--narrow">
         <div className="empty">
           <h1>낼 문제가 없어요</h1>
-          <p className="muted">헷갈리는 단어가 아직 없어요. 다른 범위를 골라 보세요.</p>
+          <p className="muted">
+            {deckId === TALK_DECK_ID ? '회화 노트에 저장한 표현이 아직 없어요.' : '헷갈리는 단어가 아직 없어요.'} 다른 범위를 골라 보세요.
+          </p>
           <button type="button" className="btn btn--primary" onClick={() => setQuestions(null)}>
             범위 다시 고르기
           </button>

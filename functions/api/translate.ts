@@ -1,0 +1,117 @@
+// Cloudflare Pages Function: POST /api/translate
+// Turns what a learner typed (usually Japanese written in Hangul, e.g. 고항 타베타이) into the
+// Japanese they meant, with reading, Korean meaning and an example, via the Gemini API.
+// The Gemini key lives only here (Pages secret GEMINI_API_KEY); the browser never sees it.
+// Each call is counted against the signed-in account's daily limit in Supabase first.
+
+interface Env {
+  GEMINI_API_KEY?: string;
+  GEMINI_MODEL?: string;
+  TRANSLATE_DAILY_LIMIT?: string;
+  VITE_SUPABASE_URL?: string;
+  VITE_SUPABASE_ANON_KEY?: string;
+}
+
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+const DEFAULT_DAILY_LIMIT = 30;
+const MAX_INPUT = 100;
+
+const SYSTEM = `You help a Korean learner of Japanese save expressions they picked up chatting with Japanese speakers.
+The input is usually Japanese written in Hangul by how it sounds (e.g. 아리가또 → ありがとう, 고항 타베타이 → ご飯食べたい), often misspelled: long vowels, small っ and voicing are frequently wrong or missing. It may also be a Korean sentence to say in Japanese, or Japanese text.
+Read Hangul as Japanese sounds first; treat it as Korean only when it clearly is Korean. Work out the natural Japanese expression the learner meant and correct it.
+Return:
+- japanese: the expression as normally written (kanji where natural, otherwise kana)
+- reading: the whole expression in hiragana (katakana loanwords stay katakana)
+- meaning: short, natural Korean meaning
+- note: one short Korean sentence on nuance or politeness, or on how the input was corrected; empty if nothing to add
+- example_ja: one natural, everyday example sentence in Japanese (Japanese script only, never Hangul) using the expression
+- example_ko: the Korean translation of example_ja (Hangul)`;
+
+const SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    japanese: { type: 'STRING' },
+    reading: { type: 'STRING' },
+    meaning: { type: 'STRING' },
+    note: { type: 'STRING' },
+    example_ja: { type: 'STRING' },
+    example_ko: { type: 'STRING' },
+  },
+  required: ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko'],
+};
+
+const FIELDS = ['japanese', 'reading', 'meaning', 'note', 'example_ja', 'example_ko'] as const;
+type Translation = Record<(typeof FIELDS)[number], string>;
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+
+const fail = (status: number, error: string) => json({ error }, status);
+
+/** Count this call for the account behind the token; null when the token is not a signed-in user. */
+async function useTranslation(env: Env, token: string): Promise<number | null> {
+  const res = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/rpc/use_translation`, {
+    method: 'POST',
+    headers: { apikey: env.VITE_SUPABASE_ANON_KEY!, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  if (res.status === 401 || res.status === 403) return null;
+  if (!res.ok) throw new Error(`use_translation ${res.status}: ${await res.text()}`);
+  return Number(await res.json());
+}
+
+async function translate(env: Env, input: string): Promise<Translation> {
+  const model = env.GEMINI_MODEL || DEFAULT_MODEL;
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: 'POST',
+    headers: { 'x-goog-api-key': env.GEMINI_API_KEY!, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: [{ role: 'user', parts: [{ text: input }] }],
+      generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA },
+    }),
+  });
+  if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`);
+  const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+  const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+  const parsed = JSON.parse(text) as Record<string, unknown>;
+  const out = Object.fromEntries(FIELDS.map((f) => [f, typeof parsed[f] === 'string' ? (parsed[f] as string).trim() : ''])) as Translation;
+  if (!out.japanese || !out.reading || !out.meaning) throw new Error(`gemini returned an incomplete result: ${text}`);
+  return out;
+}
+
+export async function onRequestPost({ request, env }: { request: Request; env: Env }): Promise<Response> {
+  if (!env.GEMINI_API_KEY || !env.VITE_SUPABASE_URL || !env.VITE_SUPABASE_ANON_KEY) {
+    return fail(500, '번역 설정이 아직 안 됐어요. 관리자에게 알려 주세요.');
+  }
+  const token = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
+  if (!token) return fail(401, '로그인이 필요해요.');
+
+  let input = '';
+  try {
+    const body = (await request.json()) as { input?: unknown };
+    input = typeof body.input === 'string' ? body.input.trim() : '';
+  } catch {
+    // Falls through to the empty-input error.
+  }
+  if (!input) return fail(400, '번역할 표현을 입력해 주세요.');
+  if (input.length > MAX_INPUT) return fail(400, `${MAX_INPUT}자 이내로 입력해 주세요.`);
+
+  const limit = Number(env.TRANSLATE_DAILY_LIMIT) || DEFAULT_DAILY_LIMIT;
+  let used: number | null;
+  try {
+    used = await useTranslation(env, token);
+  } catch (e) {
+    console.error(e);
+    return fail(500, '번역 횟수를 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+  }
+  if (used === null) return fail(401, '로그인이 필요해요. 다시 로그인해 주세요.');
+  if (used > limit) return fail(429, `오늘 번역은 ${limit}번까지예요. 내일 다시 해 주세요.`);
+
+  try {
+    return json({ result: await translate(env, input), used, limit });
+  } catch (e) {
+    console.error(e);
+    return fail(502, '번역하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+  }
+}

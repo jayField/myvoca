@@ -6,6 +6,7 @@ import { toRomaji } from './kana';
 import { seededRng } from './random';
 import {
   applyReview,
+  buildPhraseQuiz,
   buildQuiz,
   computeStats,
   deckItems,
@@ -155,6 +156,26 @@ describe('buildQuiz', () => {
       expect(new Set(ids).size).toBe(4);
       expect(ids).toContain(q.item.id);
     }
+  });
+});
+
+describe('buildPhraseQuiz', () => {
+  const phrase = (id: string, meaning: string) => ({
+    id: `talk:${id}`, deck_id: 'talk', kind: 'word' as const, term: id, display: id, reading: id, meaning, example_ja: null, example_ko: null,
+  });
+
+  it('asks saved phrases with four distinct choices, topping up with N5 words when few are saved', () => {
+    const quiz = buildPhraseQuiz([phrase('ありがとう', '고마워'), phrase('おやすみ', '잘 자')], 10, seededRng('talk'));
+    expect(quiz.questions).toHaveLength(2);
+    for (const q of quiz.questions) {
+      expect(q.choices).toHaveLength(4);
+      expect(new Set(q.choices.map((c) => c.id)).size).toBe(4);
+      expect(q.choices).toContain(q.item);
+    }
+  });
+
+  it('has no questions when nothing is saved', () => {
+    expect(buildPhraseQuiz([], 10).questions).toEqual([]);
   });
 });
 

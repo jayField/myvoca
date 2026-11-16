@@ -112,3 +112,61 @@ $$;
 drop trigger if exists feedback_author on public.feedback;
 create trigger feedback_author before insert on public.feedback
   for each row execute function public.set_feedback_author();
+
+-- 회화 노트: expressions each person picked up in conversation, translated by /api/translate.
+create table if not exists public.phrases (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  input text not null default '' check (char_length(input) <= 200),
+  japanese text not null check (char_length(japanese) between 1 and 200),
+  reading text not null check (char_length(reading) between 1 and 300),
+  meaning text not null check (char_length(meaning) between 1 and 200),
+  note text not null default '' check (char_length(note) <= 500),
+  example_ja text not null default '' check (char_length(example_ja) <= 500),
+  example_ko text not null default '' check (char_length(example_ko) <= 500),
+  created_at timestamptz not null default now()
+);
+
+alter table public.phrases enable row level security;
+
+drop policy if exists "own phrases" on public.phrases;
+create policy "own phrases" on public.phrases
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+-- Translations per account per Korean day. No policies: only use_translation() below touches it,
+-- so nobody can reset their own count.
+create table if not exists public.translate_usage (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  day date not null,
+  count integer not null default 0,
+  primary key (user_id, day)
+);
+
+alter table public.translate_usage enable row level security;
+
+-- Count one translation for the signed-in account and return today's total, so /api/translate
+-- can refuse once the daily limit is passed.
+create or replace function public.use_translation()
+returns integer
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  total integer;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in';
+  end if;
+  insert into public.translate_usage (user_id, day, count)
+  values (auth.uid(), (now() at time zone 'Asia/Seoul')::date, 1)
+  on conflict (user_id, day) do update set count = public.translate_usage.count + 1
+  returning count into total;
+  return total;
+end;
+$$;
+
+revoke execute on function public.use_translation() from public, anon;
+grant execute on function public.use_translation() to authenticated;

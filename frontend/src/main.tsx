@@ -17,6 +17,7 @@ import Speed from './pages/Speed';
 import Log from './pages/Log';
 import Stats from './pages/Stats';
 import Study from './pages/Study';
+import TalkNotes from './pages/TalkNotes';
 import './styles.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -36,6 +37,7 @@ createRoot(document.getElementById('root')!).render(
             <Route index element={<Home />} />
             <Route path="study" element={<Study />} />
             <Route path="decks" element={<Decks />} />
+            <Route path="decks/talk" element={<TalkNotes />} />
             <Route path="decks/:deckId" element={<DeckDetail />} />
             <Route path="kana" element={<Kana />} />
             <Route path="quiz" element={<Quiz />} />

@@ -1,0 +1,205 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import type { Phrase, Translation } from '../api';
+import { BackIcon } from '../components/Icons';
+import { SpeakButton } from '../components/SpeakButton';
+import { toRomaji } from '../lib/kana';
+import { deletePhrase, listPhrases, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
+
+const MAX_INPUT = 100;
+
+interface Draft {
+  input: string;
+  result: Translation;
+}
+
+export default function TalkNotes() {
+  const [phrases, setPhrases] = useState<Phrase[] | null>(null);
+  const [input, setInput] = useState('');
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number } | null>(null);
+  const [busy, setBusy] = useState<'translate' | 'save' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    listPhrases()
+      .then(setPhrases)
+      .catch((e: Error) => setError(e.message));
+  }, []);
+
+  async function translate(text: string) {
+    setBusy('translate');
+    setError(null);
+    try {
+      const res = await translatePhrase(text);
+      setDraft({ input: text, result: res.result });
+      setUsage({ used: res.used, limit: res.limit });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (input.trim() && !busy) void translate(input.trim());
+  }
+
+  function edit(field: keyof Translation, value: string) {
+    setDraft((d) => d && { ...d, result: { ...d.result, [field]: value } });
+  }
+
+  async function save() {
+    if (!draft) return;
+    const result = { ...draft.result, japanese: draft.result.japanese.trim(), reading: draft.result.reading.trim(), meaning: draft.result.meaning.trim() };
+    if (!result.japanese || !result.reading || !result.meaning) return setError('일본어, 읽기, 뜻을 모두 채워 주세요.');
+    setBusy('save');
+    setError(null);
+    try {
+      const saved = await savePhrase(draft.input, result);
+      setPhrases((list) => [saved, ...(list ?? [])]);
+      setDraft(null);
+      setInput('');
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function remove(p: Phrase) {
+    if (!window.confirm(`'${p.japanese}'를 회화 노트에서 지울까요?`)) return;
+    try {
+      await deletePhrase(p.id);
+      setPhrases((list) => list?.filter((x) => x.id !== p.id) ?? null);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  return (
+    <div className="page page--narrow">
+      <header className="page-header">
+        <div>
+          <Link to="/decks" className="back-link">
+            <BackIcon />
+            단어장
+          </Link>
+          <h1>{TALK_DECK.title}</h1>
+          <p className="muted small">{TALK_DECK.description}</p>
+        </div>
+        <div className="button-row">
+          <Link to={`/quiz?deck=${TALK_DECK.id}`} className="btn btn--ghost">
+            이 범위로 퀴즈
+          </Link>
+        </div>
+      </header>
+
+      <form className="card card--lg stack-sm" onSubmit={submit}>
+        <label className="form-field stack-sm">
+          <span className="card-title">번역하기</span>
+          <span className="hint">들은 일본어를 한글 발음 그대로 적어요. 한국어 문장이나 일본어로 적어도 돼요.</span>
+          <input
+            className="text-input text-input--block"
+            maxLength={MAX_INPUT}
+            placeholder="예) 고항 타베타이"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+        </label>
+        <div className="button-row feedback-actions">
+          {usage && (
+            <span className="muted xsmall">
+              오늘 번역 {usage.used} / {usage.limit}
+            </span>
+          )}
+          <button type="submit" className="btn btn--primary" disabled={!input.trim() || busy !== null}>
+            {busy === 'translate' ? '번역 중…' : '번역'}
+          </button>
+        </div>
+      </form>
+
+      {error && <p className="banner-error">{error}</p>}
+
+      {draft && (
+        <section className="card card--lg stack-sm talk-draft" aria-labelledby="talk-draft">
+          <div className="card-head">
+            <h2 id="talk-draft" className="card-title">
+              번역 결과
+            </h2>
+            <SpeakButton text={draft.result.japanese} />
+          </div>
+          <p className="muted small">입력: {draft.input}</p>
+          <label className="talk-field">
+            <span>일본어</span>
+            <input lang="ja" className="text-input text-input--block talk-japanese" value={draft.result.japanese} onChange={(e) => edit('japanese', e.target.value)} />
+          </label>
+          <label className="talk-field">
+            <span>읽기</span>
+            <input lang="ja" className="text-input text-input--block" value={draft.result.reading} onChange={(e) => edit('reading', e.target.value)} />
+          </label>
+          <p className="muted small talk-romaji">발음: {toRomaji(draft.result.reading)}</p>
+          <label className="talk-field">
+            <span>뜻</span>
+            <input className="text-input text-input--block" value={draft.result.meaning} onChange={(e) => edit('meaning', e.target.value)} />
+          </label>
+          {draft.result.note && <p className="hint">{draft.result.note}</p>}
+          {draft.result.example_ja && (
+            <p className="talk-example">
+              <span lang="ja">{draft.result.example_ja}</span>
+              <span className="muted">{draft.result.example_ko}</span>
+            </p>
+          )}
+          <p className="hint">번역이 틀릴 수 있어요. 이상하면 고치거나 다시 번역해 보세요.</p>
+          <div className="button-row">
+            <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy !== null}>
+              {busy === 'save' ? '저장 중…' : '단어장에 저장'}
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={() => void translate(draft.input)} disabled={busy !== null}>
+              다시 번역
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={() => setDraft(null)} disabled={busy !== null}>
+              취소
+            </button>
+          </div>
+        </section>
+      )}
+
+      {phrases && phrases.length === 0 && <p className="muted">아직 저장한 표현이 없어요. 위에서 번역해서 저장해 보세요.</p>}
+      {phrases && phrases.length > 0 && (
+        <section className="stack-sm" aria-labelledby="talk-saved">
+          <h2 id="talk-saved" className="section-title day-title">
+            저장한 표현 <span className="muted small">· {phrases.length}개</span>
+          </h2>
+          <ul className="item-list">
+            {phrases.map((p) => (
+              <li key={p.id} className="item-row talk-row">
+                <div className="talk-main">
+                  <span lang="ja" className="talk-term">
+                    {p.japanese}
+                  </span>
+                  <span className="item-text">
+                    {p.reading !== p.japanese && <span lang="ja">{p.reading}</span>}
+                    <span className="muted">{toRomaji(p.reading)}</span>
+                    <span>{p.meaning}</span>
+                  </span>
+                  {p.example_ja && (
+                    <span className="talk-example small">
+                      <span lang="ja">{p.example_ja}</span>
+                      <span className="muted">{p.example_ko}</span>
+                    </span>
+                  )}
+                </div>
+                <SpeakButton text={p.japanese} />
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => void remove(p)}>
+                  삭제
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}

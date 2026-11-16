@@ -278,6 +278,22 @@ export function buildQuiz(deckId: string, count: number, progress: Progress[], r
   return { deck_id: deckId, source, questions };
 }
 
+/**
+ * A quiz over 회화 노트 phrases. Wrong choices come from the other phrases; with fewer than four
+ * saved, N5 words fill in so every question still has four choices.
+ */
+export function buildPhraseQuiz(phrases: Item[], count: number, rng: Rng = Math.random): Quiz {
+  const questions = sample(phrases, count, rng).map((item) => {
+    let others = sample(phrases.filter((x) => x.meaning !== item.meaning), 3, rng);
+    if (others.length < 3) {
+      const filler = ITEMS_BY_DECK.get(WORD_OF_DAY_DECK)!.filter((x) => x.meaning !== item.meaning);
+      others = [...others, ...sample(filler, 3 - others.length, rng)];
+    }
+    return { item, choices: shuffle([...others, item], rng) };
+  });
+  return { deck_id: phrases[0]?.deck_id ?? '', source: 'learned', questions };
+}
+
 export function wordOfDay(today: string): Item {
   const words = ITEMS_BY_DECK.get(WORD_OF_DAY_DECK)!.filter((item) => item.example_ja);
   return words[dayNumber(today) % words.length];
