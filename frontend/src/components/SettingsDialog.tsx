@@ -4,6 +4,19 @@ import { ORDER_LABEL } from '../labels';
 
 const PRESETS = [5, 10, 20];
 
+type ReviewMode = 'five' | 'all' | 'off';
+const REVIEW_MODES: ReviewMode[] = ['five', 'all', 'off'];
+const REVIEW_LABEL: Record<ReviewMode, string> = { five: '5개', all: '전부', off: '빼기' };
+const REVIEW_HINT: Record<ReviewMode, string> = {
+  five: '새 항목 전에 이 학습 범위의 헷갈리는 단어에서 랜덤으로 5개를 먼저 보여줘요.',
+  all: '새 항목 전에 이 학습 범위의 헷갈리는 단어를 전부 섞어서 보여줘요.',
+  off: '새 항목만 보여줘요. 다시 켜면 헷갈리는 단어가 복습으로 나와요.',
+};
+
+function reviewMode(s: Settings): ReviewMode {
+  return !s.include_reviews ? 'off' : s.all_reviews ? 'all' : 'five';
+}
+
 interface Props {
   open: boolean;
   decks: Deck[];
@@ -123,23 +136,19 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
         <fieldset className="field">
           <legend>복습</legend>
           <div className="choice-row">
-            {[true, false].map((on) => (
-              <label key={String(on)} className="chip">
+            {REVIEW_MODES.map((mode) => (
+              <label key={mode} className="chip">
                 <input
                   type="radio"
                   name="reviews"
-                  checked={draft.include_reviews === on}
-                  onChange={() => setDraft({ ...draft, include_reviews: on })}
+                  checked={reviewMode(draft) === mode}
+                  onChange={() => setDraft({ ...draft, include_reviews: mode !== 'off', all_reviews: mode === 'all' })}
                 />
-                <span>{on ? '포함' : '빼기'}</span>
+                <span>{REVIEW_LABEL[mode]}</span>
               </label>
             ))}
           </div>
-          <p className="hint">
-            {draft.include_reviews
-              ? '새 항목 전에 헷갈리는 단어에서 랜덤으로 5개를 먼저 보여줘요.'
-              : '새 항목만 보여줘요. 다시 포함하면 헷갈리는 단어가 복습으로 나와요.'}
-          </p>
+          <p className="hint">{REVIEW_HINT[reviewMode(draft)]}</p>
         </fieldset>
 
         {error && <p className="error-text">{error}</p>}

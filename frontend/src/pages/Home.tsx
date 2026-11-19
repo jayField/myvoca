@@ -200,7 +200,7 @@ function TodayCard({ plan, results, deckLearned, resetting, onStart, onSettings,
         </h2>
         <button type="button" className="setting-pill" onClick={onSettings}>
           {plan.deck_title} · {ORDER_LABEL[plan.settings.order]}
-          {!plan.settings.include_reviews && ' · 복습 빼기'}
+          {!plan.settings.include_reviews ? ' · 복습 빼기' : plan.settings.all_reviews ? ' · 복습 전부' : ''}
           <GearIcon />
         </button>
       </div>

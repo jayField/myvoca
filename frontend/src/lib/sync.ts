@@ -22,6 +22,8 @@ interface SettingsRow {
   daily_new: number;
   order_mode: OrderMode;
   include_reviews: boolean;
+  /** Absent until the column is added to the table. */
+  all_reviews?: boolean;
   updated_at: string;
 }
 
@@ -56,7 +58,7 @@ async function syncOnce(userId: string): Promise<boolean> {
   const [progressRes, daysRes, settingsRes] = await Promise.all([
     supabase.from('progress').select(PROGRESS_COLUMNS),
     supabase.from('day_counts').select('day, count'),
-    supabase.from('user_settings').select('deck_id, daily_new, order_mode, include_reviews, updated_at').maybeSingle<SettingsRow>(),
+    supabase.from('user_settings').select('*').maybeSingle<SettingsRow>(),
   ]);
   if (progressRes.error) throw progressRes.error;
   if (daysRes.error) throw daysRes.error;
@@ -71,6 +73,7 @@ async function syncOnce(userId: string): Promise<boolean> {
           daily_new: settingsRes.data.daily_new,
           order: settingsRes.data.order_mode,
           include_reviews: settingsRes.data.include_reviews,
+          all_reviews: settingsRes.data.all_reviews === true,
         },
         updated_at: settingsRes.data.updated_at,
       }
@@ -97,7 +100,10 @@ async function syncOnce(userId: string): Promise<boolean> {
     writes.push(supabase.from('day_counts').upsert(daysToPush.map((d) => ({ ...d, user_id: userId }))));
   }
   if (pushSettings && local.settings) {
-    const { deck_id, daily_new, order, include_reviews } = local.settings.value;
+    const { deck_id, daily_new, order, include_reviews, all_reviews } = local.settings.value;
+    // Only send all_reviews once the table has the column (the row read back shows it), so an account
+    // whose table predates it keeps syncing.
+    const hasColumn = !settingsRes.data || 'all_reviews' in settingsRes.data;
     writes.push(
       supabase.from('user_settings').upsert({
         user_id: userId,
@@ -105,6 +111,7 @@ async function syncOnce(userId: string): Promise<boolean> {
         daily_new,
         order_mode: order,
         include_reviews: include_reviews !== false,
+        ...(hasColumn && { all_reviews: all_reviews === true }),
         updated_at: local.settings.updated_at,
       }),
     );

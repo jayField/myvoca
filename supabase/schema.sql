@@ -44,6 +44,8 @@ create table if not exists public.user_settings (
 
 -- Added after launch: today's study can leave reviews out.
 alter table public.user_settings add column if not exists include_reviews boolean not null default true;
+-- Added later: review every confusing word of the range instead of five a day.
+alter table public.user_settings add column if not exists all_reviews boolean not null default false;
 
 alter table public.progress enable row level security;
 alter table public.day_counts enable row level security;

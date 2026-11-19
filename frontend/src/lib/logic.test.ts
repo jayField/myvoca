@@ -72,7 +72,7 @@ describe('planToday', () => {
     expect(plan.new_items).toHaveLength(20);
   });
 
-  it('reviews five random confusing words from any range, none on the day they were first met', () => {
+  it('reviews five random confusing words from the chosen range only, none on the day they were first met', () => {
     const n5: Settings = { deck_id: 'n5', daily_new: 10, order: 'sequential', include_reviews: true };
     const words = planToday(n5, [], 0, TODAY).new_items.map((i) => i.id);
     const progress = learn([], words, 'again');
@@ -82,9 +82,22 @@ describe('planToday', () => {
     expect(reviews).toHaveLength(5);
     expect(new Set(reviews).size).toBe(5);
     expect(reviews.every((id) => words.includes(id))).toBe(true);
-    const hiragana = planToday(DEFAULT_SETTINGS, progress, 0, tomorrow);
-    expect(hiragana.reviews).toHaveLength(5);
-    expect(hiragana.new_items.every((i) => i.deck_id === 'hiragana')).toBe(true);
+    // N5's confusing words stay with N5: studying ひらがな brings none of them.
+    expect(planToday(DEFAULT_SETTINGS, progress, 0, tomorrow).reviews).toEqual([]);
+  });
+
+  it('reviews every confusing word of the range when set to all, each once a day', () => {
+    const n5: Settings = { deck_id: 'n5', daily_new: 10, order: 'sequential', include_reviews: true, all_reviews: true };
+    const words = planToday(n5, [], 0, TODAY).new_items.map((i) => i.id);
+    let progress = learn([], words.slice(0, 8), 'again');
+    progress = learn(progress, words.slice(8), 'good');
+    const hira = planToday(DEFAULT_SETTINGS, [], 0, TODAY).new_items.map((i) => i.id);
+    progress = learn(progress, hira, 'again');
+    const tomorrow = addDays(TODAY, 1);
+    const reviews = planToday(n5, progress, 0, tomorrow).reviews.map((i) => i.id);
+    expect(reviews.sort()).toEqual(words.slice(0, 8).sort());
+    progress = learn(progress, reviews.slice(0, 6), 'good', tomorrow);
+    expect(planToday(n5, progress, 6, tomorrow).reviews).toHaveLength(2);
   });
 
   it('keeps reviews to five a day across sessions without repeating a word', () => {

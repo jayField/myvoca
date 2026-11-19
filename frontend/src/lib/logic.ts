@@ -139,14 +139,17 @@ export function planToday(
   }
   const remaining = Math.max(0, settings.daily_new - newDone);
 
-  // Reviews are a few random 헷갈리는 단어 from any range. Words first met today are not reviews yet, and a word
-  // studied today is not served twice; those already reviewed today use up the day's count, so resuming adds no more.
-  const known = [...byItem.values()];
+  // Reviews are 헷갈리는 단어 from the chosen range only, so N5 is reviewed with N5: five at random a day, or all
+  // of them. Words first met today are not reviews yet, and a word studied today is not served twice; those
+  // already reviewed today use up the day's five, so resuming adds no more.
+  const known = [...byItem.values()].filter((p) => ITEM_BY_ID.get(p.item_id)?.deck_id === deck.id);
   const reviewsDone = known.filter((p) => p.studied_on === today && p.first_seen !== today).length;
   const reviewPool = settings.include_reviews
     ? known.filter((p) => isConfusing(p) && p.first_seen !== today && p.studied_on !== today)
     : [];
-  const reviews = sample(reviewPool, Math.max(0, DAILY_REVIEWS - reviewsDone), rng);
+  const reviews = settings.all_reviews
+    ? shuffle(reviewPool, rng)
+    : sample(reviewPool, Math.max(0, DAILY_REVIEWS - reviewsDone), rng);
 
   return {
     date: today,

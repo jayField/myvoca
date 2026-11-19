@@ -54,6 +54,7 @@ function validSettings(s: Settings): Settings {
     daily_new,
     order: s.order === 'random' ? 'random' : 'sequential',
     include_reviews: s.include_reviews !== false,
+    all_reviews: s.all_reviews === true,
   };
 }
 
