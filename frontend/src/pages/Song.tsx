@@ -8,7 +8,7 @@ import { createPlayer, PLAYING, playerError, type YouTubePlayer } from '../lib/y
 /** How often the lyrics check where the video is, in milliseconds. */
 const TICK = 150;
 /** One press of the sync buttons, in milliseconds. */
-const SYNC_STEP = 500;
+const SYNC_STEP = 100;
 /** How long after the last sync press it is saved, so a run of presses is one save. */
 const SAVE_DELAY = 800;
 
@@ -192,11 +192,11 @@ export default function Song() {
             <div className="song-sync">
               <span className="muted small">가사 싱크 {signed(offset)}</span>
               <span className="button-row">
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => shift(-SYNC_STEP)} aria-label="가사 0.5초 빠르게">
-                  −0.5초
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => shift(-SYNC_STEP)} aria-label="가사 0.1초 빠르게">
+                  −0.1초
                 </button>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => shift(SYNC_STEP)} aria-label="가사 0.5초 늦게">
-                  +0.5초
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => shift(SYNC_STEP)} aria-label="가사 0.1초 늦게">
+                  +0.1초
                 </button>
               </span>
             </div>
