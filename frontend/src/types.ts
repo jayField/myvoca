@@ -90,7 +90,7 @@ export interface Settings {
   order: OrderMode;
   /** Off: today's study serves new items only; due cards keep their schedule and wait. */
   include_reviews: boolean;
-  /** With reviews on: every 헷갈리는 단어 of the range instead of five a day. Missing on older settings. */
+  /** With reviews on: as many 헷갈리는 단어 a day as daily_new instead of five. Missing on older settings. */
   all_reviews?: boolean;
 }
 

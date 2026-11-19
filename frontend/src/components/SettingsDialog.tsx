@@ -7,11 +7,11 @@ const PRESETS = [5, 10, 20];
 type ReviewMode = 'five' | 'all' | 'off';
 const REVIEW_MODES: ReviewMode[] = ['five', 'all', 'off'];
 const REVIEW_LABEL: Record<ReviewMode, string> = { five: '5개', all: '전부', off: '빼기' };
-const REVIEW_HINT: Record<ReviewMode, string> = {
-  five: '새 항목 전에 이 학습 범위의 헷갈리는 단어에서 랜덤으로 5개를 먼저 보여줘요.',
-  all: '새 항목 전에 이 학습 범위의 헷갈리는 단어를 전부 섞어서 보여줘요.',
-  off: '새 항목만 보여줘요. 다시 켜면 헷갈리는 단어가 복습으로 나와요.',
-};
+function reviewHint(mode: ReviewMode, daily: number): string {
+  if (mode === 'off') return '새 항목만 보여줘요. 다시 켜면 헷갈리는 단어가 복습으로 나와요.';
+  const count = mode === 'all' ? `하루 개수만큼(${daily}개)` : '5개';
+  return `새 항목 전에 이 학습 범위의 헷갈리는 단어에서 랜덤으로 ${count}를 먼저 보여줘요.`;
+}
 
 function reviewMode(s: Settings): ReviewMode {
   return !s.include_reviews ? 'off' : s.all_reviews ? 'all' : 'five';
@@ -28,6 +28,8 @@ interface Props {
 export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const [draft, setDraft] = useState(settings);
+  // What is typed in the count box, kept apart from draft so it can be empty while retyping.
+  const [dailyText, setDailyText] = useState(String(settings.daily_new));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +38,7 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
     if (!dialog) return;
     if (open && !dialog.open) {
       setDraft(settings);
+      setDailyText(String(settings.daily_new));
       setError(null);
       dialog.showModal();
     } else if (!open && dialog.open) {
@@ -92,7 +95,10 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
                   type="radio"
                   name="daily"
                   checked={draft.daily_new === n}
-                  onChange={() => setDraft({ ...draft, daily_new: n })}
+                  onChange={() => {
+                    setDraft({ ...draft, daily_new: n });
+                    setDailyText(String(n));
+                  }}
                 />
                 <span>{n}개</span>
               </label>
@@ -104,8 +110,14 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
                 min={1}
                 max={100}
                 inputMode="numeric"
-                value={draft.daily_new}
-                onChange={(e) => setDraft({ ...draft, daily_new: Math.max(1, Math.min(100, Number(e.target.value) || 1)) })}
+                value={dailyText}
+                onChange={(e) => {
+                  const text = e.target.value.replace(/\D/g, '').slice(0, 3);
+                  setDailyText(text);
+                  const n = Number(text);
+                  if (n >= 1) setDraft({ ...draft, daily_new: Math.min(100, n) });
+                }}
+                onBlur={() => setDailyText(String(draft.daily_new))}
               />
               <span aria-hidden="true">개</span>
             </label>
@@ -148,7 +160,7 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
               </label>
             ))}
           </div>
-          <p className="hint">{REVIEW_HINT[reviewMode(draft)]}</p>
+          <p className="hint">{reviewHint(reviewMode(draft), draft.daily_new)}</p>
         </fieldset>
 
         {error && <p className="error-text">{error}</p>}

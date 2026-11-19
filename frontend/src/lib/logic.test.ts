@@ -86,18 +86,23 @@ describe('planToday', () => {
     expect(planToday(DEFAULT_SETTINGS, progress, 0, tomorrow).reviews).toEqual([]);
   });
 
-  it('reviews every confusing word of the range when set to all, each once a day', () => {
-    const n5: Settings = { deck_id: 'n5', daily_new: 10, order: 'sequential', include_reviews: true, all_reviews: true };
+  it('with 전부, reviews as many confusing words a day as the daily new count', () => {
+    const n5: Settings = { deck_id: 'n5', daily_new: 20, order: 'sequential', include_reviews: true, all_reviews: true };
     const words = planToday(n5, [], 0, TODAY).new_items.map((i) => i.id);
-    let progress = learn([], words.slice(0, 8), 'again');
-    progress = learn(progress, words.slice(8), 'good');
+    let progress = learn([], words.slice(0, 18), 'again');
+    progress = learn(progress, words.slice(18), 'good');
     const hira = planToday(DEFAULT_SETTINGS, [], 0, TODAY).new_items.map((i) => i.id);
     progress = learn(progress, hira, 'again');
     const tomorrow = addDays(TODAY, 1);
+    // 18 confusing N5 words, all fit under 20; ひらがな's stay out.
     const reviews = planToday(n5, progress, 0, tomorrow).reviews.map((i) => i.id);
-    expect(reviews.sort()).toEqual(words.slice(0, 8).sort());
-    progress = learn(progress, reviews.slice(0, 6), 'good', tomorrow);
-    expect(planToday(n5, progress, 6, tomorrow).reviews).toHaveLength(2);
+    expect(reviews.sort()).toEqual(words.slice(0, 18).sort());
+    // With 10 a day only 10 come, and resuming after 6 brings the other 4.
+    const ten = { ...n5, daily_new: 10 };
+    const first = planToday(ten, progress, 0, tomorrow).reviews.map((i) => i.id);
+    expect(first).toHaveLength(10);
+    progress = learn(progress, first.slice(0, 6), 'good', tomorrow);
+    expect(planToday(ten, progress, 6, tomorrow).reviews).toHaveLength(4);
   });
 
   it('keeps reviews to five a day across sessions without repeating a word', () => {
