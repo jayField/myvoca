@@ -152,7 +152,7 @@ export default function Songs() {
           {matches && matches.length > 0 && (
             <div className="button-row">
               <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={picked === null || !form.link.trim() || busy !== null}>
-                {busy === 'save' ? '가사 해석 중… (10초쯤 걸려요)' : '저장'}
+                {busy === 'save' ? '가사 해석 중… (30초쯤 걸려요)' : '저장'}
               </button>
             </div>
           )}

@@ -435,6 +435,19 @@ describe('회화 노트 search', () => {
   });
 });
 
+describe('particles after particles', () => {
+  it('says には / では / へは with 와', () => {
+    const words = [
+      { japanese: '時', reading: 'とき' },
+      { japanese: 'には', reading: 'には', attach: true },
+    ];
+    expect(phraseSound({ reading: 'ときには', words })).toBe('토키니와');
+    expect(phraseSound({ reading: 'がっこうでは', words: [{ japanese: '学校', reading: 'がっこう' }, { japanese: 'では', reading: 'では', attach: true }] })).toBe('갓코-데와');
+    // Not a particle: はは (母) as a word keeps its sound.
+    expect(phraseSound({ reading: 'はは', words: [{ japanese: '母', reading: 'はは' }, { japanese: 'は', reading: 'は', attach: true }] })).toBe('하하와');
+  });
+});
+
 describe('노래', () => {
   it('reads the video ID from any YouTube link', () => {
     for (const link of [

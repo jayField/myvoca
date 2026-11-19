@@ -47,14 +47,35 @@ function tidy(words: Word[]): Word[] {
   }));
 }
 
+const KANA = /^[\u3041-\u309f\u30a0-\u30ff（()）「」『』、。！？!?…〜~\s]+$/;
+const toHiragana = (text: string) => text.replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+
 /**
- * The line's reading: Gemini's word-by-word readings are steadier than its whole-line one (which now and
- * then gains a stray kana), so when the words spell the line exactly their readings are used.
+ * Whether a word's reading can be right, judged by the kana written in the lyric itself: a kana-only word
+ * reads exactly as written, and a word with kanji keeps its written kana at either end and reads longer
+ * than those kana alone (泣かないで can't read かないで, だけの can't read だけのに).
  */
-function lineReading(line: string, reading: string, words: Word[]): string {
+function plausible(w: Word): boolean {
+  const written = toHiragana(w.japanese);
+  const reading = toHiragana(w.reading);
+  if (KANA.test(w.japanese)) return written === reading;
+  const lead = written.match(/^[\u3041-\u309f]*/)![0];
+  const trail = written.match(/[\u3041-\u309f]*$/)![0];
+  const kana = written.replace(/[^\u3041-\u309f]/g, '').length;
+  return reading.startsWith(lead) && reading.endsWith(trail) && reading.length > kana && /^[\u3041-\u309f\u30fc]+$/.test(reading);
+}
+
+/**
+ * The line's reading and words. Gemini's word-by-word readings are usually steadier than its whole-line
+ * one, so when the words spell the line and every reading checks out they are used. Otherwise the words
+ * are dropped (the pronunciation then comes from the whole-line reading).
+ */
+function settle(line: string, reading: string, words: Word[]): { reading: string; words: Word[] } {
   const plain = (text: string) => text.replace(/\s+/g, '');
-  if (words.length && plain(words.map((w) => w.japanese).join('')) === plain(line)) return words.map((w) => w.reading).join('');
-  return reading;
+  if (words.length && plain(words.map((w) => w.japanese).join('')) === plain(line) && words.every(plausible)) {
+    return { reading: words.map((w) => w.reading).join(''), words };
+  }
+  return { reading: reading || line, words: [] };
 }
 
 async function explain(env: Env, lines: string[]): Promise<Explained[]> {
@@ -63,11 +84,9 @@ async function explain(env: Env, lines: string[]): Promise<Explained[]> {
   for (const item of Array.isArray(parsed.lines) ? (parsed.lines as Record<string, unknown>[]) : []) {
     const i = Number(item?.n) - 1;
     if (!Number.isInteger(i) || i < 0 || i >= lines.length) continue;
-    const words = tidy(cleanWords(item.words));
     out[i] = {
-      reading: lineReading(lines[i], typeof item.reading === 'string' ? item.reading.trim() : '', words),
+      ...settle(lines[i], typeof item.reading === 'string' ? item.reading.trim() : '', tidy(cleanWords(item.words))),
       meaning: typeof item.meaning === 'string' ? item.meaning.trim() : '',
-      words,
     };
   }
   // A line or two left out still plays fine; most of the song missing means the answer went wrong.

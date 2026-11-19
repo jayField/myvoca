@@ -45,11 +45,12 @@ export function autoSound(p: Pick<Translation, 'reading' | 'words'>): string {
   return p.words.map((w, i) => (i > 0 && !w.attach ? ' ' : '') + wordSound(w)).join('');
 }
 
-/** The particles は and へ are written with those kana but said わ and え. */
-const PARTICLE_SOUNDS: Record<string, string> = { は: '와', へ: '에' };
+/** The particles は and へ are written with those kana but said わ and え, also after another particle (には, では). */
+const PARTICLE = /^(に|で|と|へ|から|まで|より)?[はへ]$/;
 
 function wordSound(w: PhraseWord): string {
-  return (w.attach && PARTICLE_SOUNDS[w.reading]) || toHangul(w.reading);
+  if (!w.attach || !PARTICLE.test(w.reading)) return toHangul(w.reading);
+  return toHangul(w.reading.slice(0, -1)) + (w.reading.endsWith('は') ? '와' : '에');
 }
 
 /** A phrase as a quiz item, so the existing quiz screens can ask it like a word. */
