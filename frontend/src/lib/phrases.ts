@@ -19,11 +19,15 @@ function searchable(text: string): string {
     .replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
 }
 
-/** Whether a saved phrase matches a search: its Japanese, reading, pronunciation, meaning or what was typed. */
+/**
+ * Whether a saved phrase matches a search: its Japanese, reading, pronunciation, meaning or what was typed.
+ * Commas split the search into several words, and a phrase matching any one of them is shown.
+ */
 export function matchesSearch(p: Phrase, query: string): boolean {
-  const q = searchable(query);
-  if (!q) return true;
-  return [p.japanese, p.reading, phraseSound(p), p.meaning, p.input].some((field) => searchable(field ?? '').includes(q));
+  const words = query.split(/[,，、]/).map(searchable).filter(Boolean);
+  if (!words.length) return true;
+  const fields = [p.japanese, p.reading, phraseSound(p), p.meaning, p.input].map((field) => searchable(field ?? ''));
+  return words.some((word) => fields.some((field) => field.includes(word)));
 }
 
 /**

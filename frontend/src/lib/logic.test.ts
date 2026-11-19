@@ -427,4 +427,9 @@ describe('회화 노트 search', () => {
     for (const q of ['誤解', 'ごかい', 'ゴカイ', '고카이', '오해 하지', '  ']) expect(matchesSearch(p, q)).toBe(true);
     expect(matchesSearch(p, '대답')).toBe(false);
   });
+  it('treats commas as "or"', () => {
+    expect(matchesSearch(p, '대답, 오해')).toBe(true);
+    expect(matchesSearch(p, '대답、닥쳐')).toBe(false);
+    expect(matchesSearch(p, ' , ')).toBe(true);
+  });
 });
