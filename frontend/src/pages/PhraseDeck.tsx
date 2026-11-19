@@ -1,11 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { Phrase } from '../api';
-import { BackIcon, CloseIcon, DownloadIcon, EditIcon, GripIcon } from '../components/Icons';
+import { BackIcon, CloseIcon, DownloadIcon, EditIcon, GripIcon, SearchIcon } from '../components/Icons';
 import { PhraseCard } from '../components/PhraseCard';
 import { PhraseEditor } from '../components/PhraseEditor';
 import { SpeakButton } from '../components/SpeakButton';
-import { deletePhrase, listPhrases, phraseSound, placeAt, savePositions, TALK_DECK } from '../lib/phrases';
+import { deletePhrase, listPhrases, matchesSearch, phraseSound, placeAt, savePositions, TALK_DECK } from '../lib/phrases';
 
 const PHONE = '(max-width: 760px)';
 /** How close to the window's top or bottom edge a drag scrolls the page, and how far per move. */
@@ -47,6 +47,8 @@ export default function PhraseDeck() {
   const [exporting, setExporting] = useState(false);
   const [reordering, setReordering] = useState(false);
   const [dragging, setDragging] = useState<string | null>(null);
+  /** The search box: null while closed. */
+  const [query, setQuery] = useState<string | null>(null);
 
   // Pointer handlers read these directly, so a move right after pressing never sees a stale render.
   const listRef = useRef<Phrase[] | null>(null);
@@ -182,6 +184,7 @@ export default function PhraseDeck() {
   function toggleReordering() {
     blocks.current.clear();
     setEditing(null);
+    setQuery(null);
     setReordering(!reordering);
   }
 
@@ -214,6 +217,9 @@ export default function PhraseDeck() {
     }
   }
 
+  const searching = query !== null && query.trim() !== '';
+  const shown = phrases && searching ? phrases.filter((p) => matchesSearch(p, query)) : phrases;
+
   const editor = (p: Phrase) => <PhraseEditor phrase={p} onSaved={saved} onCancel={() => setEditing(null)} />;
 
   return (
@@ -227,7 +233,7 @@ export default function PhraseDeck() {
           <h1>{TALK_DECK.title}</h1>
           <p className="muted small">
             {TALK_DECK.description}
-            {phrases && ` · ${phrases.length}개`}
+            {phrases && (searching ? ` · ${phrases.length}개 중 ${shown!.length}개` : ` · ${phrases.length}개`)}
           </p>
         </div>
         {reordering ? (
@@ -251,11 +257,41 @@ export default function PhraseDeck() {
               {!narrow && <DownloadIcon />}
               {exporting ? '만드는 중…' : narrow ? 'PDF' : 'PDF 다운로드'}
             </button>
+            <button
+              type="button"
+              className={`btn ${query !== null ? 'btn--primary' : 'btn--ghost'}`}
+              aria-pressed={query !== null}
+              onClick={() => setQuery(query === null ? '' : null)}
+              disabled={!phrases?.length}
+            >
+              {!narrow && <SearchIcon />}
+              검색
+            </button>
           </div>
         )}
       </header>
 
+      {query !== null && !reordering && (
+        <div className="phrase-search">
+          <SearchIcon />
+          <input
+            type="search"
+            className="text-input text-input--block"
+            placeholder="일본어, 읽기, 발음, 뜻으로 찾기"
+            aria-label="회화 노트 검색"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Escape' && setQuery(null)}
+          />
+          <button type="button" className="icon-btn" aria-label="검색 닫기" title="닫기" onClick={() => setQuery(null)}>
+            <CloseIcon />
+          </button>
+        </div>
+      )}
+
       {error && <p className="banner-error">{error}</p>}
+      {searching && shown?.length === 0 && <p className="muted">'{query.trim()}'에 맞는 표현이 없어요.</p>}
       {phrases && phrases.length === 0 && (
         <p className="muted">
           아직 저장한 표현이 없어요. <Link to="/talk">표현 추가</Link>에서 번역해서 저장해 보세요.
@@ -292,9 +328,9 @@ export default function PhraseDeck() {
         </>
       )}
 
-      {phrases && phrases.length > 0 && !reordering && narrow && (
+      {shown && shown.length > 0 && !reordering && narrow && (
         <ul className="phrase-blocks">
-          {phrases.map((p) =>
+          {shown.map((p) =>
             editing === p.id ? (
               <li key={p.id} className="phrase-block phrase-block--editing">
                 {editor(p)}
@@ -306,7 +342,7 @@ export default function PhraseDeck() {
         </ul>
       )}
 
-      {phrases && phrases.length > 0 && !reordering && !narrow && (
+      {shown && shown.length > 0 && !reordering && !narrow && (
         <div className="log-scroll">
           <table className="log-table phrase-table">
             <thead>
@@ -326,7 +362,7 @@ export default function PhraseDeck() {
               </tr>
             </thead>
             <tbody>
-              {phrases.map((p) =>
+              {shown.map((p) =>
                 editing === p.id ? (
                   <tr key={p.id} className="phrase-edit-row">
                     <td colSpan={6}>{editor(p)}</td>

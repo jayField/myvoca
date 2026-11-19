@@ -2019,3 +2019,30 @@ a.device-box:hover {
   color: var(--muted);
   text-align: right;
 }
+
+/* 회화 노트 search: a box under the header, its icon inside on the left. */
+.phrase-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.phrase-search > svg {
+  position: absolute;
+  left: 0.875rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.phrase-search .text-input {
+  flex: 1;
+  width: auto;
+  padding-left: 2.5rem;
+}
+
+/* The ✕ next to the box closes it, so the browser's own clear button would be a second ✕. */
+.phrase-search .text-input::-webkit-search-cancel-button {
+  appearance: none;
+}

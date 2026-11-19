@@ -10,6 +10,22 @@ const SIGN_IN = '회화 노트는 로그인해야 쓸 수 있어요.';
 const NETWORK = '인터넷 연결을 확인하고 다시 시도해 주세요.';
 
 
+/** Folds a search text so width, case, spaces and katakana/hiragana don't matter. */
+function searchable(text: string): string {
+  return text
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[\u30a1-\u30f6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+}
+
+/** Whether a saved phrase matches a search: its Japanese, reading, pronunciation, meaning or what was typed. */
+export function matchesSearch(p: Phrase, query: string): boolean {
+  const q = searchable(query);
+  if (!q) return true;
+  return [p.japanese, p.reading, phraseSound(p), p.meaning, p.input].some((field) => searchable(field ?? '').includes(q));
+}
+
 /**
  * How a phrase sounds in Hangul, spaced the way Korean is (君を思っている → 키미오 오못테이루) when its word
  * breakdown is known; otherwise the whole reading run together.

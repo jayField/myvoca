@@ -3,7 +3,7 @@ import type { Phrase, Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
 import { toHangul } from './kana';
-import { phraseSound } from './phrases';
+import { matchesSearch, phraseSound } from './phrases';
 import { seededRng } from './random';
 import {
   applyReview,
@@ -415,5 +415,16 @@ describe('placeAt', () => {
       { id: 'x', position: 1 },
       { id: 'b', position: 2 },
     ]);
+  });
+});
+
+describe('회화 노트 search', () => {
+  const p = {
+    id: '1', input: '오해하지마', japanese: '誤解しないで', reading: 'ごかいしないで', meaning: '오해하지 마',
+    sound: '', words: [], position: 1, created_at: '',
+  } as Phrase;
+  it('finds by Japanese, reading in either kana, pronunciation and meaning, ignoring spaces', () => {
+    for (const q of ['誤解', 'ごかい', 'ゴカイ', '고카이', '오해 하지', '  ']) expect(matchesSearch(p, q)).toBe(true);
+    expect(matchesSearch(p, '대답')).toBe(false);
   });
 });
