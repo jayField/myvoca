@@ -5,7 +5,7 @@ import { addDays } from './dates';
 import { toHangul } from './kana';
 import { matchesSearch, phraseSound } from './phrases';
 import { seededRng } from './random';
-import { clock, formatTime, lineAt, parseLrc, parseTime, rankMatches, youtubeId } from './songs';
+import { clock, formatTime, lineAt, matchesSong, parseLrc, parseTime, rankMatches, youtubeId } from './songs';
 import {
   applyReview,
   buildPhraseQuiz,
@@ -497,5 +497,16 @@ describe('노래', () => {
       '夢をかなえてドラえもん',
     );
     expect(ranked.map((x) => x.id)).toEqual([3, 1, 2]);
+  });
+});
+
+describe('matchesSong', () => {
+  const song = { title_ko: '도라에몽', title_ja: '夢をかなえてドラえもん', artist: 'mao' };
+  it('finds by either title or artist, ignoring spaces, case and kana kind', () => {
+    expect(matchesSong(song, '도라 에몽')).toBe(true);
+    expect(matchesSong(song, 'どらえもん')).toBe(true);
+    expect(matchesSong(song, 'MAO')).toBe(true);
+    expect(matchesSong(song, '')).toBe(true);
+    expect(matchesSong(song, '드라이플라워')).toBe(false);
   });
 });

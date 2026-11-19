@@ -11,7 +11,7 @@ const NETWORK = '인터넷 연결을 확인하고 다시 시도해 주세요.';
 
 
 /** Folds a search text so width, case, spaces and katakana/hiragana don't matter. */
-function searchable(text: string): string {
+export function searchable(text: string): string {
   return text
     .normalize('NFKC')
     .toLowerCase()

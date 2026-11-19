@@ -2,7 +2,7 @@
 // Timed lyrics come from LRCLIB (a free, open lyrics database), each line is explained once by
 // /api/lyrics, and the result is stored in Supabase, never in this (public) code.
 import type { PhraseWord } from '../types';
-import { phraseSound } from './phrases';
+import { phraseSound, searchable } from './phrases';
 import { supabase } from './supabase';
 
 export interface SongLine {
@@ -205,4 +205,10 @@ export function parseTime(text: string): number | null {
 export function clock(seconds: number): string {
   const whole = Math.round(seconds);
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+}
+
+/** Whether a song's Korean title, Japanese title or artist contains the search text (one search, no commas). */
+export function matchesSong(song: Pick<Song, 'title_ko' | 'title_ja' | 'artist'>, query: string): boolean {
+  const word = searchable(query);
+  return !word || [song.title_ko, song.title_ja, song.artist].some((field) => searchable(field).includes(word));
 }

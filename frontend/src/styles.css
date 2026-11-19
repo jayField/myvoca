@@ -2049,13 +2049,36 @@ a.device-box:hover {
 
 /* ---------- 노래 ---------- */
 
-.song-grid {
+/* One song per row: titles on the left, artist on the right. */
+.song-list {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.song-grid .deck-card {
-  height: 100%;
+.song-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+}
+
+.song-row:hover {
+  border-color: var(--border-accent);
+}
+
+.song-row > span:first-child {
+  min-width: 0;
+}
+
+.song-row-artist {
+  flex-shrink: 0;
+  max-width: 40%;
+  text-align: right;
 }
 
 .song-card-ja {
