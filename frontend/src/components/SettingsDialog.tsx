@@ -106,16 +106,21 @@ export function SettingsDialog({ open, decks, settings, onClose, onSaved }: Prop
             <label className="number-input">
               <span className="sr-only">직접 입력</span>
               <input
-                type="number"
-                min={1}
-                max={100}
+                // Plain text with a number keypad: a number box can't select its text, and each tap should
+                // select what is there so the next digits replace it instead of joining it.
+                type="text"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 value={dailyText}
+                onFocus={(e) => e.target.select()}
+                onClick={(e) => e.currentTarget.select()}
                 onChange={(e) => {
-                  const text = e.target.value.replace(/\D/g, '').slice(0, 3);
-                  setDailyText(text);
+                  const text = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
                   const n = Number(text);
-                  if (n >= 1) setDraft({ ...draft, daily_new: Math.min(100, n) });
+                  // A digit that would go past 100 is not taken, rather than turning the count into 100.
+                  if (n > 100) return;
+                  setDailyText(text);
+                  if (n >= 1) setDraft({ ...draft, daily_new: n });
                 }}
                 onBlur={() => setDailyText(String(draft.daily_new))}
               />
