@@ -36,16 +36,38 @@ interface Explained {
   words: Word[];
 }
 
+const OPENING = /^[（(「『]+$/;
+const CLOSING = /^[）)」』、。！？!?…〜~]+$/;
+
+/** Brackets and punctuation stick to the word they belong to, so (えがいてる) reads (에가이테루), not ( 에가이테루 ). */
+function tidy(words: Word[]): Word[] {
+  return words.map((w, i) => ({
+    ...w,
+    attach: w.attach || CLOSING.test(w.japanese) || (i > 0 && OPENING.test(words[i - 1].japanese)),
+  }));
+}
+
+/**
+ * The line's reading: Gemini's word-by-word readings are steadier than its whole-line one (which now and
+ * then gains a stray kana), so when the words spell the line exactly their readings are used.
+ */
+function lineReading(line: string, reading: string, words: Word[]): string {
+  const plain = (text: string) => text.replace(/\s+/g, '');
+  if (words.length && plain(words.map((w) => w.japanese).join('')) === plain(line)) return words.map((w) => w.reading).join('');
+  return reading;
+}
+
 async function explain(env: Env, lines: string[]): Promise<Explained[]> {
   const parsed = await generate(env, SYSTEM, SCHEMA, lines.map((line, i) => `${i + 1}: ${line}`).join('\n'));
   const out: Explained[] = lines.map(() => ({ reading: '', meaning: '', words: [] }));
   for (const item of Array.isArray(parsed.lines) ? (parsed.lines as Record<string, unknown>[]) : []) {
     const i = Number(item?.n) - 1;
     if (!Number.isInteger(i) || i < 0 || i >= lines.length) continue;
+    const words = tidy(cleanWords(item.words));
     out[i] = {
-      reading: typeof item.reading === 'string' ? item.reading.trim() : '',
+      reading: lineReading(lines[i], typeof item.reading === 'string' ? item.reading.trim() : '', words),
       meaning: typeof item.meaning === 'string' ? item.meaning.trim() : '',
-      words: cleanWords(item.words),
+      words,
     };
   }
   // A line or two left out still plays fine; most of the song missing means the answer went wrong.
