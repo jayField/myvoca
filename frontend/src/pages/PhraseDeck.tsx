@@ -277,7 +277,7 @@ export default function PhraseDeck() {
           <input
             type="search"
             className="text-input text-input--block"
-            placeholder="예: 대답, 닥쳐 (쉼표로 여러 개)"
+            placeholder="예: 안녕하세요, 반갑습니다"
             aria-label="회화 노트 검색"
             autoFocus
             value={query}
