@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './auth';
 import { displayName } from './lib/username';
-import { BookIcon, ChartIcon, DeviceIcon, FeedbackIcon, HomeIcon, KanaIcon, NumberIcon, QuizIcon, TableIcon, TalkIcon } from './components/Icons';
+import { BookIcon, ChartIcon, DeviceIcon, FeedbackIcon, HomeIcon, KanaIcon, MusicIcon, NumberIcon, QuizIcon, TableIcon, TalkIcon } from './components/Icons';
 
 // `short` is the bottom tab bar's label on phones, where nine tabs leave little room.
 const NAV: { to: string; label: string; short?: string; icon: ReactNode; end?: boolean }[] = [
@@ -11,6 +11,7 @@ const NAV: { to: string; label: string; short?: string; icon: ReactNode; end?: b
   { to: '/talk', label: '회화 노트', short: '회화', icon: <TalkIcon /> },
   { to: '/kana', label: '가나표', icon: <KanaIcon /> },
   { to: '/numbers', label: '숫자', icon: <NumberIcon /> },
+  { to: '/songs', label: '노래', icon: <MusicIcon /> },
   { to: '/quiz', label: '퀴즈', icon: <QuizIcon /> },
   { to: '/log', label: '복습표', icon: <TableIcon /> },
   { to: '/stats', label: '기록', icon: <ChartIcon /> },

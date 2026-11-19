@@ -146,3 +146,26 @@ create policy "own phrases" on public.phrases
   for all to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
+
+-- 노래: songs added by each account, with lyrics timed to a YouTube video.
+-- lines holds [{ t: seconds, japanese, reading, meaning, words }] in order; offset_ms shifts every line
+-- to match the video (MV intros make lyrics run early or late).
+create table if not exists public.songs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  title_ko text not null default '' check (char_length(title_ko) <= 100),
+  title_ja text not null default '' check (char_length(title_ja) <= 100),
+  artist text not null default '' check (char_length(artist) <= 100),
+  youtube_id text not null check (youtube_id ~ '^[A-Za-z0-9_-]{11}$'),
+  offset_ms integer not null default 0 check (offset_ms between -60000 and 60000),
+  lines jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table public.songs enable row level security;
+
+drop policy if exists "own songs" on public.songs;
+create policy "own songs" on public.songs
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);

@@ -268,7 +268,7 @@ a {
     inset: auto 0 0 0;
     z-index: 10;
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
+    grid-template-columns: repeat(10, 1fr);
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--surface);
     border-top: 1px solid var(--border-soft);
@@ -2045,4 +2045,193 @@ a.device-box:hover {
 /* The ✕ next to the box closes it, so the browser's own clear button would be a second ✕. */
 .phrase-search .text-input::-webkit-search-cancel-button {
   appearance: none;
+}
+
+/* ---------- 노래 ---------- */
+
+.song-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+}
+
+@media (max-width: 760px) {
+  .song-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.song-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0; /* a fieldset is otherwise as wide as its longest line */
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.song-matches legend {
+  margin-bottom: 0.5rem;
+}
+
+.song-match {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.song-match.is-picked {
+  border-color: var(--accent);
+}
+
+.song-match input {
+  margin-top: 0.25rem;
+  accent-color: var(--accent);
+}
+
+.song-match-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.song-match-title {
+  font-weight: 700;
+}
+
+.song-match-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-grid {
+  list-style: none;
+  padding: 0;
+}
+
+.song-grid .deck-card {
+  height: 100%;
+}
+
+.song-card-ja {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* The video stays at the top while the lyrics scroll under it. */
+.song-stage {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  background: var(--bg);
+}
+
+.song-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: #000;
+}
+
+.song-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.song-sync {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.song-sync .button-row {
+  gap: 0.375rem;
+}
+
+/* Room after the last line, so it too can scroll up to the middle. */
+.lyrics {
+  list-style: none;
+  padding: 0 0 40vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lyric {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 200ms,
+    border-color 200ms,
+    opacity 200ms;
+}
+
+.lyric:hover {
+  background: var(--surface);
+}
+
+.lyric-ja {
+  font-size: 1.1875rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.lyric-sound,
+.lyric-meaning {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.lyric.is-past {
+  opacity: 0.45;
+}
+
+.lyric.is-current {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.lyric.is-current .lyric-ja {
+  color: var(--accent);
+}
+
+.lyric.is-current .lyric-meaning {
+  color: var(--text);
+}
+
+.lyric-break {
+  padding: 0.25rem 0.875rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lyric {
+    transition: none;
+  }
 }

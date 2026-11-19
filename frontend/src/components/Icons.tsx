@@ -162,3 +162,11 @@ export const SearchIcon = () => (
     <path d="M16 16l4 4" />
   </Icon>
 );
+
+export const MusicIcon = () => (
+  <Icon>
+    <path d="M9 18V6l11-2v12" />
+    <circle cx="6.5" cy="18" r="2.5" />
+    <circle cx="17.5" cy="16" r="2.5" />
+  </Icon>
+);

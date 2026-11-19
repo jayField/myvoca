@@ -5,6 +5,7 @@ import { addDays } from './dates';
 import { toHangul } from './kana';
 import { matchesSearch, phraseSound } from './phrases';
 import { seededRng } from './random';
+import { clock, lineAt, parseLrc, rankMatches, youtubeId } from './songs';
 import {
   applyReview,
   buildPhraseQuiz,
@@ -431,5 +432,47 @@ describe('회화 노트 search', () => {
     expect(matchesSearch(p, '대답, 오해')).toBe(true);
     expect(matchesSearch(p, '대답、닥쳐')).toBe(false);
     expect(matchesSearch(p, ' , ')).toBe(true);
+  });
+});
+
+describe('노래', () => {
+  it('reads the video ID from any YouTube link', () => {
+    for (const link of [
+      'https://www.youtube.com/watch?v=v4-CI-xClCM',
+      'https://youtube.com/watch?feature=share&v=v4-CI-xClCM&t=10',
+      'youtu.be/v4-CI-xClCM?si=abc',
+      'https://m.youtube.com/shorts/v4-CI-xClCM',
+      'https://music.youtube.com/watch?v=v4-CI-xClCM',
+      'v4-CI-xClCM',
+    ]) expect(youtubeId(link)).toBe('v4-CI-xClCM');
+    expect(youtubeId('https://example.com/watch?v=v4-CI-xClCM')).toBeNull();
+    expect(youtubeId('도라에몽')).toBeNull();
+  });
+  it('parses timed lyrics, keeping breaks and repeating multi-stamp lines', () => {
+    const lrc = '[ar:mao]\n[00:08.25] 心の中\n[00:10.06]いつもいつも\n[01:28.21] \n[00:05.00][01:30.5]シャララ';
+    expect(parseLrc(lrc)).toEqual([
+      { t: 5, text: 'シャララ' },
+      { t: 8.25, text: '心の中' },
+      { t: 10.06, text: 'いつもいつも' },
+      { t: 88.21, text: '' },
+      { t: 90.5, text: 'シャララ' },
+    ]);
+  });
+  it('finds the line being sung, shifted by the sync offset', () => {
+    const lines = [{ t: 8 }, { t: 10 }, { t: 12 }];
+    expect(lineAt(lines, 7)).toBe(-1);
+    expect(lineAt(lines, 10.5)).toBe(1);
+    expect(lineAt(lines, 99)).toBe(2);
+    expect(lineAt(lines, 10.5, 1)).toBe(0);
+    expect(clock(247)).toBe('4:07');
+    expect(clock(59.6)).toBe('1:00');
+  });
+  it('lists the song itself first, finer-cut lyrics before coarser', () => {
+    const m = (id: number, track: string, lrc: string) => ({ id, track, artist: 'mao', duration: 247, lrc });
+    const ranked = rankMatches(
+      [m(1, '夢をかなえてドラえもん', '[00:01]心の中 いつもいつも'), m(2, '夢をかなえてドラえもん (カラオケ)', '[00:01]a\n[00:02]b\n[00:03]c'), m(3, '夢をかなえてドラえもん', '[00:01]心の中\n[00:02]いつもいつも')],
+      '夢をかなえてドラえもん',
+    );
+    expect(ranked.map((x) => x.id)).toEqual([3, 1, 2]);
   });
 });

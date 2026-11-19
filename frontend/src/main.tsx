@@ -14,6 +14,8 @@ import Numbers from './pages/Numbers';
 import Login from './pages/Login';
 import Quiz from './pages/Quiz';
 import Signup from './pages/Signup';
+import Song from './pages/Song';
+import Songs from './pages/Songs';
 import Speed from './pages/Speed';
 import Log from './pages/Log';
 import Stats from './pages/Stats';
@@ -44,6 +46,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="decks/:deckId" element={<DeckDetail />} />
             <Route path="kana" element={<Kana />} />
             <Route path="numbers" element={<Numbers />} />
+            <Route path="songs" element={<Songs />} />
+            <Route path="songs/:songId" element={<Song />} />
             <Route path="quiz" element={<Quiz />} />
             <Route path="speed" element={<Speed />} />
             <Route path="log" element={<Log />} />
