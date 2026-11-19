@@ -21,17 +21,20 @@ export default function Study() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totals, setTotals] = useState<Record<Grade, number> | null>(null);
+  // Today's counts before this session, so the header adds up the whole day for each kind.
+  const [before, setBefore] = useState<{ review: number; new: number } | null>(null);
 
   useEffect(() => {
     api
       .today()
-      .then((plan) =>
+      .then((plan) => {
+        setBefore({ review: plan.reviews_done, new: plan.new_done });
         setQueue([
           // Reviews first, then new words, each in a fresh order every session.
           ...shuffle(plan.reviews).map((item) => ({ item, kind: 'review' as const })),
           ...shuffle(plan.new_items).map((item) => ({ item, kind: 'new' as const })),
-        ]),
-      )
+        ]);
+      })
       .catch(() => setError(LOAD_ERROR));
   }, []);
 
@@ -83,11 +86,7 @@ export default function Study() {
         <Link to="/" className="back-link">
           <BackIcon />홈
         </Link>
-        {queue && current && (
-          <span className="muted small">
-            {index + 1} / {queue.length}
-          </span>
-        )}
+        {queue && current && before && <StudyCounts queue={queue} index={index} before={before} />}
       </header>
 
       {error && <p className="banner-error">{error}</p>}
@@ -154,5 +153,26 @@ export default function Study() {
         </>
       )}
     </div>
+  );
+}
+
+/** Header counts kept apart: how many reviews and new words are done today out of today's total for each. */
+function StudyCounts({ queue, index, before }: { queue: Card[]; index: number; before: Record<Kind, number> }) {
+  const parts = (['review', 'new'] as const)
+    .map((kind) => {
+      const ofKind = queue.filter((c) => c.kind === kind).length;
+      const doneNow = queue.slice(0, index).filter((c) => c.kind === kind).length;
+      return { kind, done: before[kind] + doneNow, total: before[kind] + ofKind, ofKind };
+    })
+    .filter((p) => p.ofKind > 0);
+  const currentKind = queue[index]?.kind;
+  return (
+    <span className="study-counts small">
+      {parts.map((p) => (
+        <span key={p.kind} className={p.kind === currentKind ? 'strong' : 'muted'}>
+          {TAG[p.kind]} {p.done} / {p.total}
+        </span>
+      ))}
+    </span>
   );
 }

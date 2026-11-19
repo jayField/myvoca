@@ -101,6 +101,8 @@ export interface TodayPlan {
   reviews: Item[];
   new_items: Item[];
   new_done: number;
+  /** 헷갈리는 단어 of this range already reviewed in the study cards today. */
+  reviews_done: number;
   deck_unlearned: number;
   reviewed_today: number;
 }

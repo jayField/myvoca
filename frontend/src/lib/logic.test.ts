@@ -112,6 +112,7 @@ describe('planToday', () => {
     const tomorrow = addDays(TODAY, 1);
     const first = words.slice(0, 2);
     progress = learn(progress, first, 'good', tomorrow);
+    expect(planToday(n5, progress, 2, tomorrow).reviews_done).toBe(2);
     const resumed = planToday(n5, progress, 2, tomorrow).reviews.map((i) => i.id);
     expect(resumed).toHaveLength(3);
     expect(resumed.some((id) => first.includes(id))).toBe(false);

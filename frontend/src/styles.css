@@ -2241,3 +2241,9 @@ a.device-box:hover {
   margin-left: auto;
   color: var(--danger);
 }
+
+/* Study header: 복습 and 새 단어 counted apart, the kind on screen now in bold. */
+.study-counts {
+  display: flex;
+  gap: 0.75rem;
+}

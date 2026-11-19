@@ -157,6 +157,7 @@ export function planToday(
     reviews: reviews.map((p) => ITEM_BY_ID.get(p.item_id)!),
     new_items: unlearned.slice(0, remaining),
     new_done: newDone,
+    reviews_done: reviewsDone,
     deck_unlearned: unlearned.length,
     reviewed_today: reviewedToday,
   };

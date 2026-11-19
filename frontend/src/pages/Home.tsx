@@ -212,6 +212,15 @@ function TodayCard({ plan, results, deckLearned, resetting, onStart, onSettings,
             <span className="big-number-sub"> / {target}</span>
           </div>
         </div>
+        {plan.settings.include_reviews && (
+          <div>
+            <div className="muted small">복습</div>
+            <div className="big-number">
+              {plan.reviews_done}
+              <span className="big-number-sub"> / {plan.reviews_done + plan.reviews.length}</span>
+            </div>
+          </div>
+        )}
       </div>
       <div className="progress" role="progressbar" aria-label="오늘의 새 단어 진행률" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
         <div className="progress-fill" style={{ width: `${percent}%` }} />
