@@ -147,7 +147,8 @@ create policy "own phrases" on public.phrases
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
--- 노래: songs added by each account, with lyrics timed to a YouTube video.
+-- 노래: songs registered ahead of time, with lyrics timed to a YouTube video. Every account sees every
+-- song and may fix its lyrics or sync; only whoever registered a song can delete it.
 -- lines holds [{ t: seconds, japanese, reading, meaning, words }] in order; offset_ms shifts every line
 -- to match the video (MV intros make lyrics run early or late).
 create table if not exists public.songs (
@@ -165,7 +166,11 @@ create table if not exists public.songs (
 alter table public.songs enable row level security;
 
 drop policy if exists "own songs" on public.songs;
-create policy "own songs" on public.songs
-  for all to authenticated
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+drop policy if exists "read songs" on public.songs;
+drop policy if exists "add songs" on public.songs;
+drop policy if exists "edit songs" on public.songs;
+drop policy if exists "delete own songs" on public.songs;
+create policy "read songs" on public.songs for select to authenticated using (true);
+create policy "add songs" on public.songs for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "edit songs" on public.songs for update to authenticated using (true) with check (true);
+create policy "delete own songs" on public.songs for delete to authenticated using ((select auth.uid()) = user_id);

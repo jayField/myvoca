@@ -2049,68 +2049,6 @@ a.device-box:hover {
 
 /* ---------- 노래 ---------- */
 
-.song-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.875rem;
-}
-
-@media (max-width: 760px) {
-  .song-form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.song-matches {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0; /* a fieldset is otherwise as wide as its longest line */
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.song-matches legend {
-  margin-bottom: 0.5rem;
-}
-
-.song-match {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem 0.875rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.song-match.is-picked {
-  border-color: var(--accent);
-}
-
-.song-match input {
-  margin-top: 0.25rem;
-  accent-color: var(--accent);
-}
-
-.song-match-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: 0;
-}
-
-.song-match-title {
-  font-weight: 700;
-}
-
-.song-match-preview {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .song-grid {
   list-style: none;
   padding: 0;
@@ -2234,4 +2172,49 @@ a.device-box:hover {
   .lyric {
     transition: none;
   }
+}
+
+/* 가사 수정: a ✏️ beside each line, and the line's editor in its place. */
+.lyric-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lyric-row > .lyric {
+  flex: 1;
+  min-width: 0;
+}
+
+.lyrics > li {
+  scroll-margin-top: calc(var(--song-stage, 0px) + 0.5rem);
+}
+
+.lyric-editing {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.lyric-editor-time {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.lyric-time-input {
+  flex: none;
+  width: 8rem;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.lyric-time-input.is-invalid {
+  border-color: var(--danger);
+}
+
+.lyric-delete {
+  margin-left: auto;
+  color: var(--danger);
 }

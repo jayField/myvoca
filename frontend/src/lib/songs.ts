@@ -1,6 +1,8 @@
-// 노래: songs with lyrics timed to a YouTube video. Timed lyrics come from LRCLIB (a free, open lyrics
-// database), each line is explained once by /api/lyrics, and the result is stored per account in Supabase.
+// 노래: songs with lyrics timed to a YouTube video, registered ahead of time and shared by every account.
+// Timed lyrics come from LRCLIB (a free, open lyrics database), each line is explained once by
+// /api/lyrics, and the result is stored in Supabase, never in this (public) code.
 import type { PhraseWord } from '../types';
+import { phraseSound } from './phrases';
 import { supabase } from './supabase';
 
 export interface SongLine {
@@ -10,7 +12,12 @@ export interface SongLine {
   reading: string;
   meaning: string;
   words: PhraseWord[];
+  /** A Hangul pronunciation typed in by hand, used instead of the automatic one. */
+  sound?: string;
 }
+
+/** A line's Hangul pronunciation: the hand-typed one, else the one made from its reading. */
+export const lineSound = (line: SongLine) => line.sound || phraseSound(line);
 
 export interface Song {
   id: string;
@@ -171,9 +178,27 @@ export async function saveOffset(id: string, offset_ms: number): Promise<void> {
   if (error) throw failed(error, '싱크를 저장하지 못했어요.');
 }
 
-export async function deleteSong(id: string): Promise<void> {
-  const { error } = await client().from('songs').delete().eq('id', id);
-  if (error) throw failed(error, '노래를 지우지 못했어요.');
+/** Stores a song's edited lyrics, in time order. */
+export async function saveLines(id: string, lines: SongLine[]): Promise<SongLine[]> {
+  const sorted = [...lines].sort((a, b) => a.t - b.t);
+  const { error } = await client().from('songs').update({ lines: sorted }).eq('id', id);
+  if (error) throw failed(error, '가사를 저장하지 못했어요.');
+  return sorted;
+}
+
+/** "1:23.45" for 83.45 seconds, as a lyric's start time is written for editing. */
+export function formatTime(seconds: number): string {
+  const hundredths = Math.round(seconds * 100);
+  const sec = (hundredths % 6000) / 100;
+  return `${Math.floor(hundredths / 6000)}:${sec.toFixed(2).padStart(5, '0')}`;
+}
+
+/** Reads "1:23.45" (or plain seconds, "83.45") back into seconds; null if it isn't a time. */
+export function parseTime(text: string): number | null {
+  const m = text.trim().match(/^(?:(\d+):)?(\d+(?:\.\d*)?)$/);
+  if (!m) return null;
+  const seconds = Number(m[1] ?? 0) * 60 + Number(m[2]);
+  return Number.isFinite(seconds) ? Math.round(seconds * 1000) / 1000 : null;
 }
 
 /** "4:07" for 247 seconds. */

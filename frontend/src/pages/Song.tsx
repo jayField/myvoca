@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { BackIcon } from '../components/Icons';
-import { phraseSound } from '../lib/phrases';
-import { deleteSong, getSong, lineAt, saveOffset, type Song as SongData } from '../lib/songs';
+import { Link, useParams } from 'react-router-dom';
+import { BackIcon, EditIcon } from '../components/Icons';
+import { LyricEditor } from '../components/LyricEditor';
+import { getSong, lineAt, lineSound, saveLines, saveOffset, type Song as SongData, type SongLine } from '../lib/songs';
 import { createPlayer, PLAYING, playerError, type YouTubePlayer } from '../lib/youtube';
 
 /** How often the lyrics check where the video is, in milliseconds. */
@@ -17,12 +17,14 @@ const signed = (ms: number) => `${ms > 0 ? '+' : ms < 0 ? '−' : ''}${(Math.abs
 /**
  * One song, karaoke style: the YouTube video stays at the top while the lyrics below follow it, the line
  * being sung lit and kept in view, each with its Hangul pronunciation and meaning. Pressing a line plays
- * from there.
+ * from there. 가사 수정 gives every line a ✏️ to fix its words or timing.
  */
 export default function Song() {
   const { songId = '' } = useParams();
-  const navigate = useNavigate();
   const [song, setSong] = useState<SongData | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  /** The line open in the editor, by index. */
+  const [editing, setEditing] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [current, setCurrent] = useState(-1);
   const [offset, setOffset] = useState(0);
@@ -32,6 +34,8 @@ export default function Song() {
   const player = useRef<YouTubePlayer | null>(null);
   const lineEls = useRef(new Map<number, HTMLElement>());
   const offsetRef = useRef(0);
+  const linesRef = useRef<SongLine[]>([]);
+  linesRef.current = song?.lines ?? [];
   const saveTimer = useRef<number>(undefined);
 
   useEffect(() => {
@@ -45,10 +49,13 @@ export default function Song() {
       .catch((e: Error) => setError(e.message));
   }, [songId]);
 
+  // Editing lyrics changes `song`; only a different video needs a new player.
+  const videoId = song?.youtube_id;
+
   // The player, and a clock that moves the lit line along with the video.
   useEffect(() => {
     const box = host.current;
-    if (!song || !box) return;
+    if (!videoId || !box) return;
     // The API swaps its element for an iframe, so give it one React doesn't manage.
     const mount = document.createElement('div');
     box.append(mount);
@@ -57,7 +64,7 @@ export default function Song() {
     let at = -1;
     createPlayer(
       mount,
-      song.youtube_id,
+      videoId,
       () => {},
       (code) => setError(playerError(code)),
     )
@@ -65,7 +72,7 @@ export default function Song() {
         if (cancelled) return p.destroy();
         player.current = p;
         timer = window.setInterval(() => {
-          const now = lineAt(song.lines, p.getCurrentTime(), offsetRef.current / 1000);
+          const now = lineAt(linesRef.current, p.getCurrentTime(), offsetRef.current / 1000);
           if (now === at) return;
           at = now;
           setCurrent(now);
@@ -80,9 +87,27 @@ export default function Song() {
       player.current = null;
       box.replaceChildren();
     };
-  }, [song]);
+  }, [videoId]);
 
   useEffect(() => () => window.clearTimeout(saveTimer.current), []);
+
+  // Lines scrolled into view stop below the sticky video rather than under it.
+  useEffect(() => {
+    const el = stage.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const observer = new ResizeObserver(() => root.style.setProperty('--song-stage', `${el.offsetHeight}px`));
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty('--song-stage');
+    };
+  }, [videoId]);
+
+  // An opened editor comes into view just below the video.
+  useEffect(() => {
+    if (editing !== null) document.querySelector('.lyric-editing')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [editing]);
 
   /** Scrolls so line `i` sits in the middle of what is visible below the video. */
   function keepInView(i: number) {
@@ -112,14 +137,24 @@ export default function Song() {
     }, SAVE_DELAY);
   }
 
-  async function remove() {
-    if (!song || !window.confirm(`'${song.title_ko || song.title_ja}'를 지울까요?`)) return;
-    try {
-      await deleteSong(song.id);
-      navigate('/songs');
-    } catch (e) {
-      setError((e as Error).message);
-    }
+  /** Where the video is on the lyrics' own clock, for the editor's 지금 button. */
+  function lyricsNow(): number | null {
+    const p = player.current;
+    return p ? p.getCurrentTime() - offsetRef.current / 1000 : null;
+  }
+
+  /** Saves the lyrics with line `i` replaced (or removed when `line` is null). */
+  async function storeLine(i: number, line: SongLine | null) {
+    if (!song) return;
+    const next = line ? song.lines.map((l, j) => (j === i ? line : l)) : song.lines.filter((_, j) => j !== i);
+    const lines = await saveLines(song.id, next);
+    setSong({ ...song, lines });
+    setEditing(null);
+  }
+
+  function toggleEditMode() {
+    setEditing(null);
+    setEditMode(!editMode);
   }
 
   return (
@@ -141,8 +176,8 @@ export default function Song() {
         </div>
         {song && (
           <div className="button-row">
-            <button type="button" className="btn btn--ghost" onClick={() => void remove()}>
-              삭제
+            <button type="button" className={`btn ${editMode ? 'btn--primary' : 'btn--ghost'}`} onClick={toggleEditMode}>
+              {editMode ? '완료' : '가사 수정'}
             </button>
           </div>
         )}
@@ -166,12 +201,26 @@ export default function Song() {
               </span>
             </div>
           </div>
-          <p className="hint">가사가 노래보다 빨리 나오면 +, 늦게 나오면 −를 눌러요. 줄을 누르면 거기서부터 재생해요.</p>
+          <p className="hint">
+            {editMode
+              ? '✏️를 눌러 줄마다 가사·발음·뜻·시작 시간을 고쳐요. 지금 버튼은 영상이 있는 곳을 그 줄의 시작으로 맞춰요.'
+              : '가사가 노래보다 빨리 나오면 +, 늦게 나오면 −를 눌러요. 줄을 누르면 거기서부터 재생해요.'}
+          </p>
 
           <ol className="lyrics">
             {song.lines.map((line, i) =>
-              line.japanese ? (
-                <li key={i} ref={(el) => void (el ? lineEls.current.set(i, el) : lineEls.current.delete(i))}>
+              editing === i ? (
+                <li key={i} className="lyric-editing">
+                  <LyricEditor
+                    line={line}
+                    now={lyricsNow}
+                    onSave={(l) => storeLine(i, l)}
+                    onDelete={() => storeLine(i, null)}
+                    onCancel={() => setEditing(null)}
+                  />
+                </li>
+              ) : line.japanese ? (
+                <li key={i} ref={(el) => void (el ? lineEls.current.set(i, el) : lineEls.current.delete(i))} className="lyric-row">
                   <button
                     type="button"
                     className={`lyric${i === current ? ' is-current' : i < current ? ' is-past' : ''}`}
@@ -181,9 +230,14 @@ export default function Song() {
                     <span lang="ja" className="lyric-ja">
                       {line.japanese}
                     </span>
-                    <span className="lyric-sound">{phraseSound(line)}</span>
+                    <span className="lyric-sound">{lineSound(line)}</span>
                     {line.meaning && <span className="lyric-meaning">{line.meaning}</span>}
                   </button>
+                  {editMode && (
+                    <button type="button" className="icon-btn lyric-edit-btn" aria-label={`${line.japanese} 수정`} title="수정" onClick={() => setEditing(i)}>
+                      <EditIcon />
+                    </button>
+                  )}
                 </li>
               ) : (
                 <li key={i} className="lyric-break" aria-hidden="true">

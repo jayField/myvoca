@@ -5,7 +5,7 @@ import { addDays } from './dates';
 import { toHangul } from './kana';
 import { matchesSearch, phraseSound } from './phrases';
 import { seededRng } from './random';
-import { clock, lineAt, parseLrc, rankMatches, youtubeId } from './songs';
+import { clock, formatTime, lineAt, parseLrc, parseTime, rankMatches, youtubeId } from './songs';
 import {
   applyReview,
   buildPhraseQuiz,
@@ -479,6 +479,16 @@ describe('노래', () => {
     expect(lineAt(lines, 10.5, 1)).toBe(0);
     expect(clock(247)).toBe('4:07');
     expect(clock(59.6)).toBe('1:00');
+  });
+  it('writes and reads lyric start times', () => {
+    expect(formatTime(8.12)).toBe('0:08.12');
+    expect(formatTime(83.456)).toBe('1:23.46');
+    expect(formatTime(119.999)).toBe('2:00.00');
+    expect(parseTime('1:23.45')).toBe(83.45);
+    expect(parseTime(' 83.5 ')).toBe(83.5);
+    expect(parseTime('0:08')).toBe(8);
+    expect(parseTime(formatTime(247.3))).toBe(247.3);
+    for (const bad of ['', 'abc', '1:2:3', '-3']) expect(parseTime(bad)).toBeNull();
   });
   it('lists the song itself first, finer-cut lyrics before coarser', () => {
     const m = (id: number, track: string, lrc: string) => ({ id, track, artist: 'mao', duration: 247, lrc });
