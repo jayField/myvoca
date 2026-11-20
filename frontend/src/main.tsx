@@ -10,6 +10,7 @@ import Feedback from './pages/Feedback';
 import Decks from './pages/Decks';
 import Home from './pages/Home';
 import Kana from './pages/Kana';
+import Patterns from './pages/Patterns';
 import Numbers from './pages/Numbers';
 import Login from './pages/Login';
 import Quiz from './pages/Quiz';
@@ -46,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="decks/:deckId" element={<DeckDetail />} />
             <Route path="kana" element={<Kana />} />
             <Route path="numbers" element={<Numbers />} />
+            <Route path="patterns" element={<Patterns />} />
             <Route path="songs" element={<Songs />} />
             <Route path="songs/:songId" element={<Song />} />
             <Route path="quiz" element={<Quiz />} />

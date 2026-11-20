@@ -65,6 +65,13 @@ export const ChartIcon = () => (
   </Icon>
 );
 
+/** 표현패턴표: two columns of lines, like a pattern and its Japanese side by side. */
+export const PatternIcon = () => (
+  <Icon>
+    <path d="M4 6h4M4 12h4M4 18h4M12 6h8M12 12h8M12 18h8" />
+  </Icon>
+);
+
 export const TableIcon = () => (
   <Icon>
     <rect x="4" y="4" width="16" height="16" rx="2" />
