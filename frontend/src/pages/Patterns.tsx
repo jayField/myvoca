@@ -1,13 +1,13 @@
 import { PATTERN_TABLES, spokenPattern, type PatternTable } from '../lib/patterns';
 import { speak } from '../speech';
 
-/** 표현패턴표: each group of sentence patterns as its own table. Tapping the Japanese reads it aloud. */
+/** 표현: each group of sentence patterns as its own table. Tapping the Japanese reads it aloud. */
 export default function Patterns() {
   return (
     <div className="page page--narrow">
       <header className="page-header">
         <div>
-          <h1>표현패턴표</h1>
+          <h1>표현</h1>
           <p className="muted small">문장 틀을 통째로 익혀 두면 바로 꺼내 쓸 수 있어요. 일본어를 누르면 발음을 들려줘요.</p>
         </div>
       </header>

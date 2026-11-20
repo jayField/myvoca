@@ -1,4 +1,4 @@
-/** 표현패턴표: sentence patterns to learn as set phrases, grouped into tables. */
+/** 표현: sentence patterns to learn as set phrases, grouped into tables. */
 
 export interface PatternRow {
   ko: string;
@@ -22,7 +22,7 @@ const row = (ko: string, ja: string, sound: string, use?: string): PatternRow =>
 export const PATTERN_TABLES: PatternTable[] = [
   {
     id: 'common',
-    title: '가장 많이 쓰는 표현 20개',
+    title: '말끝만 바꾸면 되는 기본 패턴 20',
     koLabel: '표현',
     rows: [
       row('~했어', '～した', '시타'),
@@ -64,7 +64,7 @@ export const PATTERN_TABLES: PatternTable[] = [
   },
   {
     id: 'friends',
-    title: '일본 친구와 대화할 때 특히 유용한 표현',
+    title: '대화가 술술 이어지는 한마디',
     koLabel: '한국어',
     rows: [
       row('그런 것 같아', 'そうだとおもう', '소오다토 오모우'),

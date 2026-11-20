@@ -11,7 +11,7 @@ const NAV: { to: string; label: string; short?: string; icon: ReactNode; end?: b
   { to: '/talk', label: '회화 노트', short: '회화', icon: <TalkIcon /> },
   { to: '/kana', label: '가나표', icon: <KanaIcon /> },
   { to: '/numbers', label: '숫자', icon: <NumberIcon /> },
-  { to: '/patterns', label: '표현패턴표', short: '패턴', icon: <PatternIcon /> },
+  { to: '/patterns', label: '표현', icon: <PatternIcon /> },
   { to: '/songs', label: '노래', icon: <MusicIcon /> },
   { to: '/quiz', label: '퀴즈', icon: <QuizIcon /> },
   { to: '/log', label: '복습표', icon: <TableIcon /> },
