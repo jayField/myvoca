@@ -141,6 +141,22 @@ alter table public.phrases add column if not exists example_sound text not null 
 alter table public.phrases add column if not exists position double precision;
 update public.phrases set position = -extract(epoch from created_at) where position is null;
 
+-- Groups (folders) each person makes in 회화 노트. A phrase sits in one group or none (미분류); deleting a
+-- group sends its phrases back to 미분류.
+create table if not exists public.phrase_groups (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  name text not null check (char_length(name) between 1 and 30),
+  created_at timestamptz not null default now()
+);
+alter table public.phrase_groups enable row level security;
+drop policy if exists "own phrase groups" on public.phrase_groups;
+create policy "own phrase groups" on public.phrase_groups
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+alter table public.phrases add column if not exists group_id uuid references public.phrase_groups (id) on delete set null;
+
 alter table public.phrases enable row level security;
 
 drop policy if exists "own phrases" on public.phrases;

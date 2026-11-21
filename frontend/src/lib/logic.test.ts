@@ -3,7 +3,7 @@ import type { Phrase, Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
 import { addDays } from './dates';
 import { toHangul } from './kana';
-import { matchesSearch, phraseSound } from './phrases';
+import { groupName, inGroup, matchesSearch, mergeOrder, phraseSound } from './phrases';
 import { seededRng } from './random';
 import { clock, formatTime, lineAt, matchesSong, parseLrc, parseTime, rankMatches, youtubeId } from './songs';
 import {
@@ -441,7 +441,7 @@ describe('placeAt', () => {
 describe('회화 노트 search', () => {
   const p = {
     id: '1', input: '오해하지마', japanese: '誤解しないで', reading: 'ごかいしないで', meaning: '오해하지 마',
-    sound: '', words: [], position: 1, created_at: '',
+    sound: '', words: [], position: 1, group_id: null, created_at: '',
   } as Phrase;
   it('finds by Japanese, reading in either kana, pronunciation and meaning, ignoring spaces', () => {
     for (const q of ['誤解', 'ごかい', 'ゴカイ', '고카이', '오해 하지', '  ']) expect(matchesSearch(p, q)).toBe(true);
@@ -527,5 +527,25 @@ describe('matchesSong', () => {
     expect(matchesSong(song, 'MAO')).toBe(true);
     expect(matchesSong(song, '')).toBe(true);
     expect(matchesSong(song, '드라이플라워')).toBe(false);
+  });
+});
+
+describe('회화 노트 groups', () => {
+  const P = (id: string, group_id: string | null) => ({ id, group_id }) as Phrase;
+  const list = [P('a', 'g1'), P('b', null), P('c', 'g1'), P('d', 'g2'), P('e', 'g1')];
+  it('shows everything, 미분류 only, or one group', () => {
+    expect(list.filter((p) => inGroup(p, 'all'))).toHaveLength(5);
+    expect(list.filter((p) => inGroup(p, 'none')).map((p) => p.id)).toEqual(['b']);
+    expect(list.filter((p) => inGroup(p, 'g1')).map((p) => p.id)).toEqual(['a', 'c', 'e']);
+  });
+  it('reorders inside a group without moving the other phrases', () => {
+    const merged = mergeOrder(list, [P('e', 'g1'), P('a', 'g1'), P('c', 'g1')], 'g1');
+    expect(merged.map((p) => p.id)).toEqual(['e', 'b', 'a', 'd', 'c']);
+  });
+  it('takes a group name trimmed, up to 30 characters, and refuses a blank one', () => {
+    expect(groupName('  식당 ')).toBe('식당');
+    expect(groupName('   ')).toBeNull();
+    expect(groupName(null)).toBeNull();
+    expect(groupName('가'.repeat(40))).toHaveLength(30);
   });
 });

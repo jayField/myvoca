@@ -11,11 +11,31 @@ export function PhraseCard({
   phrase: p,
   onEdit,
   onDelete,
+  selected,
+  onToggle,
 }: {
   phrase: Phrase;
   onEdit?: () => void;
   onDelete: () => void;
+  /** In 선택 mode: whether it is ticked. The whole block toggles it and the buttons step aside. */
+  selected?: boolean;
+  onToggle?: () => void;
 }) {
+  if (onToggle) {
+    return (
+      <li className={`phrase-block phrase-block--select${selected ? ' is-selected' : ''}`}>
+        <label className="phrase-block-pick">
+          <input type="checkbox" checked={!!selected} onChange={onToggle} />
+          <span className="phrase-block-main">
+            <span lang="ja" className="phrase-block-term">
+              {p.japanese}
+            </span>
+            <span className="phrase-block-meaning">{p.meaning}</span>
+          </span>
+        </label>
+      </li>
+    );
+  }
   return (
     <li className="phrase-block">
       <div className="phrase-block-main">

@@ -68,6 +68,15 @@ export interface Phrase extends Translation {
   sound: string;
   /** Where the learner put it in 회화 노트, lowest first; null until the order column exists. */
   position: number | null;
+  /** The learner's own group (폴더); null is 미분류, also before the group column exists. */
+  group_id: string | null;
+  created_at: string;
+}
+
+/** A group the learner made in 회화 노트; each phrase sits in at most one. */
+export interface PhraseGroup {
+  id: string;
+  name: string;
   created_at: string;
 }
 

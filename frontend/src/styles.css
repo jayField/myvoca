@@ -2307,3 +2307,122 @@ a.device-box:hover {
 .pattern-ja [lang='ja'] {
   font-size: 1.0625rem;
 }
+
+/* ---------- 회화 노트 그룹 ---------- */
+
+.group-bar {
+  margin-bottom: 1rem;
+}
+
+/* One row of chips that scrolls sideways on phones rather than wrapping into many lines. */
+.group-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.group-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.group-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.group-chip:hover {
+  border-color: var(--border-accent);
+}
+
+.group-chip.is-active {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+
+.group-chip-count {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.group-chip--add {
+  border-style: dashed;
+  color: var(--accent);
+}
+
+.group-tools {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.group-tools .link-btn.danger-text {
+  color: var(--danger);
+}
+
+/* 선택 mode: what is ticked and where to put it, kept in reach while scrolling. */
+.select-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.select-bar-move {
+  flex: 1;
+  min-width: 9rem;
+  min-height: 2.5rem;
+}
+
+.phrase-block--select {
+  padding: 0;
+}
+
+.phrase-block-pick {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1.125rem;
+  cursor: pointer;
+}
+
+.phrase-block-pick input {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.phrase-block--select .phrase-block-main {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.phrase-block--select.is-selected {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}

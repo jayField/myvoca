@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Phrase } from '../api';
+import type { Phrase, PhraseGroup } from '../api';
 import { autoSound, updatePhrase } from '../lib/phrases';
 
 type Field = 'japanese' | 'reading' | 'sound' | 'meaning';
@@ -11,8 +11,22 @@ const FIELDS: { key: Field; label: string; ja?: boolean; max: number }[] = [
   { key: 'meaning', label: '뜻', max: 200 },
 ];
 
-/** Edit a saved phrase in place: the phrase, its reading, its Hangul pronunciation and its meaning. */
-export function PhraseEditor({ phrase, onSaved, onCancel }: { phrase: Phrase; onSaved: (p: Phrase) => void; onCancel: () => void }) {
+/**
+ * Edit a saved phrase in place: the phrase, its reading, its Hangul pronunciation and its meaning, and its
+ * group when the learner has made any.
+ */
+export function PhraseEditor({
+  phrase,
+  groups = [],
+  onSaved,
+  onCancel,
+}: {
+  phrase: Phrase;
+  groups?: PhraseGroup[];
+  onSaved: (p: Phrase) => void;
+  onCancel: () => void;
+}) {
+  const [groupId, setGroupId] = useState(phrase.group_id);
   const [form, setForm] = useState<Record<Field, string>>(() => {
     const { japanese, reading, sound, meaning } = phrase;
     return { japanese, reading, sound, meaning };
@@ -37,7 +51,9 @@ export function PhraseEditor({ phrase, onSaved, onCancel }: { phrase: Phrase; on
     try {
       // Stored only when it differs from the automatic one, so a later reading fix still updates it.
       const sound = typed && trimmed.sound !== auto ? trimmed.sound : '';
-      onSaved(await updatePhrase(phrase.id, { ...trimmed, sound, words }));
+      // The group is sent only when it changed, so editing still works before the group SQL has run.
+      const group = groupId !== phrase.group_id ? { group_id: groupId } : {};
+      onSaved(await updatePhrase(phrase.id, { ...trimmed, sound, words, ...group }));
     } catch (err) {
       setError((err as Error).message);
       setSaving(false);
@@ -71,6 +87,19 @@ export function PhraseEditor({ phrase, onSaved, onCancel }: { phrase: Phrase; on
             )}
           </label>
         ))}
+        {groups.length > 0 && (
+          <label className="talk-field">
+            <span>그룹</span>
+            <select className="text-input text-input--block" value={groupId ?? ''} onChange={(e) => setGroupId(e.target.value || null)}>
+              <option value="">미분류</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
       {error && <p className="banner-error">{error}</p>}
       <div className="button-row">

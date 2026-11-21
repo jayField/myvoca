@@ -1,10 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import type { Phrase, Translation } from '../api';
+import { Link, useSearchParams } from 'react-router-dom';
+import type { Phrase, PhraseGroup, Translation } from '../api';
 import { PhraseCard } from '../components/PhraseCard';
 import { SpeakButton } from '../components/SpeakButton';
 import { localDate } from '../lib/dates';
-import { deletePhrase, listPhrases, phraseSound, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
+import { deletePhrase, listGroups, listPhrases, phraseSound, savePhrase, TALK_DECK, translatePhrase } from '../lib/phrases';
 
 const MAX_INPUT = 100;
 
@@ -19,6 +19,10 @@ export default function TalkNotes() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState<'translate' | 'save' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [groups, setGroups] = useState<PhraseGroup[]>([]);
+  // Opened from a group in 회화 노트 (?group=id): new phrases go in that group unless another is picked.
+  const [params] = useSearchParams();
+  const [groupId, setGroupId] = useState<string | null>(params.get('group'));
   // Only today's saves are listed here; everything saved so far lives in 단어장 → 회화 노트.
   const todayDate = localDate();
   const today = phrases?.filter((p) => localDate(new Date(p.created_at)) === todayDate) ?? null;
@@ -27,6 +31,12 @@ export default function TalkNotes() {
     listPhrases()
       .then(setPhrases)
       .catch((e: Error) => setError(e.message));
+    listGroups()
+      .then((list) => {
+        setGroups(list);
+        setGroupId((id) => (list.some((g) => g.id === id) ? id : null));
+      })
+      .catch(() => setGroups([]));
   }, []);
 
   async function translate(text: string) {
@@ -57,7 +67,7 @@ export default function TalkNotes() {
     setBusy('save');
     setError(null);
     try {
-      const saved = await savePhrase(draft.input, result);
+      const saved = await savePhrase(draft.input, result, groupId);
       setPhrases((list) => [saved, ...(list ?? [])]);
       setDraft(null);
       setInput('');
@@ -135,6 +145,19 @@ export default function TalkNotes() {
             <span>뜻</span>
             <input className="text-input text-input--block" value={draft.result.meaning} onChange={(e) => edit('meaning', e.target.value)} />
           </label>
+          {groups.length > 0 && (
+            <label className="talk-field">
+              <span>그룹</span>
+              <select className="text-input text-input--block" value={groupId ?? ''} onChange={(e) => setGroupId(e.target.value || null)}>
+                <option value="">미분류</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <p className="hint">번역이 틀릴 수 있어요. 이상하면 고치거나 다시 번역해 보세요.</p>
           <div className="button-row">
             <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy !== null}>

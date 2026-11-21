@@ -1,6 +1,6 @@
 // 회화 노트: expressions picked up in conversation, translated by /api/translate and saved per account.
 // Unlike the bundled decks these live only in Supabase, so they need a signed-in account.
-import type { Item, Phrase, PhraseWord, Translation } from '../types';
+import type { Item, Phrase, PhraseGroup, PhraseWord, Translation } from '../types';
 import { toHangul } from './kana';
 import { supabase } from './supabase';
 
@@ -73,16 +73,23 @@ function client() {
   return supabase;
 }
 
-/** Only what the app shows; older rows also hold examples and notes that are no longer used. */
-const COLUMNS = 'id,input,japanese,reading,meaning,sound,position,words,created_at';
+/**
+ * Every column, so the group column is picked up once its SQL has run and simply missing before. Older rows
+ * also hold examples and notes that are no longer shown; they are small.
+ */
+const COLUMNS = '*';
 const WITHOUT_POSITION = 'id,input,japanese,reading,meaning,sound,words,created_at';
 /** A query's outcome, loosely typed so the with- and without-position queries can share a variable. */
 type Result = { data: unknown; error: { code: string } | null };
 /** Postgres / PostgREST codes for a column that does not exist yet (the order column before its SQL is run). */
 const MISSING_COLUMN = new Set(['42703', 'PGRST204']);
 const NEEDS_SQL = '순서를 저장하려면 Supabase에서 순서 칸을 추가하는 SQL을 먼저 실행해 주세요.';
+/** Codes for a table that does not exist yet (phrase_groups before its SQL is run). */
+const MISSING_TABLE = new Set(['42P01', 'PGRST205']);
+const NEEDS_GROUP_SQL = '그룹을 쓰려면 Supabase에서 그룹 SQL을 먼저 실행해 주세요.';
 
-const withPosition = (row: Omit<Phrase, 'position'> & { position?: number | null }): Phrase => ({ ...row, position: row.position ?? null });
+type Row = Omit<Phrase, 'position' | 'group_id'> & { position?: number | null; group_id?: string | null };
+const withPosition = (row: Row): Phrase => ({ ...row, position: row.position ?? null, group_id: row.group_id ?? null });
 
 /** In the learner's order: by position, then (for rows never moved) newest first. */
 export async function listPhrases(): Promise<Phrase[]> {
@@ -95,20 +102,22 @@ export async function listPhrases(): Promise<Phrase[]> {
     res = await phrases.select(WITHOUT_POSITION).order('created_at', { ascending: false });
   }
   if (res.error) throw new Error(NETWORK);
-  return (res.data as Omit<Phrase, 'position'>[]).map(withPosition);
+  return (res.data as Row[]).map(withPosition);
 }
 
 /** New phrases go on top: below every position given so far (moves use small numbers, this a large negative). */
 const topPosition = () => -Date.now() / 1000;
 
-export async function savePhrase(input: string, t: Translation): Promise<Phrase> {
+/** Saves a new phrase on top, in `groupId` when given (adding while a group is open). */
+export async function savePhrase(input: string, t: Translation, groupId: string | null = null): Promise<Phrase> {
   const phrases = client().from('phrases');
-  let res: Result = await phrases.insert({ input, ...t, position: topPosition() }).select(COLUMNS).single();
+  const row = { input, ...t, position: topPosition(), ...(groupId && { group_id: groupId }) };
+  let res: Result = await phrases.insert(row).select(COLUMNS).single();
   if (res.error && MISSING_COLUMN.has(res.error.code)) {
     res = await phrases.insert({ input, ...t }).select(WITHOUT_POSITION).single();
   }
   if (res.error) throw new Error(`저장하지 못했어요. ${NETWORK}`);
-  return withPosition(res.data as Omit<Phrase, 'position'>);
+  return withPosition(res.data as Row);
 }
 
 /**
@@ -132,15 +141,73 @@ export async function savePositions(updates: { id: string; position: number }[])
   if (failed?.error) throw new Error(MISSING_COLUMN.has(failed.error.code) ? NEEDS_SQL : `순서를 저장하지 못했어요. ${NETWORK}`);
 }
 
-export type PhraseEdit = Pick<Phrase, 'japanese' | 'reading' | 'sound' | 'meaning' | 'words'>;
+export type PhraseEdit = Pick<Phrase, 'japanese' | 'reading' | 'sound' | 'meaning' | 'words'> & { group_id?: string | null };
 
 /** Save edits to a phrase; returns the stored row. */
 export async function updatePhrase(id: string, edit: PhraseEdit): Promise<Phrase> {
   const phrases = client().from('phrases');
   let res: Result = await phrases.update(edit).eq('id', id).select(COLUMNS).single();
   if (res.error && MISSING_COLUMN.has(res.error.code)) res = await phrases.update(edit).eq('id', id).select(WITHOUT_POSITION).single();
-  if (res.error) throw new Error(`고치지 못했어요. ${NETWORK}`);
-  return withPosition(res.data as Omit<Phrase, 'position'>);
+  if (res.error) throw new Error(MISSING_COLUMN.has(res.error.code) && 'group_id' in edit ? NEEDS_GROUP_SQL : `고치지 못했어요. ${NETWORK}`);
+  return withPosition(res.data as Row);
+}
+
+// ---------- 그룹 ----------
+
+/** Which phrases a group chip shows: everything, those in no group (미분류), or one group's. */
+export type GroupView = 'all' | 'none' | string;
+
+export function inGroup(p: Phrase, view: GroupView): boolean {
+  return view === 'all' || (view === 'none' ? p.group_id === null : p.group_id === view);
+}
+
+/**
+ * `full` with the phrases of one view put in the order of `subset`: each slot a view phrase held now holds
+ * the next one from `subset`, so reordering inside a group leaves the other phrases where they were.
+ */
+export function mergeOrder(full: Phrase[], subset: Phrase[], view: GroupView): Phrase[] {
+  let i = 0;
+  return full.map((p) => (inGroup(p, view) ? subset[i++] : p));
+}
+
+/** The learner's groups, oldest first. Empty (not an error) before the group SQL has run. */
+export async function listGroups(): Promise<PhraseGroup[]> {
+  const { data, error } = await client().from('phrase_groups').select('id,name,created_at').order('created_at');
+  if (error && MISSING_TABLE.has(error.code)) return [];
+  if (error) throw new Error(NETWORK);
+  return data as PhraseGroup[];
+}
+
+const groupFailure = (error: { code: string }, doing: string) =>
+  new Error(MISSING_TABLE.has(error.code) || MISSING_COLUMN.has(error.code) ? NEEDS_GROUP_SQL : `${doing} 못했어요. ${NETWORK}`);
+
+export async function createGroup(name: string): Promise<PhraseGroup> {
+  const { data, error } = await client().from('phrase_groups').insert({ name }).select('id,name,created_at').single();
+  if (error) throw groupFailure(error, '그룹을 만들지');
+  return data as PhraseGroup;
+}
+
+export async function renameGroup(id: string, name: string): Promise<void> {
+  const { error } = await client().from('phrase_groups').update({ name }).eq('id', id);
+  if (error) throw groupFailure(error, '이름을 바꾸지');
+}
+
+/** Deletes the group; its phrases go back to 미분류 (the database clears their group). */
+export async function deleteGroup(id: string): Promise<void> {
+  const { error } = await client().from('phrase_groups').delete().eq('id', id);
+  if (error) throw groupFailure(error, '그룹을 지우지');
+}
+
+/** Puts these phrases in `groupId`, or back in 미분류 with null. */
+export async function movePhrases(ids: string[], groupId: string | null): Promise<void> {
+  const { error } = await client().from('phrases').update({ group_id: groupId }).in('id', ids);
+  if (error) throw groupFailure(error, '그룹에 넣지');
+}
+
+/** A group name as typed: trimmed, at most 30 characters; null when nothing is left. */
+export function groupName(text: string | null): string | null {
+  const name = text?.trim().slice(0, 30);
+  return name ? name : null;
 }
 
 export async function deletePhrase(id: string): Promise<void> {
