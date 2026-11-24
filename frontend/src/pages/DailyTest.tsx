@@ -172,6 +172,7 @@ function Test({ day }: { day: number }) {
             tag={current.earlier ? '전 날 단어' : `${day}일차`}
             flipped={flipped}
             onFlip={() => setFlipped((f) => !f)}
+            hideExample
           />
           {flipped ? (
             <div className="grade-row">
