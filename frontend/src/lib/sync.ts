@@ -1,6 +1,7 @@
 // Two-way sync between this browser's IndexedDB and the signed-in user's rows in Supabase.
 import type { DayCount, OrderMode, Progress } from '../types';
 import * as storage from './storage';
+import { deleteRemotePassedDays } from './daily';
 import { supabase } from './supabase';
 
 const PROGRESS_COLUMNS = 'item_id, ease, interval_days, reps, lapses, due, first_seen, last_grade, missed_on, studied_on, study_grade, reset_on, updated_at';
@@ -42,6 +43,7 @@ export async function deleteRemoteStudyData(deckId?: string): Promise<void> {
   if (!deckId) {
     const days = await supabase.from('day_counts').delete().gte('day', '1900-01-01');
     if (days.error) throw days.error;
+    await deleteRemotePassedDays();
   }
 }
 

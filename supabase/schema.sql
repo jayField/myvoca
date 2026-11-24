@@ -165,6 +165,21 @@ create policy "own phrases" on public.phrases
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
+-- 하루 단어: the days each person has passed (a perfect test). The days and words are the same for
+-- everyone; which days are colored in is each account's own.
+create table if not exists public.daily_passed (
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  day integer not null check (day between 1 and 1000),
+  passed_at timestamptz not null default now(),
+  primary key (user_id, day)
+);
+alter table public.daily_passed enable row level security;
+drop policy if exists "own daily passed" on public.daily_passed;
+create policy "own daily passed" on public.daily_passed
+  for all to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
 -- 노래: songs registered ahead of time, with lyrics timed to a YouTube video. Every account sees every
 -- song and may fix its lyrics or sync; only whoever registered a song can delete it.
 -- lines holds [{ t: seconds, japanese, reading, meaning, words }] in order; offset_ms shifts every line

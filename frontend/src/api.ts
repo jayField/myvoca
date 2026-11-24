@@ -18,7 +18,7 @@ import {
 } from './lib/logic';
 import { NUMBER_DECK, numberItems } from './lib/numbers';
 import { listPhrases, phraseItem, TALK_DECK } from './lib/phrases';
-import { DAILY_DONE_KEY } from './lib/daily';
+import { DAILY_PASSED_KEY } from './lib/daily';
 import * as storage from './lib/storage';
 import { deleteRemoteStudyData, exclusive } from './lib/sync';
 import type { DayCount, Grade, Progress, ReviewSource, Settings } from './types';
@@ -186,7 +186,7 @@ export const api = {
     });
     try {
       Object.keys(localStorage)
-        .filter((key) => key.startsWith('tango-note.speed.best') || key.startsWith(DAILY_DONE_KEY))
+        .filter((key) => key.startsWith('tango-note.speed.best') || key.startsWith(DAILY_PASSED_KEY))
         .forEach((key) => localStorage.removeItem(key));
     } catch {
       // Best scores are a nicety; ignore storage failures.

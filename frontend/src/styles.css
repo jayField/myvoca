@@ -2493,11 +2493,10 @@ a.device-box:hover {
 }
 
 .daily-tile.is-done {
-  color: var(--muted);
-}
-
-.daily-tile.is-done span {
-  color: var(--accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
 }
 
 .daily-tile.is-next {
@@ -2553,4 +2552,36 @@ a.device-box:hover {
 .daily-day-nav {
   justify-content: space-between;
   margin-top: 1.25rem;
+}
+
+.daily-score {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.daily-score--pass {
+  color: var(--accent);
+}
+
+.daily-missed {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 1rem;
+  width: 100%;
+  max-width: 22rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  text-align: left;
+}
+
+.daily-missed li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }

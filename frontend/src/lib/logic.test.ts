@@ -1,4 +1,4 @@
-import { DAILY_DAYS, DAILY_WORDS, dailyLabel, dayTest, dayWords, parseDay } from './daily';
+import { DAILY_DAYS, DAILY_WORDS, dailyLabel, dayTest, dayWords, parseDay, testScore } from './daily';
 import { describe, expect, it } from 'vitest';
 import type { Phrase, Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
@@ -582,6 +582,12 @@ describe('하루 단어', () => {
     expect(dailyLabel({ term: '猫', reading: 'ねこ' })).toBe('ねこ(猫)');
     expect(dailyLabel({ term: 'コーヒー', reading: 'こーひー' })).toBe('コーヒー');
     expect(dailyLabel({ term: 'ありがとう', reading: 'ありがとう' })).toBe('ありがとう');
+  });
+
+  it('scores out of 100, and only all 알았음 is 100', () => {
+    expect(testScore(20, 20)).toBe(100);
+    expect(testScore(19, 20)).toBe(95);
+    expect(testScore(0, 0)).toBe(0);
   });
 
   it('only accepts days that exist', () => {
