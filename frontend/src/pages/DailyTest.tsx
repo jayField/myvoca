@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { api, type Grade } from '../api';
+import type { Grade } from '../api';
 import { useAuth } from '../auth';
 import { Flashcard } from '../components/Flashcard';
 import { BackIcon } from '../components/Icons';
@@ -11,7 +11,7 @@ import { shuffle } from '../lib/random';
 /**
  * A day's test, the same way as 오늘의 학습: flip the card, then 몰랐음 / 헷갈림 / 알았음. Only 알았음 on every
  * card is 100점, which passes the day; anything less offers the same words again, in a new order, until it is.
- * Grades count as quiz grades, so a missed word joins 헷갈리는 단어 without using up today's study goal.
+ * The grades stay in this test: nothing goes to 복습표, 헷갈리는 단어 or 오늘의 학습, so 하루 단어 is its own track.
  */
 export default function DailyTest() {
   const day = parseDay(useParams().day);
@@ -28,8 +28,6 @@ function Test({ day }: { day: number }) {
   const [round, setRound] = useState(1);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [counts, setCounts] = useState(NO_COUNTS);
   const [missed, setMissed] = useState<Card[]>([]);
   const current = queue[index];
@@ -40,23 +38,14 @@ function Test({ day }: { day: number }) {
   }, [perfect, day, user?.id]);
 
   const grade = useCallback(
-    async (g: Grade) => {
-      if (!current || !flipped || saving) return;
-      setSaving(true);
-      try {
-        await api.review(current.item.id, g, 'quiz');
-        setCounts((c) => ({ ...c, [g]: c[g] + 1 }));
-        if (g !== 'good') setMissed((m) => [...m, current]);
-        setIndex((i) => i + 1);
-        setFlipped(false);
-        setError(null);
-      } catch {
-        setError('저장하지 못했어요. 다시 눌러 주세요.');
-      } finally {
-        setSaving(false);
-      }
+    (g: Grade) => {
+      if (!current || !flipped) return;
+      setCounts((c) => ({ ...c, [g]: c[g] + 1 }));
+      if (g !== 'good') setMissed((m) => [...m, current]);
+      setIndex((i) => i + 1);
+      setFlipped(false);
     },
-    [current, flipped, saving],
+    [current, flipped],
   );
 
   function retry() {
@@ -77,7 +66,7 @@ function Test({ day }: { day: number }) {
         return;
       }
       const match = GRADES.find((g) => g.key === e.key);
-      if (match) void grade(match.grade);
+      if (match) grade(match.grade);
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -111,8 +100,6 @@ function Test({ day }: { day: number }) {
           </span>
         )}
       </header>
-
-      {error && <p className="banner-error">{error}</p>}
 
       {!current && perfect && (
         <div className="empty">
@@ -180,8 +167,7 @@ function Test({ day }: { day: number }) {
                   key={g.grade}
                   type="button"
                   className={`btn grade-btn grade-btn--${g.grade}`}
-                  disabled={saving}
-                  onClick={() => void grade(g.grade)}
+                  onClick={() => grade(g.grade)}
                 >
                   {g.label}
                   <kbd className="kbd">{g.key}</kbd>
