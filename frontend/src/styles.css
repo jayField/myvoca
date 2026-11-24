@@ -2585,3 +2585,22 @@ a.device-box:hover {
   border: 1px solid var(--border);
   border-radius: 10px;
 }
+
+.daily-turn {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: var(--surface-accent);
+  color: var(--accent);
+  text-align: center;
+}
+
+.flashcard-term.daily-reverse-term {
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  overflow-wrap: anywhere;
+}
+
+.daily-reverse-ja {
+  font-size: 1.5rem;
+  font-weight: 600;
+}

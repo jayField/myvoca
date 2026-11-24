@@ -24,9 +24,11 @@ export default function DailyDay() {
           <h1>{day}일차</h1>
           <p className="muted small">
             JLPT {dayLevel(day)} · 단어 {words.length}개
+          </p>
+          <p className="muted small">
             {day === 1
-              ? ' · 테스트 10문제'
-              : ` · 테스트 ${words.length + DAILY_REVIEW}문제 (오늘 단어 전부 + ${day === 2 ? '1일차 단어 전부' : `앞 단어 ${DAILY_REVIEW}개, 밀린 날 먼저 · 매일 바뀜`})`}
+              ? '테스트: 10단어 × 일→한·한→일 = 20문제'
+              : `테스트: ${words.length + DAILY_REVIEW}단어 × 일→한·한→일 = ${(words.length + DAILY_REVIEW) * 2}문제 (오늘 단어 전부 + ${day === 2 ? '1일차 단어 전부' : `앞 단어 ${DAILY_REVIEW}개, 밀린 날 먼저 · 매일 바뀜`})`}
           </p>
         </div>
         <Link to={`/daily/${day}/test`} className="btn btn--primary">

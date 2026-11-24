@@ -1,18 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import type { Grade } from '../api';
+import type { Grade, Item } from '../api';
 import { useAuth } from '../auth';
 import { Flashcard } from '../components/Flashcard';
+import { SpeakButton } from '../components/SpeakButton';
 import { BackIcon } from '../components/Icons';
 import { GRADES } from '../labels';
 import { DAILY_DAYS, dailyLabel, dayTest, loadPassedDays, markDayPassed, parseDay, testScore, testSeed } from '../lib/daily';
 import { localDate } from '../lib/dates';
+import { toHangul } from '../lib/kana';
 import { seededRng, shuffle } from '../lib/random';
 
 /**
  * A day's test, the same way as 오늘의 학습: flip the card, then 몰랐음 / 헷갈림 / 알았음. Only 알았음 on every
  * card is 100점, which passes the day; anything less offers the same words again, in a new order, until it is.
  * The earlier words lean on days not passed yet and are fixed for the calendar day, so they change daily.
+ * Two halves: the twenty words read as Japanese (뜻 떠올리기), then the same words from their Korean meaning
+ * (일본어 떠올리기), forty cards in all.
  * The grades stay in this test: nothing goes to 복습표, 헷갈리는 단어 or 오늘의 학습, so 하루 단어 is its own track.
  */
 export default function DailyTest() {
@@ -21,12 +25,18 @@ export default function DailyTest() {
   return <Test key={day} day={day} />;
 }
 
-type Card = ReturnType<typeof dayTest>[number];
+type Word = ReturnType<typeof dayTest>[number];
+type Card = Word & { reverse: boolean };
+
+/** The words Japanese → Korean, then the same words in a new order Korean → Japanese. */
+function bothWays(words: Word[]): Card[] {
+  return [...words.map((w) => ({ ...w, reverse: false })), ...shuffle(words).map((w) => ({ ...w, reverse: true }))];
+}
 const NO_COUNTS: Record<Grade, number> = { good: 0, hard: 0, again: 0 };
 
 function Test({ day }: { day: number }) {
   const { user } = useAuth();
-  const [cards, setCards] = useState<Card[] | null>(null);
+  const [cards, setCards] = useState<Word[] | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -49,8 +59,8 @@ function Test({ day }: { day: number }) {
   return <Run day={day} cards={cards} userId={user?.id} />;
 }
 
-function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: string | undefined }) {
-  const [queue, setQueue] = useState(cards);
+function Run({ day, cards, userId }: { day: number; cards: Word[]; userId: string | undefined }) {
+  const [queue, setQueue] = useState(() => bothWays(cards));
   const [round, setRound] = useState(1);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -75,7 +85,7 @@ function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: strin
   );
 
   function retry() {
-    setQueue((q) => shuffle(q));
+    setQueue((q) => bothWays(shuffle(q.filter((c) => !c.reverse))));
     setRound((r) => r + 1);
     setIndex(0);
     setFlipped(false);
@@ -98,11 +108,9 @@ function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: strin
     return () => window.removeEventListener('keydown', onKey);
   }, [grade]);
 
-  // Today's and earlier words come mixed, so each count adds up the cards of its kind already graded.
-  const own = queue.filter((c) => !c.earlier).length;
-  const earlier = queue.length - own;
-  const ownDone = queue.slice(0, index).filter((c) => !c.earlier).length;
-  const earlierDone = index - ownDone;
+  const half = queue.length / 2;
+  // A word missed both ways is listed once.
+  const missedWords = [...new Map(missed.map((c) => [c.item.id, c.item])).values()];
   const score = testScore(counts.good, queue.length);
 
   return (
@@ -115,14 +123,12 @@ function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: strin
         {current && (
           <span className="study-counts small">
             {round > 1 && <span className="muted">{round}번째 도전</span>}
-            <span className={current.earlier ? 'muted' : 'strong'}>
-              {day}일차 {ownDone} / {own}
+            <span className={current.reverse ? 'muted' : 'strong'}>
+              일→한 {Math.min(index, half)} / {half}
             </span>
-            {earlier > 0 && (
-              <span className={current.earlier ? 'strong' : 'muted'}>
-                전 날 {earlierDone} / {earlier}
-              </span>
-            )}
+            <span className={current.reverse ? 'strong' : 'muted'}>
+              한→일 {Math.max(0, index - half)} / {half}
+            </span>
           </span>
         )}
       </header>
@@ -156,10 +162,10 @@ function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: strin
             통과돼요.
           </p>
           <ul className="daily-missed">
-            {missed.map((c) => (
-              <li key={c.item.id}>
-                <span lang="ja">{dailyLabel(c.item)}</span>
-                <span className="muted">{c.item.meaning}</span>
+            {missedWords.map((item) => (
+              <li key={item.id}>
+                <span lang="ja">{dailyLabel(item)}</span>
+                <span className="muted">{item.meaning}</span>
               </li>
             ))}
           </ul>
@@ -179,13 +185,24 @@ function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: strin
           <div className="progress">
             <div className="progress-fill" style={{ width: `${(index / queue.length) * 100}%` }} />
           </div>
-          <Flashcard
-            key={`${round}-${current.item.id}-${index}`}
-            item={current.item}
-            tag={current.earlier ? '전 날 단어' : `${day}일차`}
-            flipped={flipped}
-            onFlip={() => setFlipped((f) => !f)}
-          />
+          {index === half && <p className="daily-turn small">이제 거꾸로! 한국어 뜻을 보고 일본어를 떠올려요.</p>}
+          {current.reverse ? (
+            <ReverseCard
+              key={`${round}-r-${current.item.id}`}
+              item={current.item}
+              tag={current.earlier ? '전 날 단어 · 한→일' : `${day}일차 · 한→일`}
+              flipped={flipped}
+              onFlip={() => setFlipped((f) => !f)}
+            />
+          ) : (
+            <Flashcard
+              key={`${round}-${current.item.id}`}
+              item={current.item}
+              tag={current.earlier ? '전 날 단어' : `${day}일차`}
+              flipped={flipped}
+              onFlip={() => setFlipped((f) => !f)}
+            />
+          )}
           {flipped ? (
             <div className="grade-row">
               {GRADES.map((g) => (
@@ -205,6 +222,44 @@ function Run({ day, cards, userId }: { day: number; cards: Card[]; userId: strin
           )}
         </>
       )}
+    </div>
+  );
+}
+
+/** 한→일: the Korean meaning up front; flipped, the word as ひらがな(漢字) with its sound, voice and example. */
+function ReverseCard({ item, tag, flipped, onFlip }: { item: Item; tag: string; flipped: boolean; onFlip: () => void }) {
+  return (
+    <div className="flashcard">
+      <span className="flashcard-tag">{tag}</span>
+      {flipped && (
+        <div className="flashcard-speak">
+          <SpeakButton text={item.term} />
+        </div>
+      )}
+      <button
+        type="button"
+        className="flashcard-face"
+        aria-label={flipped ? `${item.meaning}, 뒷면` : `${item.meaning}, 눌러서 뒤집기`}
+        onClick={onFlip}
+      >
+        <span className="flashcard-term daily-reverse-term">{item.meaning}</span>
+        {flipped ? (
+          <span className="flashcard-back">
+            <span lang="ja" className="daily-reverse-ja">
+              {dailyLabel(item)}
+            </span>
+            <span className="flashcard-sound">{toHangul(item.reading)}</span>
+            {item.example_ja && (
+              <span className="flashcard-example">
+                <span lang="ja">{item.example_ja}</span>
+                <span>{item.example_ko}</span>
+              </span>
+            )}
+          </span>
+        ) : (
+          <span className="flashcard-hint">일본어로 떠올려 보고 탭</span>
+        )}
+      </button>
     </div>
   );
 }
