@@ -6,7 +6,7 @@ import { sample, shuffle, type Rng } from './random';
 import { supabase } from './supabase';
 
 export const DAILY_SIZE = 10;
-/** Earlier words added to a day's test: day 2 gets all of day 1, later days ten at random from the days before. */
+/** Earlier words added to a day's test, so every test after day 1 is twenty. */
 export const DAILY_REVIEW = 10;
 export const DAILY_PASSED_KEY = 'tango-note.daily.passed';
 
@@ -18,9 +18,41 @@ export function dayWords(day: number): Item[] {
   return DAILY_WORDS.slice((day - 1) * DAILY_SIZE, day * DAILY_SIZE);
 }
 
-/** All of the day's own words plus DAILY_REVIEW at random from the days before, mixed together. */
-export function dayTest(day: number, rng: Rng = Math.random): { item: Item; earlier: boolean }[] {
-  const earlier = sample(DAILY_WORDS.slice(0, (day - 1) * DAILY_SIZE), DAILY_REVIEW, rng);
+/**
+ * The days before `day` still owed: those after the last day passed before it, not passed themselves. Passed
+ * up to 3 and now on 6 → 4 and 5.
+ */
+export function backlogDays(day: number, passed: ReadonlySet<number>): number[] {
+  let last = 0;
+  for (let d = day - 1; d >= 1; d--) {
+    if (passed.has(d)) {
+      last = d;
+      break;
+    }
+  }
+  return Array.from({ length: day - 1 - last }, (_, i) => last + 1 + i).filter((d) => !passed.has(d));
+}
+
+/** Seed for a day's test: the calendar date and the day, so a test stays the same all day and changes the next. */
+export function testSeed(date: string, day: number): string {
+  return `daily:${date}:${day}`;
+}
+
+/**
+ * All of the day's own words plus DAILY_REVIEW earlier ones: words from the backlog days first, the rest at random
+ * from the other earlier days. Mixed together.
+ */
+export function dayTest(day: number, passed: ReadonlySet<number> = new Set(), rng: Rng = Math.random): { item: Item; earlier: boolean }[] {
+  const backlog = new Set(backlogDays(day, passed));
+  const before = DAILY_WORDS.slice(0, (day - 1) * DAILY_SIZE);
+  const owed = before.filter((_, i) => backlog.has(Math.floor(i / DAILY_SIZE) + 1));
+  const first = sample(owed, DAILY_REVIEW, rng);
+  const rest = sample(
+    before.filter((w) => !first.includes(w)),
+    DAILY_REVIEW - first.length,
+    rng,
+  );
+  const earlier = [...first, ...rest];
   return shuffle(
     [...dayWords(day).map((item) => ({ item, earlier: false })), ...earlier.map((item) => ({ item, earlier: true }))],
     rng,

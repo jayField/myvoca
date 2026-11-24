@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDataVersion } from '../auth';
+import { useAuth, useDataVersion } from '../auth';
 import { api, CONFUSING_DECK_ID, LOAD_ERROR, type Deck } from '../api';
+import { DAILY_DAYS, loadPassedDays, localPassedDays } from '../lib/daily';
 import { listPhrases, TALK_DECK } from '../lib/phrases';
 
 export default function Decks() {
@@ -16,6 +17,18 @@ export default function Decks() {
       .then((list) => setPhraseCount(list.length))
       .catch(() => setPhraseCount(null));
   }, []);
+
+  // 하루 단어 lives on its own page; this card only shows how far along it is.
+  const { user } = useAuth();
+  const [passed, setPassed] = useState(() => localPassedDays(user?.id));
+  useEffect(() => {
+    let live = true;
+    loadPassedDays(user?.id).then((days) => live && setPassed(days)).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [user?.id]);
+  const nextDay = Array.from({ length: DAILY_DAYS }, (_, i) => i + 1).find((d) => !passed.has(d)) ?? 1;
 
   const dataVersion = useDataVersion();
   useEffect(() => {
@@ -51,6 +64,22 @@ export default function Decks() {
             </div>
           </Link>
         ))}
+        {decks && (
+          <Link to="/daily" className="card deck-card deck-card--tall">
+            <div>
+              <span className="deck-title">하루 단어</span>
+              <p className="muted small">하루 10개씩 N5부터. 테스트 100점이면 그날 통과예요.</p>
+            </div>
+            <div>
+              <div className="progress progress--thin">
+                <div className="progress-fill" style={{ width: `${(passed.size / DAILY_DAYS) * 100}%` }} />
+              </div>
+              <span className="muted small">
+                {passed.size}일 통과 · 다음 {nextDay}일차
+              </span>
+            </div>
+          </Link>
+        )}
         {decks && (
           <Link to={`/decks/${TALK_DECK.id}`} className="card deck-card deck-card--tall deck-card--talk">
             <div>

@@ -1,4 +1,4 @@
-import { DAILY_DAYS, DAILY_WORDS, dailyLabel, dayTest, dayWords, parseDay, testScore } from './daily';
+import { backlogDays, DAILY_DAYS, DAILY_WORDS, dailyLabel, dayTest, dayWords, parseDay, testScore, testSeed } from './daily';
 import { describe, expect, it } from 'vitest';
 import type { Phrase, Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
@@ -565,14 +565,14 @@ describe('하루 단어', () => {
     const two = dayTest(2);
     expect(two).toHaveLength(20);
     expect(new Set(two.filter((c) => c.earlier).map((c) => c.item.id))).toEqual(new Set(dayWords(1).map((w) => w.id)));
-    const five = dayTest(5, seededRng('five'));
+    const five = dayTest(5, new Set(), seededRng('five'));
     expect(five).toHaveLength(20);
     expect(new Set(five.map((c) => c.item.id)).size).toBe(20);
     expect(five.every((c) => DAILY_WORDS.indexOf(c.item) < 50)).toBe(true);
     expect(five.every((c) => c.earlier === DAILY_WORDS.indexOf(c.item) < 40)).toBe(true);
     // Every one of the day's words, every time, and ten earlier ones.
     for (let i = 0; i < 20; i++) {
-      const test = dayTest(5, seededRng(`d${i}`));
+      const test = dayTest(5, new Set(), seededRng(`d${i}`));
       expect(test.filter((c) => !c.earlier).map((c) => c.item.id).sort()).toEqual(dayWords(5).map((w) => w.id).sort());
       expect(test.filter((c) => c.earlier)).toHaveLength(10);
     }
@@ -582,6 +582,41 @@ describe('하루 단어', () => {
     expect(dailyLabel({ term: '猫', reading: 'ねこ' })).toBe('ねこ(猫)');
     expect(dailyLabel({ term: 'コーヒー', reading: 'こーひー' })).toBe('コーヒー');
     expect(dailyLabel({ term: 'ありがとう', reading: 'ありがとう' })).toBe('ありがとう');
+  });
+
+  it('owes the days after the last one passed', () => {
+    expect(backlogDays(6, new Set([1, 2, 3]))).toEqual([4, 5]);
+    expect(backlogDays(6, new Set([1, 2, 3, 4, 5]))).toEqual([]);
+    expect(backlogDays(4, new Set())).toEqual([1, 2, 3]);
+    expect(backlogDays(6, new Set([2, 5]))).toEqual([]);
+    expect(backlogDays(6, new Set([2, 4]))).toEqual([5]);
+    expect(backlogDays(1, new Set())).toEqual([]);
+  });
+
+  it('fills the earlier half from owed days first, then older ones', () => {
+    const passed = new Set([1, 2, 3, 4, 5, 6, 7]);
+    // Day 10 with 8 and 9 owed: twenty owed words, so all ten earlier ones come from them.
+    const test = dayTest(10, passed, seededRng('a'));
+    const earlier = test.filter((c) => c.earlier).map((c) => DAILY_WORDS.indexOf(c.item));
+    expect(earlier).toHaveLength(10);
+    expect(earlier.every((i) => i >= 70 && i < 90)).toBe(true);
+    // Day 9 with only 8 owed: its ten, and nothing more to add from older days.
+    const nine = dayTest(9, new Set([1, 2, 3, 4, 5, 6, 7]), seededRng('b')).filter((c) => c.earlier);
+    expect(nine.map((c) => DAILY_WORDS.indexOf(c.item)).sort((a, b) => a - b)).toEqual([70, 71, 72, 73, 74, 75, 76, 77, 78, 79]);
+    // Nothing owed: ten at random from all earlier days.
+    const caught = dayTest(9, new Set([1, 2, 3, 4, 5, 6, 7, 8]), seededRng('c')).filter((c) => c.earlier);
+    expect(caught).toHaveLength(10);
+    expect(new Set(caught.map((c) => c.item.id)).size).toBe(10);
+  });
+
+  it('keeps a test the same all day and changes it the next day', () => {
+    const ids = (date: string) =>
+      dayTest(20, new Set(Array.from({ length: 19 }, (_, i) => i + 1)), seededRng(testSeed(date, 20)))
+        .map((c) => c.item.id)
+        .sort()
+        .join();
+    expect(ids('2026-11-24')).toBe(ids('2026-11-24'));
+    expect(ids('2026-11-24')).not.toBe(ids('2026-11-25'));
   });
 
   it('scores out of 100, and only all 알았음 is 100', () => {
