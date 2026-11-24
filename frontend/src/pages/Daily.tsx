@@ -16,7 +16,7 @@ export default function Daily() {
         <div>
           <h1>하루 단어</h1>
           <p className="muted small">
-            하루 {DAILY_SIZE}개씩, 일상 기초 단어(N5)부터 차근차근. 테스트에는 그 전 날 단어도 섞여 나와요.
+            하루 {DAILY_SIZE}개씩, 일상 기초 단어(N5)부터 차근차근. 테스트는 1일차부터 그날까지의 단어에서 무작위로 20문제예요.
           </p>
         </div>
       </header>

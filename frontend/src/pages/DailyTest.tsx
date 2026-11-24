@@ -65,8 +65,11 @@ function Test({ day }: { day: number }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [grade]);
 
+  // Today's and earlier words come mixed, so each count adds up the cards of its kind already graded.
   const own = queue.filter((c) => !c.earlier).length;
   const earlier = queue.length - own;
+  const ownDone = queue.slice(0, index).filter((c) => !c.earlier).length;
+  const earlierDone = index - ownDone;
 
   return (
     <div className="page page--narrow">
@@ -78,11 +81,11 @@ function Test({ day }: { day: number }) {
         {current && (
           <span className="study-counts small">
             <span className={current.earlier ? 'muted' : 'strong'}>
-              {day}일차 {Math.min(index, own)} / {own}
+              {day}일차 {ownDone} / {own}
             </span>
             {earlier > 0 && (
               <span className={current.earlier ? 'strong' : 'muted'}>
-                전 날 {Math.max(0, index - own)} / {earlier}
+                전 날 {earlierDone} / {earlier}
               </span>
             )}
           </span>

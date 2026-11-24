@@ -1,7 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { BackIcon } from '../components/Icons';
 import { SpeakButton } from '../components/SpeakButton';
-import { DAILY_DAYS, DAILY_REVIEW, dayLevel, dayWords, dailyLabel, parseDay } from '../lib/daily';
+import { DAILY_DAYS, DAILY_TEST, dayLevel, dayWords, dailyLabel, parseDay } from '../lib/daily';
 import { toHangul } from '../lib/kana';
 
 /** One day of 하루 단어: its ten words as ひらがな(漢字), meaning, Hangul sound and voice, with the test on top. */
@@ -24,7 +24,7 @@ export default function DailyDay() {
           <h1>{day}일차</h1>
           <p className="muted small">
             JLPT {dayLevel(day)} · 단어 {words.length}개
-            {day > 1 && ` · 테스트에 전 날 단어 ${Math.min(DAILY_REVIEW, (day - 1) * 10)}개 포함`}
+            {` · 테스트 ${Math.min(DAILY_TEST, day * words.length)}문제${day > 2 ? ` (1~${day}일차에서 무작위)` : day === 2 ? ' (1·2일차 전부)' : ''}`}
           </p>
         </div>
         <Link to={`/daily/${day}/test`} className="btn btn--primary">
