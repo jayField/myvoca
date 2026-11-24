@@ -1,11 +1,11 @@
 /** 하루 단어: the JLPT words in order (N5, then N4, then N3), ten a day, each day's test adding earlier days' words. */
 import type { Item } from '../types';
 import { ITEMS_BY_DECK } from './content';
-import { sample, type Rng } from './random';
+import { sample, shuffle, type Rng } from './random';
 
 export const DAILY_SIZE = 10;
-/** A day's test size: day 1 tests its ten, day 2 all twenty so far, later days twenty drawn from every day so far. */
-export const DAILY_TEST = 20;
+/** Earlier words added to a day's test: day 2 gets all of day 1, later days ten at random from the days before. */
+export const DAILY_REVIEW = 10;
 export const DAILY_DONE_KEY = 'tango-note.daily.done';
 
 const LEVELS = ['n5', 'n4', 'n3'] as const;
@@ -16,10 +16,13 @@ export function dayWords(day: number): Item[] {
   return DAILY_WORDS.slice((day - 1) * DAILY_SIZE, day * DAILY_SIZE);
 }
 
-/** DAILY_TEST words at random from day 1 through this day (today's included), mixed together. */
+/** All of the day's own words plus DAILY_REVIEW at random from the days before, mixed together. */
 export function dayTest(day: number, rng: Rng = Math.random): { item: Item; earlier: boolean }[] {
-  const own = new Set(dayWords(day));
-  return sample(DAILY_WORDS.slice(0, day * DAILY_SIZE), DAILY_TEST, rng).map((item) => ({ item, earlier: !own.has(item) }));
+  const earlier = sample(DAILY_WORDS.slice(0, (day - 1) * DAILY_SIZE), DAILY_REVIEW, rng);
+  return shuffle(
+    [...dayWords(day).map((item) => ({ item, earlier: false })), ...earlier.map((item) => ({ item, earlier: true }))],
+    rng,
+  );
 }
 
 /** JLPT level of a day, from its first word: N5, N4 or N3. */

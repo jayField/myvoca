@@ -560,7 +560,7 @@ describe('하루 단어', () => {
     expect(dayWords(DAILY_DAYS).length).toBeGreaterThan(0);
   });
 
-  it('tests day 1 alone, day 2 with all of day 1, later days with twenty from day 1 through that day', () => {
+  it('tests all of the day, plus all of day 1 on day 2 and ten earlier words at random after that', () => {
     expect(dayTest(1)).toHaveLength(10);
     const two = dayTest(2);
     expect(two).toHaveLength(20);
@@ -570,9 +570,12 @@ describe('하루 단어', () => {
     expect(new Set(five.map((c) => c.item.id)).size).toBe(20);
     expect(five.every((c) => DAILY_WORDS.indexOf(c.item) < 50)).toBe(true);
     expect(five.every((c) => c.earlier === DAILY_WORDS.indexOf(c.item) < 40)).toBe(true);
-    // Over many draws, today's words and earlier ones both turn up.
-    const seen = new Set(Array.from({ length: 30 }, (_, i) => dayTest(5, seededRng(`d${i}`))).flat().map((c) => c.earlier));
-    expect(seen).toEqual(new Set([true, false]));
+    // Every one of the day's words, every time, and ten earlier ones.
+    for (let i = 0; i < 20; i++) {
+      const test = dayTest(5, seededRng(`d${i}`));
+      expect(test.filter((c) => !c.earlier).map((c) => c.item.id).sort()).toEqual(dayWords(5).map((w) => w.id).sort());
+      expect(test.filter((c) => c.earlier)).toHaveLength(10);
+    }
   });
 
   it('writes words as ひらがな(漢字), and kana-only words as they are', () => {
