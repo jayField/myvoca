@@ -8,11 +8,9 @@ interface Props {
   tag: string;
   flipped: boolean;
   onFlip: () => void;
-  /** Leave the example sentence off the back, for tests that are about the word alone (하루 단어). */
-  hideExample?: boolean;
 }
 
-export function Flashcard({ item, tag, flipped, onFlip, hideExample = false }: Props) {
+export function Flashcard({ item, tag, flipped, onFlip }: Props) {
   return (
     <div className="flashcard">
       <span className="flashcard-tag">{tag}</span>
@@ -37,7 +35,7 @@ export function Flashcard({ item, tag, flipped, onFlip, hideExample = false }: P
             )}
             {item.kind === 'word' && <span className="flashcard-sound">{toHangul(item.reading)}</span>}
             {item.kind === 'word' && <span className="flashcard-meaning">{item.meaning}</span>}
-            {item.example_ja && !hideExample && (
+            {item.example_ja && (
               <span className="flashcard-example">
                 <span lang="ja">{item.example_ja}</span>
                 <span>{item.example_ko}</span>
