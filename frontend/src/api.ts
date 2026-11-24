@@ -18,6 +18,7 @@ import {
 } from './lib/logic';
 import { NUMBER_DECK, numberItems } from './lib/numbers';
 import { listPhrases, phraseItem, TALK_DECK } from './lib/phrases';
+import { DAILY_DONE_KEY } from './lib/daily';
 import * as storage from './lib/storage';
 import { deleteRemoteStudyData, exclusive } from './lib/sync';
 import type { DayCount, Grade, Progress, ReviewSource, Settings } from './types';
@@ -177,7 +178,7 @@ export const api = {
     notifyLocalChange();
   },
 
-  /** Forget all progress, daily counts and speed-quiz best scores, here and on the account. */
+  /** Forget all progress, daily counts, speed-quiz best scores and 하루 단어 ticks, here and on the account. */
   async resetAll() {
     await exclusive(async () => {
       await deleteRemoteStudyData();
@@ -185,7 +186,7 @@ export const api = {
     });
     try {
       Object.keys(localStorage)
-        .filter((key) => key.startsWith('tango-note.speed.best'))
+        .filter((key) => key.startsWith('tango-note.speed.best') || key.startsWith(DAILY_DONE_KEY))
         .forEach((key) => localStorage.removeItem(key));
     } catch {
       // Best scores are a nicety; ignore storage failures.

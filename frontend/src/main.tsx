@@ -6,6 +6,9 @@ import { AuthProvider } from './auth';
 import { RequireAuth } from './components/RequireAuth';
 import Account from './pages/Account';
 import DeckDetail from './pages/DeckDetail';
+import Daily from './pages/Daily';
+import DailyDay from './pages/DailyDay';
+import DailyTest from './pages/DailyTest';
 import Feedback from './pages/Feedback';
 import Decks from './pages/Decks';
 import Home from './pages/Home';
@@ -42,6 +45,9 @@ createRoot(document.getElementById('root')!).render(
             <Route index element={<Home />} />
             <Route path="study" element={<Study />} />
             <Route path="decks" element={<Decks />} />
+            <Route path="daily" element={<Daily />} />
+            <Route path="daily/:day" element={<DailyDay />} />
+            <Route path="daily/:day/test" element={<DailyTest />} />
             <Route path="talk" element={<TalkNotes />} />
             <Route path="decks/talk" element={<PhraseDeck />} />
             <Route path="decks/:deckId" element={<DeckDetail />} />

@@ -66,6 +66,13 @@ export const ChartIcon = () => (
 );
 
 /** 표현: two columns of lines, like a pattern and its Japanese side by side. */
+export const CalendarIcon = () => (
+  <Icon>
+    <rect x="4" y="5" width="16" height="15" rx="2" />
+    <path d="M4 10h16M9 3v4M15 3v4M9 14h2M13 14h2M9 17h2" />
+  </Icon>
+);
+
 export const PatternIcon = () => (
   <Icon>
     <path d="M4 6h4M4 12h4M4 18h4M12 6h8M12 12h8M12 18h8" />

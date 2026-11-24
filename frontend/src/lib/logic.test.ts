@@ -1,3 +1,4 @@
+import { DAILY_DAYS, DAILY_WORDS, dailyLabel, dayTest, dayWords, parseDay } from './daily';
 import { describe, expect, it } from 'vitest';
 import type { Phrase, Progress, Settings } from '../types';
 import { DECKS, ITEMS, ITEMS_BY_DECK } from './content';
@@ -547,5 +548,39 @@ describe('회화 노트 groups', () => {
     expect(groupName('   ')).toBeNull();
     expect(groupName(null)).toBeNull();
     expect(groupName('가'.repeat(40))).toHaveLength(30);
+  });
+});
+
+describe('하루 단어', () => {
+  it('splits N5, then N4, then N3 into days of ten', () => {
+    expect(DAILY_WORDS[0].deck_id).toBe('n5');
+    expect(DAILY_WORDS.at(-1)!.deck_id).toBe('n3');
+    expect(dayWords(1)).toHaveLength(10);
+    expect(dayWords(2)[0]).toBe(DAILY_WORDS[10]);
+    expect(dayWords(DAILY_DAYS).length).toBeGreaterThan(0);
+  });
+
+  it('tests day 1 alone, day 2 with all of day 1, later days with ten earlier words', () => {
+    expect(dayTest(1)).toHaveLength(10);
+    const two = dayTest(2);
+    expect(two).toHaveLength(20);
+    expect(new Set(two.filter((c) => c.earlier).map((c) => c.item.id))).toEqual(new Set(dayWords(1).map((w) => w.id)));
+    const five = dayTest(5);
+    expect(five).toHaveLength(20);
+    expect(five.filter((c) => !c.earlier).map((c) => c.item.id).sort()).toEqual(dayWords(5).map((w) => w.id).sort());
+    expect(five.filter((c) => c.earlier).every((c) => DAILY_WORDS.indexOf(c.item) < 40)).toBe(true);
+  });
+
+  it('writes words as ひらがな(漢字), and kana-only words as they are', () => {
+    expect(dailyLabel({ term: '猫', reading: 'ねこ' })).toBe('ねこ(猫)');
+    expect(dailyLabel({ term: 'コーヒー', reading: 'こーひー' })).toBe('コーヒー');
+    expect(dailyLabel({ term: 'ありがとう', reading: 'ありがとう' })).toBe('ありがとう');
+  });
+
+  it('only accepts days that exist', () => {
+    expect(parseDay('1')).toBe(1);
+    expect(parseDay('0')).toBeNull();
+    expect(parseDay('1.5')).toBeNull();
+    expect(parseDay(String(DAILY_DAYS + 1))).toBeNull();
   });
 });
