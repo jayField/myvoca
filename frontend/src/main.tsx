@@ -48,6 +48,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="daily" element={<Daily />} />
             <Route path="daily/:day" element={<DailyDay />} />
             <Route path="daily/:day/test" element={<DailyTest />} />
+            <Route path="daily/:day/today" element={<DailyTest only />} />
             <Route path="talk" element={<TalkNotes />} />
             <Route path="decks/talk" element={<PhraseDeck />} />
             <Route path="decks/:deckId" element={<DeckDetail />} />

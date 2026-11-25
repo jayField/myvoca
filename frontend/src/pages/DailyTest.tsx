@@ -6,7 +6,7 @@ import { Flashcard } from '../components/Flashcard';
 import { SpeakButton } from '../components/SpeakButton';
 import { BackIcon } from '../components/Icons';
 import { GRADES } from '../labels';
-import { DAILY_DAYS, dailyLabel, dayTest, loadPassedDays, markDayPassed, parseDay, testScore, testSeed } from '../lib/daily';
+import { DAILY_DAYS, dailyLabel, dayTest, dayWords, loadPassedDays, markDayPassed, parseDay, testScore, testSeed } from '../lib/daily';
 import { localDate } from '../lib/dates';
 import { toHangul } from '../lib/kana';
 import { seededRng, shuffle } from '../lib/random';
@@ -19,9 +19,11 @@ import { seededRng, shuffle } from '../lib/random';
  * (일본어 떠올리기), forty cards in all.
  * The grades stay in this test: nothing goes to 복습표, 헷갈리는 단어 or 오늘의 학습, so 하루 단어 is its own track.
  */
-export default function DailyTest() {
+export default function DailyTest({ only = false }: { only?: boolean }) {
   const day = parseDay(useParams().day);
   if (day === null) return <Navigate to="/daily" replace />;
+  // 오늘 단어만: just the day's ten words both ways, a practice run that never marks the day passed.
+  if (only) return <Run key={`only-${day}`} day={day} cards={shuffle(dayWords(day)).map((item) => ({ item, earlier: false }))} userId={undefined} only />;
   return <Test key={day} day={day} />;
 }
 
@@ -59,7 +61,7 @@ function Test({ day }: { day: number }) {
   return <Run day={day} cards={cards} userId={user?.id} />;
 }
 
-function Run({ day, cards, userId }: { day: number; cards: Word[]; userId: string | undefined }) {
+function Run({ day, cards, userId, only = false }: { day: number; cards: Word[]; userId: string | undefined; only?: boolean }) {
   const [queue, setQueue] = useState(() => bothWays(cards));
   const [round, setRound] = useState(1);
   const [index, setIndex] = useState(0);
@@ -70,8 +72,8 @@ function Run({ day, cards, userId }: { day: number; cards: Word[]; userId: strin
   const perfect = !current && counts.good === queue.length;
 
   useEffect(() => {
-    if (perfect) void markDayPassed(userId, day);
-  }, [perfect, day, userId]);
+    if (perfect && !only) void markDayPassed(userId, day);
+  }, [perfect, day, userId, only]);
 
   const grade = useCallback(
     (g: Grade) => {
@@ -122,6 +124,7 @@ function Run({ day, cards, userId }: { day: number; cards: Word[]; userId: strin
         </Link>
         {current && (
           <span className="study-counts small">
+            {only && <span className="muted">오늘 단어만</span>}
             {round > 1 && <span className="muted">{round}번째 도전</span>}
             <span className={current.reverse ? 'muted' : 'strong'}>
               일→한 {Math.min(index, half)} / {half}
@@ -133,7 +136,25 @@ function Run({ day, cards, userId }: { day: number; cards: Word[]; userId: strin
         )}
       </header>
 
-      {!current && perfect && (
+      {!current && perfect && only && (
+        <div className="empty">
+          <p className="daily-score daily-score--pass">100점</p>
+          <h1>오늘 단어 {cards.length}개 완벽!</h1>
+          <p className="muted">
+            일→한, 한→일 {queue.length}개 모두 알았어요{round > 1 ? ` · ${round}번 만에` : ''}. 이제 테스트로 {day}일차를 통과해 보세요.
+          </p>
+          <div className="button-row">
+            <Link to={`/daily/${day}/test`} className="btn btn--primary">
+              테스트 보기
+            </Link>
+            <Link to={`/daily/${day}`} className="btn btn--ghost">
+              단어 다시 보기
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {!current && perfect && !only && (
         <div className="empty">
           <p className="daily-score daily-score--pass">100점</p>
           <h1>{day}일차 통과!</h1>
@@ -158,8 +179,8 @@ function Run({ day, cards, userId }: { day: number; cards: Word[]; userId: strin
           <p className="daily-score">{score}점</p>
           <h1>100점이 될 때까지 다시!</h1>
           <p className="muted">
-            {queue.length}개 중 알았음 {counts.good} · 헷갈림 {counts.hard} · 몰랐음 {counts.again}. 모두 알았음이어야 {day}일차가
-            통과돼요.
+            {queue.length}개 중 알았음 {counts.good} · 헷갈림 {counts.hard} · 몰랐음 {counts.again}.{' '}
+            {only ? '오늘 단어 연습이라 통과 기록에는 안 남아요.' : `모두 알았음이어야 ${day}일차가 통과돼요.`}
           </p>
           <ul className="daily-missed">
             {missedWords.map((item) => (
