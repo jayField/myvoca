@@ -6,15 +6,14 @@ import { Flashcard } from '../components/Flashcard';
 import { SpeakButton } from '../components/SpeakButton';
 import { BackIcon } from '../components/Icons';
 import { GRADES } from '../labels';
-import { DAILY_DAYS, dailyLabel, dayTest, dayWords, loadPassedDays, markDayPassed, parseDay, testScore, testSeed } from '../lib/daily';
-import { localDate } from '../lib/dates';
+import { DAILY_DAYS, dailyLabel, dayTest, dayWords, loadPassedDays, markDayPassed, parseDay, testScore } from '../lib/daily';
 import { toHangul } from '../lib/kana';
-import { seededRng, shuffle } from '../lib/random';
+import { shuffle } from '../lib/random';
 
 /**
  * A day's test, the same way as 오늘의 학습: flip the card, then 몰랐음 / 헷갈림 / 알았음. Only 알았음 on every
  * card is 100점, which passes the day; anything less offers the same words again, in a new order, until it is.
- * The earlier words lean on days not passed yet and are fixed for the calendar day, so they change daily.
+ * The earlier words lean on days not passed yet and are drawn afresh on every start and every 다시 하기.
  * Two halves: the twenty words read as Japanese (뜻 떠올리기), then the same words from their Korean meaning
  * (일본어 떠올리기), forty cards in all.
  * The grades stay in this test: nothing goes to 복습표, 헷갈리는 단어 or 오늘의 학습, so 하루 단어 is its own track.
@@ -23,7 +22,7 @@ export default function DailyTest({ only = false }: { only?: boolean }) {
   const day = parseDay(useParams().day);
   if (day === null) return <Navigate to="/daily" replace />;
   // 오늘 단어만: just the day's ten words both ways, a practice run that never marks the day passed.
-  if (only) return <Run key={`only-${day}`} day={day} cards={shuffle(dayWords(day)).map((item) => ({ item, earlier: false }))} userId={undefined} only />;
+  if (only) return <Run key={`only-${day}`} day={day} draw={() => shuffle(dayWords(day)).map((item) => ({ item, earlier: false }))} userId={undefined} only />;
   return <Test key={day} day={day} />;
 }
 
@@ -38,31 +37,31 @@ const NO_COUNTS: Record<Grade, number> = { good: 0, hard: 0, again: 0 };
 
 function Test({ day }: { day: number }) {
   const { user } = useAuth();
-  const [cards, setCards] = useState<Word[] | null>(null);
+  const [passed, setPassed] = useState<Set<number> | null>(null);
 
   useEffect(() => {
     let live = true;
     // Which days are owed decides the earlier words, so wait for the account's passed days first.
     void loadPassedDays(user?.id)
       .catch(() => new Set<number>())
-      .then((passed) => live && setCards(dayTest(day, passed, seededRng(testSeed(localDate(), day)))));
+      .then((days) => live && setPassed(days));
     return () => {
       live = false;
     };
   }, [day, user?.id]);
 
-  if (!cards) {
+  if (!passed) {
     return (
       <div className="page page--narrow">
         <p className="muted center">테스트 준비 중…</p>
       </div>
     );
   }
-  return <Run day={day} cards={cards} userId={user?.id} />;
+  return <Run day={day} draw={() => dayTest(day, passed)} userId={user?.id} />;
 }
 
-function Run({ day, cards, userId, only = false }: { day: number; cards: Word[]; userId: string | undefined; only?: boolean }) {
-  const [queue, setQueue] = useState(() => bothWays(cards));
+function Run({ day, draw, userId, only = false }: { day: number; draw: () => Word[]; userId: string | undefined; only?: boolean }) {
+  const [queue, setQueue] = useState(() => bothWays(draw()));
   const [round, setRound] = useState(1);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -87,7 +86,7 @@ function Run({ day, cards, userId, only = false }: { day: number; cards: Word[];
   );
 
   function retry() {
-    setQueue((q) => bothWays(shuffle(q.filter((c) => !c.reverse))));
+    setQueue(bothWays(draw()));
     setRound((r) => r + 1);
     setIndex(0);
     setFlipped(false);
@@ -139,7 +138,7 @@ function Run({ day, cards, userId, only = false }: { day: number; cards: Word[];
       {!current && perfect && only && (
         <div className="empty">
           <p className="daily-score daily-score--pass">100점</p>
-          <h1>오늘 단어 {cards.length}개 완벽!</h1>
+          <h1>오늘 단어 {queue.length / 2}개 완벽!</h1>
           <p className="muted">
             일→한, 한→일 {queue.length}개 모두 알았어요{round > 1 ? ` · ${round}번 만에` : ''}. 이제 테스트로 {day}일차를 통과해 보세요.
           </p>
